@@ -78,12 +78,17 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-40 flex flex-col bg-gradient-to-b from-[#003B5C] via-[#003553] to-[#002840] text-white transition-all duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${collapsed ? 'w-20' : 'w-72'}`}>
         {/* Brand */}
-        <div className="flex items-center justify-center px-4 py-5 border-b border-white/10">
-          <img src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png" alt="Alliage" className="w-10 h-10 rounded-xl flex-shrink-0" />
-          <button className="hidden lg:block text-cyan-200/50 hover:text-white transition-colors p-1 ml-auto" onClick={() => setCollapsed(!collapsed)}>
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10">
+          {!collapsed && (
+            <img src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png" alt="Alliage" className="h-12 w-auto flex-shrink-0" />
+          )}
+          {collapsed && (
+            <img src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png" alt="Alliage" className="h-10 w-auto flex-shrink-0 mx-auto" />
+          )}
+          <button className="hidden lg:block text-cyan-200/50 hover:text-white transition-colors p-1 ml-auto flex-shrink-0" onClick={() => setCollapsed(!collapsed)}>
             {collapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
           </button>
-          <button className="lg:hidden text-cyan-200 ml-auto" onClick={() => setSidebarOpen(false)}>
+          <button className="lg:hidden text-cyan-200 ml-auto flex-shrink-0" onClick={() => setSidebarOpen(false)}>
             <X className="w-5 h-5" />
           </button>
         </div>
