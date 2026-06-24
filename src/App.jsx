@@ -12,6 +12,7 @@ import Dashboard from '@/pages/Dashboard';
 import NewRequest from '@/pages/NewRequest';
 import PastEvent from '@/pages/PastEvent';
 import MyRequests from '@/pages/MyRequests';
+import Solicitacao from '@/pages/Solicitacao';
 import RequestList from '@/pages/RequestList';
 import RequestDetail from '@/pages/RequestDetail';
 import Survey from '@/pages/Survey';
@@ -43,6 +44,7 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/requests" element={<RequestList />} />
         <Route path="/requests/new" element={<NewRequest />} />
+        <Route path="/solicitacao" element={<Solicitacao />} />
         <Route path="/requests/past" element={<PastEvent />} />
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/requests/:id" element={<RequestDetail />} />
