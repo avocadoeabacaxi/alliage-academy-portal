@@ -52,9 +52,11 @@ export default function Layout() {
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
-    if (path === '/requests') return location.pathname === '/requests' || location.pathname === '/requests/new' || location.pathname.startsWith('/requests/');
+    if (path === '/requests') return location.pathname === '/requests' || location.pathname.startsWith('/requests/');
+    if (path === '/requests/past') return location.pathname === '/requests/past';
+    if (path === '/requests/new') return location.pathname === '/requests/new';
     if (path === '/solicitacao') return location.pathname === '/solicitacao';
-    return location.pathname.startsWith(path);
+    return location.pathname === path;
   };
 
   const handleLogout = async () => {
