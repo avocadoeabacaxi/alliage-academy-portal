@@ -79,7 +79,7 @@ export default function Layout() {
       <aside className={`fixed lg:static inset-y-0 left-0 z-40 flex flex-col bg-gradient-to-b from-[#003B5C] via-[#003553] to-[#002840] text-white transition-all duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${collapsed ? 'w-20' : 'w-72'}`}>
         {/* Brand */}
         <div className="flex items-center gap-3 px-4 py-5 border-b border-white/10">
-          <img src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/e8be71451_generated_image.png" alt="Alliage" className="w-10 h-10 rounded-xl flex-shrink-0" />
+          <img src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png" alt="Alliage" className="w-10 h-10 rounded-xl flex-shrink-0" />
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <h1 className="text-lg font-bold tracking-tight leading-tight">Alliage</h1>
