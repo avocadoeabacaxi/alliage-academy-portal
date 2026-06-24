@@ -175,23 +175,18 @@ export default function Layout() {
           <button className="lg:hidden text-slate-600" onClick={() => setSidebarOpen(true)}>
             <Menu className="w-6 h-6" />
           </button>
-          {collapsed && (
-            <div className="hidden lg:flex items-center gap-1">
-              {navGroups.map(group => group.items.filter(item => item.roles.includes(userRole)).map(item => {
-                const Icon = item.icon;
-                const active = isActive(item.path);
-                return (
-                  <Link key={item.path} to={item.path} className={`relative p-2 rounded-lg transition-colors ${active ? 'bg-[#00A6D6]/10 text-[#00A6D6]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}>
-                    <Icon className="w-5 h-5" />
-                    {item.badge > 0 && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#00A6D6]" />}
-                  </Link>
-                );
-              }))}
-              <button onClick={() => setCollapsed(false)} className="ml-1 p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
-                <PanelLeftOpen className="w-5 h-5" />
-              </button>
-            </div>
-          )}
+          <div className="hidden lg:flex items-center gap-1">
+            {navGroups.map(group => group.items.filter(item => item.roles.includes(userRole)).map(item => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
+              return (
+                <Link key={item.path} to={item.path} className={`relative p-2 rounded-lg transition-colors ${active ? 'bg-[#00A6D6]/10 text-[#00A6D6]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}>
+                  <Icon className="w-5 h-5" />
+                  {item.badge > 0 && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#00A6D6]" />}
+                </Link>
+              );
+            }))}
+          </div>
           <div className="flex-1" />
           <LanguageSelector />
         </header>
