@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
-import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList, Edit, User as UserIcon, ChevronDown } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function Layout() {
@@ -14,6 +14,7 @@ export default function Layout() {
   const [user, setUser] = useState(null);
   const [pendingCount, setPendingCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -155,16 +156,41 @@ export default function Layout() {
             <Menu className="w-6 h-6" />
           </button>
           <div className="flex-1" />
-          <div className="flex items-center gap-3">
-            <div className="relative flex-shrink-0">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00A6D6] to-[#0088B0] flex items-center justify-center text-xs font-bold text-white ring-2 ring-white/15">
-                {user?.full_name?.charAt(0)?.toUpperCase() || '?'}
-              </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[#003553]" />
-            </div>
+          <div className="flex items-center gap-4">
             <LanguageSelector />
+            <div className="relative">
+              <button 
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              >
+                <div className="relative flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00A6D6] to-[#0088B0] flex items-center justify-center text-xs font-bold text-white ring-2 ring-white/15">
+                    {user?.full_name?.charAt(0)?.toUpperCase() || '?'}
+                  </div>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[#003553]" />
+                </div>
+                <ChevronDown className="w-4 h-4 text-white/70" />
+              </button>
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden z-50 animate-fade-in">
+                  <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
+                    <p className="text-sm font-semibold text-slate-900">{user?.full_name || '—'}</p>
+                    <p className="text-xs text-slate-500">{user?.email}</p>
+                  </div>
+                  <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left">
+                    <UserIcon className="w-4 h-4" />
+                    {t('common.edit')} Perfil
+                  </button>
+                  <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left border-t border-slate-100">
+                    <LogOut className="w-4 h-4" />
+                    {t('nav.logout')}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
+        {userMenuOpen && <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />}
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">
