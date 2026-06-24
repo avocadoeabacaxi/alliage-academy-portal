@@ -67,11 +67,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     setSubmitting(true);
     setSubmitMsg(t('form.generatingId'));
     try {
-      const idResp = await base44.functions.invoke('generateRequestId', {
-        region: form.region,
-        company_type: form.company_type,
-        area: form.area
-      });
+      const idResp = await base44.functions.invoke('generateRequestId', {});
       const request_id = idResp.data.request_id;
 
       setSubmitMsg(t('form.translatingFields'));
