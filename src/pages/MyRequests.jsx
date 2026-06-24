@@ -51,8 +51,8 @@ export default function MyRequests() {
       ) : (
         <div className="space-y-2.5">
           {myRequests.map(r => (
-            <Link key={r.id} to={`/requests/${r.id}`} className="card-modern p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow">
-              <div className="w-10 h-10 rounded-xl bg-[#00A6D6]/10 flex items-center justify-center flex-shrink-0">
+            <Link key={r.id} to={`/requests/${r.id}`} className="card-modern p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow rounded-3xl">
+              <div className="w-10 h-10 rounded-full bg-[#00A6D6]/10 flex items-center justify-center flex-shrink-0">
                 <FileText className="w-5 h-5 text-[#00A6D6]" />
               </div>
               <div className="flex-1 min-w-0">
