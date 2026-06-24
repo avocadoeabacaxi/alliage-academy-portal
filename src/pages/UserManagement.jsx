@@ -31,7 +31,7 @@ const PERMISSION_LABELS = {
 const ROLE_STYLES = {
   admin: 'bg-red-50 text-red-700 border-red-200',
   gerente_regional: 'bg-purple-50 text-purple-700 border-purple-200',
-  educador: 'bg-blue-50 text-blue-700 border-blue-200',
+  educador: 'bg-[#00A6D6]/10 text-[#003B5C] border-blue-200',
   solicitante: 'bg-slate-100 text-slate-600 border-slate-200',
 };
 
@@ -124,13 +124,13 @@ export default function UserManagement() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('users.title')}</h1>
+          <h1 className="text-2xl font-bold text-[#003B5C]">{t('users.title')}</h1>
           <p className="text-sm text-slate-500 mt-0.5">{t('users.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowPerms(!showPerms)}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition-colors"
           >
             <Shield className="w-4 h-4" />
             {t('users.permissions')}
@@ -138,7 +138,7 @@ export default function UserManagement() {
           </button>
           <button
             onClick={() => setShowInvite(true)}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-[#00A6D6] rounded-full hover:bg-[#0094BD] transition-colors"
           >
             <UserPlus className="w-4 h-4" />
             {t('users.invite')}
@@ -156,7 +156,7 @@ export default function UserManagement() {
 
       {/* Permissions Matrix */}
       {showPerms && (
-        <div className="mb-6 bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="mb-6 card-modern overflow-hidden">
           <div className="px-4 py-3 border-b border-slate-200 flex items-center gap-2">
             <Lock className="w-4 h-4 text-slate-500" />
             <h3 className="text-sm font-semibold text-slate-700">{t('users.permissionsMatrix')}</h3>
@@ -204,7 +204,7 @@ export default function UserManagement() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={t('users.searchPlaceholder')}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#00A6D6]/20 focus:border-[#00A6D6]"
           />
         </div>
         <select
@@ -222,21 +222,21 @@ export default function UserManagement() {
         {ROLES.map(r => {
           const count = users.filter(u => u.role === r).length;
           return (
-            <div key={r} className="bg-white rounded-xl border border-slate-200 p-4">
+            <div key={r} className="card-modern p-4">
               <div className="flex items-center justify-between mb-1">
                 <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium border ${ROLE_STYLES[r]}`}>
                   {t(`role.${r}`)}
                 </span>
                 <UsersIcon className="w-4 h-4 text-slate-400" />
               </div>
-              <p className="text-2xl font-bold text-slate-900">{count}</p>
+              <p className="text-2xl font-bold text-[#003B5C]">{count}</p>
             </div>
           );
         })}
       </div>
 
       {/* User List */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="card-modern overflow-hidden">
         {filteredUsers.length === 0 ? (
           <div className="px-4 py-12 text-center text-sm text-slate-400">{t('common.noResults')}</div>
         ) : (
@@ -322,7 +322,7 @@ export default function UserManagement() {
                       ) : (
                         <button
                           onClick={() => startEdit(u)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-[#00A6D6] hover:bg-[#00A6D6]/10 transition-colors"
                           title={t('common.edit')}
                         >
                           <Edit className="w-4 h-4" />
@@ -342,8 +342,8 @@ export default function UserManagement() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30" onClick={() => setShowInvite(false)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                <Mail className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 rounded-xl bg-[#00A6D6]/10 flex items-center justify-center">
+                <Mail className="w-5 h-5 text-[#00A6D6]" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-slate-900">{t('users.invite')}</h3>
@@ -369,7 +369,7 @@ export default function UserManagement() {
                     <button
                       key={r}
                       onClick={() => setInviteForm({...inviteForm, role: r})}
-                      className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${inviteForm.role === r ? 'border-blue-600 bg-blue-50 text-blue-700 font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}
+                      className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${inviteForm.role === r ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}
                     >
                       {t(`role.${r}`)}
                     </button>
@@ -406,7 +406,7 @@ export default function UserManagement() {
               <button
                 onClick={handleInvite}
                 disabled={!inviteForm.email || saving}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-[#00A6D6] rounded-full hover:bg-[#0094BD] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                 {t('users.sendInvite')}

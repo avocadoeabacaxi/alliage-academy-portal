@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
-import { Search, PlusCircle, FileText } from 'lucide-react';
+import { Search, PlusCircle, FileText, ChevronRight } from 'lucide-react';
 
 export default function RequestList() {
   const { t, tf } = useLanguage();
@@ -24,14 +24,12 @@ export default function RequestList() {
   const filtered = useMemo(() => {
     let result = requests;
 
-    // Role-based filtering
     if (user?.role === 'solicitante') {
       result = result.filter(r => r.requester_email === user.email || r.created_by_id === user.id);
     } else if (user?.role === 'gerente_regional' && user.region) {
       result = result.filter(r => r.region === user.region);
     }
 
-    // Search
     if (search) {
       const s = search.toLowerCase();
       result = result.filter(r =>
@@ -42,7 +40,6 @@ export default function RequestList() {
       );
     }
 
-    // Filters
     if (filters.status) result = result.filter(r => r.status === filters.status);
     if (filters.region) result = result.filter(r => r.region === filters.region);
     if (filters.priority) result = result.filter(r => r.priority === filters.priority);
@@ -53,20 +50,20 @@ export default function RequestList() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="w-8 h-8 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-[#00A6D6]/20 border-t-[#00A6D6] rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="p-4 lg:p-6 max-w-[1200px] mx-auto">
+    <div className="p-4 lg:p-6 max-w-[1200px] mx-auto animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('list.title')}</h1>
+          <h1 className="text-2xl font-bold text-[#003B5C]">{t('list.title')}</h1>
           <p className="text-sm text-slate-500 mt-0.5">{filtered.length} {t('nav.requests').toLowerCase()}</p>
         </div>
-        <Link to="/requests/new" className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+        <Link to="/requests/new" className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#00A6D6] rounded-full hover:bg-[#0094BD] shadow-md shadow-[#00A6D6]/20 transition-colors">
           <PlusCircle className="w-4 h-4" />
           {t('list.newRequest')}
         </Link>
@@ -98,7 +95,7 @@ export default function RequestList() {
       </div>
 
       {/* Table - Desktop */}
-      <div className="hidden md:block bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="hidden md:block card-modern overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50/50">
@@ -108,13 +105,14 @@ export default function RequestList() {
               <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('list.region')}</th>
               <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('list.priority')}</th>
               <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('list.status')}</th>
+              <th className="w-8" />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filtered.map(r => (
-              <tr key={r.id} className="hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => window.location.href = `/requests/${r.id}`}>
+              <tr key={r.id} className="hover:bg-slate-50 transition-colors cursor-pointer group" onClick={() => window.location.href = `/requests/${r.id}`}>
                 <td className="px-4 py-3">
-                  <span className="text-sm font-semibold text-blue-600">{r.request_id}</span>
+                  <span className="text-sm font-semibold text-[#00A6D6]">{r.request_id}</span>
                   <p className="text-xs text-slate-400">{r.created_date?.split('T')[0]}</p>
                 </td>
                 <td className="px-4 py-3">
@@ -125,6 +123,9 @@ export default function RequestList() {
                 <td className="px-4 py-3 text-sm text-slate-600">{t(`region.${(r.region || '').toLowerCase()}`)}</td>
                 <td className="px-4 py-3"><PriorityBadge priority={r.priority} t={t} /></td>
                 <td className="px-4 py-3"><StatusBadge status={r.status} t={t} /></td>
+                <td className="px-4 py-3 text-slate-300 group-hover:text-[#00A6D6] transition-colors">
+                  <ChevronRight className="w-4 h-4" />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -134,9 +135,9 @@ export default function RequestList() {
       {/* Cards - Mobile */}
       <div className="md:hidden space-y-2">
         {filtered.map(r => (
-          <Link key={r.id} to={`/requests/${r.id}`} className="block bg-white rounded-xl border border-slate-200 p-4 hover:shadow-sm transition-shadow">
+          <Link key={r.id} to={`/requests/${r.id}`} className="block card-modern p-4 hover:shadow-card-hover transition-shadow">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-blue-600">{r.request_id}</span>
+              <span className="text-sm font-semibold text-[#00A6D6]">{r.request_id}</span>
               <StatusBadge status={r.status} t={t} />
             </div>
             <p className="text-sm font-medium text-slate-900 mb-1">{r.product_name}</p>
@@ -148,7 +149,9 @@ export default function RequestList() {
       {/* Empty state */}
       {filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <FileText className="w-12 h-12 text-slate-300 mb-3" />
+          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+            <FileText className="w-8 h-8 text-slate-300" />
+          </div>
           <p className="text-sm font-medium text-slate-600">{t('list.empty')}</p>
           <p className="text-xs text-slate-400 mt-0.5">{t('list.emptyDesc')}</p>
         </div>

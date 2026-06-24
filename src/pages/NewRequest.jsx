@@ -106,7 +106,7 @@ export default function NewRequest() {
   if (submitting) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
-        <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+        <Loader2 className="w-10 h-10 text-[#00A6D6] animate-spin" />
         <p className="text-sm text-slate-600 font-medium">{submitMsg}</p>
       </div>
     );
@@ -116,7 +116,7 @@ export default function NewRequest() {
     <div className="p-4 lg:p-6 max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">{t('form.title')}</h1>
+        <h1 className="text-2xl font-bold text-[#003B5C]">{t('form.title')}</h1>
         <div className="flex items-center gap-1.5 mt-1 text-sm text-slate-500">
           <Globe className="w-3.5 h-3.5" />
           <span>{t('form.step')} {step + 1} {t('form.of')} {totalSteps}</span>
@@ -129,11 +129,11 @@ export default function NewRequest() {
           {steps.map((s, i) => (
             <React.Fragment key={i}>
               <div className="flex flex-col items-center flex-shrink-0">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-all ${i < step ? 'bg-blue-600 border-blue-600 text-white' : i === step ? 'bg-white border-blue-600 text-blue-600' : 'bg-white border-slate-200 text-slate-400'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-all ${i < step ? 'bg-[#00A6D6] border-[#00A6D6] text-white' : i === step ? 'bg-white border-[#00A6D6] text-[#00A6D6]' : 'bg-white border-slate-200 text-slate-400'}`}>
                   {i < step ? <Check className="w-4 h-4" /> : i + 1}
                 </div>
               </div>
-              {i < steps.length - 1 && <div className={`flex-1 h-0.5 mx-1 rounded ${i < step ? 'bg-blue-600' : 'bg-slate-200'}`} />}
+              {i < steps.length - 1 && <div className={`flex-1 h-0.5 mx-1 rounded ${i < step ? 'bg-[#00A6D6]' : 'bg-slate-200'}`} />}
             </React.Fragment>
           ))}
         </div>
@@ -144,7 +144,7 @@ export default function NewRequest() {
       </div>
 
       {/* Form steps */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6 min-h-[300px]">
+      <div className="card-modern p-5 mb-6 min-h-[300px]">
         {step === 0 && (
           <div className="space-y-4">
             <Field label={t('form.requesterName')} required>
@@ -183,7 +183,7 @@ export default function NewRequest() {
             <Field label={t('form.requestType')} required>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {['Novo treinamento', 'Reciclagem', 'Atualização de produto', 'Treinamento de lançamento', 'Técnico avançado', 'Clínico', 'Outro'].map(opt => (
-                  <button key={opt} onClick={() => update('request_type', opt)} className={`px-3 py-2.5 text-sm rounded-lg border text-left transition-all ${form.request_type === opt ? 'border-blue-600 bg-blue-50 text-blue-700 font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                  <button key={opt} onClick={() => update('request_type', opt)} className={`px-3 py-2.5 text-sm rounded-lg border text-left transition-all ${form.request_type === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
                     {opt}
                   </button>
                 ))}
@@ -219,7 +219,7 @@ export default function NewRequest() {
             <Field label={t('form.audience')}>
               <div className="grid grid-cols-2 gap-2">
                 {AUDIENCE_OPTIONS.map(opt => (
-                  <button key={opt} onClick={() => toggleArrayItem('audience', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.audience.includes(opt) ? 'border-blue-600 bg-blue-50 text-blue-700 font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                  <button key={opt} onClick={() => toggleArrayItem('audience', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.audience.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
                     {opt}
                   </button>
                 ))}
@@ -228,7 +228,7 @@ export default function NewRequest() {
             <Field label={t('form.participantsCount')}>
               <div className="grid grid-cols-4 gap-2">
                 {['1-5', '6-10', '11-20', '20+'].map(opt => (
-                  <button key={opt} onClick={() => update('participants_count', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.participants_count === opt ? 'border-blue-600 bg-blue-50 text-blue-700 font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                  <button key={opt} onClick={() => update('participants_count', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.participants_count === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
                     {opt}
                   </button>
                 ))}
@@ -245,7 +245,7 @@ export default function NewRequest() {
             <Field label={t('form.specificProblems')}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {PROBLEM_OPTIONS.map(opt => (
-                  <button key={opt} onClick={() => toggleArrayItem('specific_problems', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.specific_problems.includes(opt) ? 'border-blue-600 bg-blue-50 text-blue-700 font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                  <button key={opt} onClick={() => toggleArrayItem('specific_problems', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.specific_problems.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
                     {opt}
                   </button>
                 ))}
@@ -254,7 +254,7 @@ export default function NewRequest() {
             <Field label={t('form.expectedImpacts')}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {IMPACT_OPTIONS.map(opt => (
-                  <button key={opt} onClick={() => toggleArrayItem('expected_impacts', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.expected_impacts.includes(opt) ? 'border-blue-600 bg-blue-50 text-blue-700 font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                  <button key={opt} onClick={() => toggleArrayItem('expected_impacts', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.expected_impacts.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
                     {opt}
                   </button>
                 ))}
@@ -271,7 +271,7 @@ export default function NewRequest() {
             <Field label={t('form.priority')}>
               <div className="grid grid-cols-4 gap-2">
                 {['Baixa', 'Média', 'Alta', 'Crítica'].map(opt => (
-                  <button key={opt} onClick={() => update('priority', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.priority === opt ? 'border-blue-600 bg-blue-50 text-blue-700 font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                  <button key={opt} onClick={() => update('priority', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.priority === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
                     {t(`priority.${opt.toLowerCase()}`)}
                   </button>
                 ))}
@@ -290,16 +290,16 @@ export default function NewRequest() {
           <div className="space-y-4">
             <Field label={t('form.hasMultiplier')}>
               <div className="flex gap-2">
-                <button onClick={() => update('has_multiplier', true)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${form.has_multiplier ? 'border-blue-600 bg-blue-50 text-blue-700 font-medium' : 'border-slate-200 text-slate-700'}`}>
+                <button onClick={() => update('has_multiplier', true)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${form.has_multiplier ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
                   {t('common.yes')}
                 </button>
-                <button onClick={() => update('has_multiplier', false)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${!form.has_multiplier ? 'border-blue-600 bg-blue-50 text-blue-700 font-medium' : 'border-slate-200 text-slate-700'}`}>
+                <button onClick={() => update('has_multiplier', false)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${!form.has_multiplier ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
                   {t('common.no')}
                 </button>
               </div>
             </Field>
             {form.has_multiplier && (
-              <div className="space-y-4 pl-3 border-l-2 border-blue-100">
+              <div className="space-y-4 pl-3 border-l-2 border-[#00A6D6]/20">
                 <Field label={t('form.specialistName')}><input value={form.specialist_name} onChange={e => update('specialist_name', e.target.value)} className="input-base" /></Field>
                 <Field label={t('form.specialistRole')}><input value={form.specialist_role} onChange={e => update('specialist_role', e.target.value)} className="input-base" /></Field>
                 <Field label={t('form.specialistEmail')}><input type="email" value={form.specialist_email} onChange={e => update('specialist_email', e.target.value)} className="input-base" /></Field>
@@ -308,14 +308,14 @@ export default function NewRequest() {
             <Field label={t('form.format')}>
               <div className="flex gap-2">
                 {['Remoto', 'Presencial'].map(opt => (
-                  <button key={opt} onClick={() => update('format', opt)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${form.format === opt ? 'border-blue-600 bg-blue-50 text-blue-700 font-medium' : 'border-slate-200 text-slate-700'}`}>
+                  <button key={opt} onClick={() => update('format', opt)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${form.format === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
                     {t(`format.${opt.toLowerCase()}`)}
                   </button>
                 ))}
               </div>
             </Field>
             {form.format === 'Presencial' && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pl-3 border-l-2 border-blue-100">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pl-3 border-l-2 border-[#00A6D6]/20">
                 <Field label={t('form.locationCountry')}><input value={form.location_country} onChange={e => update('location_country', e.target.value)} className="input-base" /></Field>
                 <Field label={t('form.locationCity')}><input value={form.location_city} onChange={e => update('location_city', e.target.value)} className="input-base" /></Field>
                 <Field label={t('form.locationSpecific')}><input value={form.location_specific} onChange={e => update('location_specific', e.target.value)} className="input-base" /></Field>
@@ -341,7 +341,7 @@ export default function NewRequest() {
           <button
             onClick={() => canProceed() && setStep(step + 1)}
             disabled={!canProceed()}
-            className="flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-white bg-[#00A6D6] rounded-lg hover:bg-[#0094BD] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {t('common.next')}
             <ChevronRight className="w-4 h-4" />
