@@ -1,0 +1,224 @@
+{
+  "name": "TrainingRequest",
+  "type": "object",
+  "properties": {
+    "request_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pendente An\u00e1lise",
+        "Aprovado Etapa 1",
+        "Aprovado Etapa 2",
+        "Rejeitado",
+        "Conclu\u00eddo"
+      ],
+      "default": "Pendente An\u00e1lise"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "Baixa",
+        "M\u00e9dia",
+        "Alta",
+        "Cr\u00edtica"
+      ]
+    },
+    "requester_name": {
+      "type": "string"
+    },
+    "requester_email": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string",
+      "enum": [
+        "Brasil",
+        "LATAM",
+        "USA",
+        "ROW"
+      ]
+    },
+    "company_type": {
+      "type": "string",
+      "enum": [
+        "Filial Alliage",
+        "Distribuidor/Dealer",
+        "Cliente Final",
+        "Outro"
+      ]
+    },
+    "position": {
+      "type": "string"
+    },
+    "area": {
+      "type": "string",
+      "enum": [
+        "Comercial",
+        "Aplica\u00e7\u00e3o Cl\u00ednica",
+        "Educa\u00e7\u00e3o",
+        "Marketing",
+        "P\u00f3s-vendas",
+        "Outro"
+      ]
+    },
+    "request_type": {
+      "type": "string",
+      "enum": [
+        "Novo treinamento",
+        "Reciclagem",
+        "Atualiza\u00e7\u00e3o de produto",
+        "Treinamento de lan\u00e7amento",
+        "T\u00e9cnico avan\u00e7ado",
+        "Cl\u00ednico",
+        "Outro"
+      ]
+    },
+    "product_category": {
+      "type": "string"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "training_focus": {
+      "type": "object"
+    },
+    "audience": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "participants_count": {
+      "type": "string",
+      "enum": [
+        "1-5",
+        "6-10",
+        "11-20",
+        "20+"
+      ]
+    },
+    "justification": {
+      "type": "object"
+    },
+    "specific_problems": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expected_impacts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "consequence_60_days": {
+      "type": "object"
+    },
+    "deadline_requested": {
+      "type": "string",
+      "format": "date"
+    },
+    "deadline_reason": {
+      "type": "object"
+    },
+    "has_multiplier": {
+      "type": "boolean"
+    },
+    "specialist_name": {
+      "type": "string"
+    },
+    "specialist_role": {
+      "type": "string"
+    },
+    "specialist_email": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "Remoto",
+        "Presencial"
+      ]
+    },
+    "format_details": {
+      "type": "string"
+    },
+    "location_country": {
+      "type": "string"
+    },
+    "location_city": {
+      "type": "string"
+    },
+    "location_specific": {
+      "type": "string"
+    },
+    "educator_analysis": {
+      "type": "object"
+    },
+    "decision_stage1": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Aprovado",
+        "Rejeitado"
+      ],
+      "default": "Pendente"
+    },
+    "date_stage1": {
+      "type": "string",
+      "format": "date"
+    },
+    "manager_analysis": {
+      "type": "object"
+    },
+    "decision_stage2": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Aprovado",
+        "Rejeitado"
+      ],
+      "default": "Pendente"
+    },
+    "date_stage2": {
+      "type": "string",
+      "format": "date"
+    },
+    "rejection_reason": {
+      "type": "object"
+    },
+    "training_scheduled_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "training_completed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "execution_notes": {
+      "type": "object"
+    },
+    "final_notes": {
+      "type": "object"
+    },
+    "original_language": {
+      "type": "string",
+      "enum": [
+        "pt",
+        "en",
+        "es"
+      ],
+      "default": "pt"
+    }
+  },
+  "required": [
+    "requester_name",
+    "requester_email",
+    "region",
+    "request_type",
+    "product_name"
+  ]
+}

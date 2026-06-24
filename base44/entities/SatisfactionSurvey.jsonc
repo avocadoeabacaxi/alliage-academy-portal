@@ -1,0 +1,29 @@
+{
+  "name": "SatisfactionSurvey",
+  "type": "object",
+  "properties": {
+    "training_request_id": {
+      "type": "string"
+    },
+    "request_id_display": {
+      "type": "string"
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "public_token": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "training_request_id",
+    "public_token"
+  ]
+}

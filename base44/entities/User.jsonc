@@ -1,0 +1,29 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "description": "The role of the user in the app",
+      "enum": [
+        "admin",
+        "solicitante",
+        "educador",
+        "gerente_regional"
+      ],
+      "default": "solicitante"
+    },
+    "region": {
+      "type": "string",
+      "enum": [
+        "Brasil",
+        "LATAM",
+        "USA",
+        "ROW"
+      ]
+    }
+  },
+  "required": [
+    "role"
+  ]
+}
