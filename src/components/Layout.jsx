@@ -78,11 +78,8 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-40 flex flex-col bg-gradient-to-b from-[#003B5C] via-[#003553] to-[#002840] text-white transition-all duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${collapsed ? 'w-20' : 'w-56'}`}>
         {/* Brand */}
-        <div className="flex items-center justify-center px-4 py-4 border-b border-white/10 relative">
+        <div className="flex items-center justify-center px-4 py-4 border-b border-white/10">
           <img src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png" alt="Alliage" className={`flex-shrink-0 ${collapsed ? 'h-10' : 'h-12'} w-auto`} />
-          <button className="hidden lg:block absolute right-4 text-cyan-200/50 hover:text-white transition-colors p-1" onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
-          </button>
           <button className="lg:hidden absolute right-4 text-cyan-200" onClick={() => setSidebarOpen(false)}>
             <X className="w-5 h-5" />
           </button>
