@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
+import ProfileEditModal from '@/components/ProfileEditModal';
 import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList, Edit, User as UserIcon, ChevronDown } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -15,6 +16,7 @@ export default function Layout() {
   const [pendingCount, setPendingCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -156,9 +158,9 @@ export default function Layout() {
                     <p className="text-sm font-semibold text-slate-900">{user?.full_name || '—'}</p>
                     <p className="text-xs text-slate-500">{user?.email}</p>
                   </div>
-                  <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left">
-                    <UserIcon className="w-4 h-4" />
-                    {t('common.edit')} Perfil
+                  <button onClick={() => { setProfileModalOpen(true); setUserMenuOpen(false); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left">
+                   <UserIcon className="w-4 h-4" />
+                   {t('common.edit')} Perfil
                   </button>
                   <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left border-t border-slate-100">
                     <LogOut className="w-4 h-4" />
@@ -176,6 +178,13 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+
+      <ProfileEditModal
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        user={user}
+        onUpdateUser={setUser}
+      />
     </div>
   );
 }
