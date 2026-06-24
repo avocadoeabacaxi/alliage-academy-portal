@@ -80,6 +80,8 @@ export default function RequestDetail() {
 
         updateData = {
           educator_analysis: translations.analysis || { [lang]: educatorAnalysis },
+          educator_name: user?.full_name,
+          educator_id: user?.id,
           decision_stage1: decision,
           date_stage1: today,
           status: decision === 'Aprovado' ? 'Aprovado Etapa 1' : 'Rejeitado'

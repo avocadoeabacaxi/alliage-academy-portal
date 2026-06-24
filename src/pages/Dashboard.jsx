@@ -5,6 +5,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
 import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 import { TrendingUp, Clock, CheckCircle2, XCircle, FileText, PlusCircle, Download, Activity } from 'lucide-react';
+import TrainersTab from '@/components/dashboard/TrainersTab';
 
 const STATUS_COLORS = {
   'Pendente Análise': '#F59E0B',
@@ -35,6 +36,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [filters, setFilters] = useState({ region: '', status: '', priority: '' });
+  const [activeTab, setActiveTab] = useState('general');
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -141,6 +143,18 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 border-b border-slate-200">
+        <button onClick={() => setActiveTab('general')} className={`px-4 py-2.5 text-sm font-semibold transition-all border-b-2 -mb-px ${activeTab === 'general' ? 'border-[#00A6D6] text-[#003B5C]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+          {t('dash.tab.general')}
+        </button>
+        <button onClick={() => setActiveTab('trainers')} className={`px-4 py-2.5 text-sm font-semibold transition-all border-b-2 -mb-px ${activeTab === 'trainers' ? 'border-[#00A6D6] text-[#003B5C]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+          {t('dash.tab.trainers')}
+        </button>
+      </div>
+
+      {activeTab === 'general' && (
+      <>
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2 mb-6">
         <select value={filters.region} onChange={e => setFilters({...filters, region: e.target.value})} className="input-base w-auto">
@@ -262,6 +276,9 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      </>
+      )}
+      {activeTab === 'trainers' && <TrainersTab requests={requests} />}
     </div>
   );
 }

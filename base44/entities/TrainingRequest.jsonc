@@ -155,6 +155,12 @@
     "location_specific": {
       "type": "string"
     },
+    "educator_name": {
+      "type": "string"
+    },
+    "educator_id": {
+      "type": "string"
+    },
     "educator_analysis": {
       "type": "object"
     },
