@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
-import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function Layout() {
@@ -36,6 +36,7 @@ export default function Layout() {
       label: t('nav.section.actions'),
       items: [
         { path: '/requests/new', label: t('nav.newRequest'), icon: PlusCircle, roles: ['admin', 'solicitante', 'educador', 'gerente_regional'] },
+        { path: '/requests/past', label: t('nav.pastEvent'), icon: History, roles: ['admin', 'solicitante', 'educador', 'gerente_regional'] },
       ]
     },
     {

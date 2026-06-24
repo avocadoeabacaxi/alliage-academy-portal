@@ -10,6 +10,7 @@ import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import Layout from '@/components/Layout';
 import Dashboard from '@/pages/Dashboard';
 import NewRequest from '@/pages/NewRequest';
+import PastEvent from '@/pages/PastEvent';
 import RequestList from '@/pages/RequestList';
 import RequestDetail from '@/pages/RequestDetail';
 import Survey from '@/pages/Survey';
@@ -41,6 +42,7 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/requests" element={<RequestList />} />
         <Route path="/requests/new" element={<NewRequest />} />
+        <Route path="/requests/past" element={<PastEvent />} />
         <Route path="/requests/:id" element={<RequestDetail />} />
         <Route path="/users" element={<UserManagement />} />
       </Route>
