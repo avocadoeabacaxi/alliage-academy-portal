@@ -11,6 +11,7 @@ import Layout from '@/components/Layout';
 import Dashboard from '@/pages/Dashboard';
 import NewRequest from '@/pages/NewRequest';
 import PastEvent from '@/pages/PastEvent';
+import MyRequests from '@/pages/MyRequests';
 import RequestList from '@/pages/RequestList';
 import RequestDetail from '@/pages/RequestDetail';
 import Survey from '@/pages/Survey';
@@ -43,6 +44,7 @@ const AuthenticatedApp = () => {
         <Route path="/requests" element={<RequestList />} />
         <Route path="/requests/new" element={<NewRequest />} />
         <Route path="/requests/past" element={<PastEvent />} />
+        <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/requests/:id" element={<RequestDetail />} />
         <Route path="/users" element={<UserManagement />} />
       </Route>

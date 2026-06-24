@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
-import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function Layout() {
@@ -30,6 +30,7 @@ export default function Layout() {
       items: [
         { path: '/', label: t('nav.dashboard'), icon: LayoutDashboard, roles: ['admin', 'solicitante', 'educador', 'gerente_regional'] },
         { path: '/requests', label: t('nav.requests'), icon: FileText, roles: ['admin', 'solicitante', 'educador', 'gerente_regional'], badge: pendingCount },
+        { path: '/my-requests', label: t('nav.myRequests'), icon: ClipboardList, roles: ['admin', 'solicitante', 'educador', 'gerente_regional'] },
       ]
     },
     {
