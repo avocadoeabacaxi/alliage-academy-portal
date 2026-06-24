@@ -144,35 +144,26 @@ export default function Layout() {
           })}
         </nav>
 
-        {/* User card */}
-        <div className="px-3 py-3 border-t border-white/10">
-          <div className={`flex items-center gap-2 p-2 rounded-xl bg-white/5`}>
-            <div className="relative flex-shrink-0">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#00A6D6] to-[#0088B0] flex items-center justify-center text-sm font-bold text-white ring-2 ring-white/15">
-                {user?.full_name?.charAt(0)?.toUpperCase() || '?'}
-              </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2 border-[#003553]" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user?.full_name || '—'}</p>
-              <p className="text-xs text-cyan-200/50 truncate">{t(`role.${userRole}`)}</p>
-            </div>
-            <button onClick={handleLogout} className="text-cyan-200/50 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10" title={t('nav.logout')}>
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+
       </aside>
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex items-center justify-between px-4 lg:px-6 py-3 bg-white/80 backdrop-blur-md border-b border-slate-200/60">
-          <button className="lg:hidden text-slate-600" onClick={() => setSidebarOpen(true)}>
+        <header className="flex items-center justify-between px-4 lg:px-6 py-3 bg-gradient-to-r from-[#003B5C] via-[#003553] to-[#002840] border-b border-white/10">
+          <button className="lg:hidden text-white" onClick={() => setSidebarOpen(true)}>
             <Menu className="w-6 h-6" />
           </button>
           <div className="flex-1" />
-          <LanguageSelector />
+          <div className="flex items-center gap-3">
+            <div className="relative flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00A6D6] to-[#0088B0] flex items-center justify-center text-xs font-bold text-white ring-2 ring-white/15">
+                {user?.full_name?.charAt(0)?.toUpperCase() || '?'}
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[#003553]" />
+            </div>
+            <LanguageSelector />
+          </div>
         </header>
 
         {/* Page content */}
