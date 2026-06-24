@@ -27,8 +27,7 @@ export function StatusBadge({ status, t }) {
 }
 
 export function PriorityBadge({ priority, t }) {
-  const key = priority ? priority.toLowerCase() : 'media';
-  const label = t ? t(`priority.${key}`) : priority;
+  const label = priority || 'Média';
   return (
     <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${PRIORITY_CONFIG[priority] || PRIORITY_CONFIG['Média']}`}>
       {label}
