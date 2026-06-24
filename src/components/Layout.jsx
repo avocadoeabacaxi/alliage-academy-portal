@@ -52,6 +52,8 @@ export default function Layout() {
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
+    if (path === '/requests') return location.pathname === '/requests' || location.pathname === '/requests/new' || location.pathname.startsWith('/requests/');
+    if (path === '/solicitacao') return location.pathname === '/solicitacao';
     return location.pathname.startsWith(path);
   };
 
@@ -124,7 +126,7 @@ export default function Layout() {
                       <Link
                         key={item.path}
                         to={item.path}
-                        onClick={() => setSidebarOpen(false)}
+                        onClick={() => { setSidebarOpen(false); setUserMenuOpen(false); }}
                         className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${active ? 'bg-[#00A6D6]/15 text-white' : 'text-cyan-100/70 hover:bg-white/5 hover:text-white'} ${collapsed ? 'justify-center' : ''}`}
                       >
                         {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 rounded-r-full bg-[#00A6D6]" />}
