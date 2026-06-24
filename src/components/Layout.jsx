@@ -76,38 +76,19 @@ export default function Layout() {
       {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-30 lg:hidden backdrop-blur-sm animate-fade-in" onClick={() => setSidebarOpen(false)} />}
 
       {/* Sidebar */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-40 flex flex-col bg-gradient-to-b from-[#003B5C] via-[#003553] to-[#002840] text-white transition-all duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${collapsed ? 'w-20' : 'w-72'}`}>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-40 flex flex-col bg-gradient-to-b from-[#003B5C] via-[#003553] to-[#002840] text-white transition-all duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${collapsed ? 'w-20' : 'w-56'}`}>
         {/* Brand */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10">
-          {!collapsed && (
-            <img src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png" alt="Alliage" className="h-12 w-auto flex-shrink-0" />
-          )}
-          {collapsed && (
-            <img src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png" alt="Alliage" className="h-10 w-auto flex-shrink-0 mx-auto" />
-          )}
-          <button className="hidden lg:block text-cyan-200/50 hover:text-white transition-colors p-1 ml-auto flex-shrink-0" onClick={() => setCollapsed(!collapsed)}>
+        <div className="flex items-center justify-center px-4 py-4 border-b border-white/10 relative">
+          <img src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png" alt="Alliage" className={`flex-shrink-0 ${collapsed ? 'h-10' : 'h-12'} w-auto`} />
+          <button className="hidden lg:block absolute right-4 text-cyan-200/50 hover:text-white transition-colors p-1" onClick={() => setCollapsed(!collapsed)}>
             {collapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
           </button>
-          <button className="lg:hidden text-cyan-200 ml-auto flex-shrink-0" onClick={() => setSidebarOpen(false)}>
+          <button className="lg:hidden absolute right-4 text-cyan-200" onClick={() => setSidebarOpen(false)}>
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Search */}
-        {!collapsed && (
-          <div className="px-4 py-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-200/40" />
-              <input
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearch}
-                placeholder={t('nav.searchPlaceholder')}
-                className="w-full pl-9 pr-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-cyan-200/40 focus:outline-none focus:border-[#00A6D6] focus:bg-white/10 transition-all"
-              />
-            </div>
-          </div>
-        )}
+
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-2 overflow-y-auto">
