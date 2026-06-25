@@ -511,11 +511,15 @@ export default function RequestDetail() {
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center gap-2 bg-slate-50 rounded-xl p-3">
-                  <input readOnly value={`${window.location.origin}/survey/${survey.public_token}`} className="flex-1 bg-transparent text-sm text-slate-600 outline-none" />
+                  <input readOnly value={`${window.location.origin}/survey/${survey.public_token}`} className="flex-1 bg-transparent text-sm text-slate-600 outline-none cursor-default" />
                   <button onClick={copySurveyLink} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#00A6D6] rounded-full hover:bg-[#0094BD] transition-colors">
                     <Copy className="w-3.5 h-3.5" />
                     {copied ? '✓' : t('detail.copyLink')}
                   </button>
+                  <a href={`/survey/${survey.public_token}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#003B5C] rounded-full hover:bg-[#002D47] transition-colors">
+                    <Globe className="w-3.5 h-3.5" />
+                    Abrir
+                  </a>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                   <span className="text-slate-500">{t('detail.surveyResponses')}:</span>
