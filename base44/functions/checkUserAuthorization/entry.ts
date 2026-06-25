@@ -13,7 +13,15 @@ Deno.serve(async (req) => {
     const auth = auths.length > 0 ? auths[0] : null;
 
     if (!auth) {
-      return Response.json({ authorized: false, status: 'not_found' });
+      // First login - create pending authorization record
+      await base44.asServiceRole.entities.UserAuthorization.create({
+        email,
+        full_name: user.full_name,
+        role: 'solicitante',
+        status: 'pending',
+        first_login_attempt: new Date().toISOString()
+      });
+      return Response.json({ authorized: false, status: 'pending' });
     }
 
     if (auth.status === 'pending') {

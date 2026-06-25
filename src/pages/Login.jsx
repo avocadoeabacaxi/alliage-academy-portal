@@ -21,18 +21,25 @@ export default function Login() {
     setAuthStatus(null);
     setLoading(true);
     try {
-      // First, check user authorization
+      // Try to login first
+      await base44.auth.loginViaEmailPassword(email, password);
+      
+      // After successful login, ensure authorization record exists
+      try {
+        await base44.functions.invoke('ensureUserAuthorization', {});
+      } catch (e) {
+        console.warn('Could not create authorization record:', e);
+      }
+      
+      // Check authorization status
       const authCheck = await base44.functions.invoke('checkUserAuthorization', { email });
       
-      if (!authCheck.data.authorized) {
+      if (authCheck.data.authorized) {
+        window.location.href = "/";
+      } else {
         setAuthStatus(authCheck.data.status);
-        setLoading(false);
-        return;
+        await base44.auth.logout(false);
       }
-
-      // If authorized, proceed with login
-      await base44.auth.loginViaEmailPassword(email, password);
-      window.location.href = "/";
     } catch (err) {
       setError(err.message || "Invalid email or password");
     } finally {
