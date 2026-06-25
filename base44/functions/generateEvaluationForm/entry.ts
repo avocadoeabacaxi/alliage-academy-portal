@@ -36,30 +36,30 @@ Crie um objeto JSON com esta estrutura exata:
 Garanta que as questões sejam específicas ao produto e tipo de treinamento mencionados.`;
 
     const llmResponse = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          questions: {
-            type: 'array',
-            items: { type: 'object' }
-          }
-        }
-      }
+      prompt
     });
 
     // Generate unique token for public access
     const publicToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
+    // Parse LLM response as JSON if it's a string
+    let questionsData = [];
+    try {
+      const parsed = typeof llmResponse === 'string' ? JSON.parse(llmResponse) : llmResponse;
+      questionsData = parsed.questions || [];
+    } catch (e) {
+      console.log('Could not parse LLM response as JSON');
+    }
+
     // Create evaluation record
     const evaluation = await base44.entities.TrainingEvaluation.create({
       training_request_id: trainingRequestId,
       request_id_display: request.request_id,
-      educator_name: request.educator_name,
+      educator_name: request.educator_name || 'A Definir',
       educator_id: request.educator_id,
       product_name: request.product_name,
       training_date: request.training_completed_date || request.training_scheduled_date,
-      questions: llmResponse.questions || [],
+      questions: questionsData,
       status: 'pending',
       public_token: publicToken
     });
