@@ -16,14 +16,22 @@ export default function Survey() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    base44.functions.invoke('getSurveyByToken', { token })
-      .then(res => {
-        if (res.data?.data) {
-          setSurvey(res.data.data);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    const fetchSurvey = async () => {
+      try {
+        const res = await fetch(`${window.location.origin}/.functions/getSurveyByToken`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+        const data = await res.json();
+        if (data.data) setSurvey(data.data);
+      } catch (e) {
+        console.error('Error fetching survey:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSurvey();
   }, [token]);
 
   const setAnswer = (qId, val) => {
@@ -43,15 +51,20 @@ export default function Survey() {
         answer: answers[q.id] || null
       }));
 
-      await base44.functions.invoke('createSurveyResponse', {
-        survey_id: survey.id,
-        training_request_id: survey.training_request_id,
-        respondent_name: respondentName || '',
-        responses: responseEntries,
-        language: lang,
-        rating_overall: overallRating || null,
-        submitted_at: new Date().toISOString()
+      const res = await fetch(`${window.location.origin}/.functions/createSurveyResponse`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          survey_id: survey.id,
+          training_request_id: survey.training_request_id,
+          respondent_name: respondentName || '',
+          responses: responseEntries,
+          language: lang,
+          rating_overall: overallRating || null,
+          submitted_at: new Date().toISOString()
+        })
       });
+      if (!res.ok) throw new Error('Erro ao enviar pesquisa');
 
       setSubmitted(true);
     } catch (e) {
