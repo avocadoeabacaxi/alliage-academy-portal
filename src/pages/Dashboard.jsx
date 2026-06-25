@@ -39,13 +39,27 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('general');
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-    // Ensure user has authorization record
-    base44.functions.invoke('ensureUserAuthorization', {}).catch(() => {});
-    base44.entities.TrainingRequest.list('-created_date', 1000)
-      .then(setRequests)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    const loadData = async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+        // Ensure user has authorization record
+        await base44.functions.invoke('ensureUserAuthorization', {});
+      } catch (e) {
+        console.error('Error loading user:', e);
+      }
+      
+      try {
+        const requests = await base44.entities.TrainingRequest.list('-created_date', 1000);
+        setRequests(requests);
+      } catch (e) {
+        console.error('Error loading requests:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
   }, []);
 
   const filteredRequests = useMemo(() => {
