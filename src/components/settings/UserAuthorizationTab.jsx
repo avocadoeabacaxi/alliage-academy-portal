@@ -17,7 +17,7 @@ export default function UserAuthorizationTab() {
 
   const loadData = async () => {
     try {
-      const data = await base44.entities.UserAuthorization.list('-created_date', 100);
+      const data = await base44.entities.UserAuthorization.filter({}, '-created_date', 100);
       setAuths(data);
     } catch (e) {
       console.error(e);
