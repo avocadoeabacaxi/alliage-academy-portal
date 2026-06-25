@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
     // Send via Resend
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
     const result = await resend.emails.send({
-      from: 'surveys@alliageacademy.com',
+      from: 'onboarding@resend.dev',
       to: requester_email,
       subject: `Pesquisa de Satisfação - Treinamento ${request_id_display}`,
       html: `
