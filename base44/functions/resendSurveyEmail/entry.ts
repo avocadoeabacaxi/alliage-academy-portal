@@ -19,9 +19,10 @@ Deno.serve(async (req) => {
 
     // Send via Resend
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+    const emailToSend = request.requester_email;
     const result = await resend.emails.send({
       from: 'onboarding@resend.dev',
-      to: request.requester_email,
+      to: emailToSend,
       subject: `[Reenvio] Pesquisa de Satisfação - Treinamento ${request_id_display}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
