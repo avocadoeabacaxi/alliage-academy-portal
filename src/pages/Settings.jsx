@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { ArrowLeft, Mail, Users as UsersIcon, AlertCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, Mail, Users as UsersIcon, AlertCircle, Loader2, Lock } from 'lucide-react';
 import EmailTemplates from '@/components/settings/EmailTemplates';
 import SettingsUsers from '@/components/settings/SettingsUsers';
+import UserAuthorizationTab from '@/components/settings/UserAuthorizationTab';
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -46,6 +47,17 @@ export default function Settings() {
       {/* Tabs */}
       <div className="flex gap-2 mb-6 border-b border-slate-200">
         <button
+          onClick={() => setActiveTab('authorization')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
+            activeTab === 'authorization'
+              ? 'border-[#00A6D6] text-[#00A6D6]'
+              : 'border-transparent text-slate-600 hover:text-slate-800'
+          }`}
+        >
+          <Lock className="w-4 h-4" />
+          Autorizações
+        </button>
+        <button
           onClick={() => setActiveTab('emails')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
             activeTab === 'emails'
@@ -71,6 +83,7 @@ export default function Settings() {
 
       {/* Content */}
       <div>
+        {activeTab === 'authorization' && <UserAuthorizationTab />}
         {activeTab === 'emails' && <EmailTemplates />}
         {activeTab === 'users' && <SettingsUsers />}
       </div>
