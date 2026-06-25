@@ -9,6 +9,7 @@ export default function Survey() {
   const { token } = useParams();
   const { t, tf, lang, setLang } = useLanguage();
   const [survey, setSurvey] = useState(null);
+  const [trainingRequest, setTrainingRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState({});
   const [respondentName, setRespondentName] = useState('');
@@ -19,7 +20,12 @@ export default function Survey() {
     const fetchSurvey = async () => {
       try {
         const response = await base44.functions.invoke('getSurveyByToken', { token });
-        if (response.data?.data) setSurvey(response.data.data);
+        if (response.data?.data) {
+          setSurvey(response.data.data);
+          // Buscar detalhes do treinamento
+          const trainingData = await base44.entities.TrainingRequest.get(response.data.data.training_request_id);
+          if (trainingData) setTrainingRequest(trainingData);
+        }
       } catch (e) {
         console.error('Error fetching survey:', e);
       } finally {
@@ -115,6 +121,29 @@ export default function Survey() {
           </div>
           <LanguageSelector />
         </div>
+
+        {/* Training Details */}
+        {trainingRequest && (
+          <div className="card-modern p-6 mb-6 border-l-4 border-l-[#00A6D6]">
+            <h2 className="text-lg font-semibold text-[#003B5C] mb-4">Detalhes do Treinamento</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-slate-500 font-medium uppercase">Produto</p>
+                <p className="text-sm font-medium text-slate-800">{trainingRequest.product_name}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 font-medium uppercase">Tipo de Treinamento</p>
+                <p className="text-sm font-medium text-slate-800">{trainingRequest.request_type}</p>
+              </div>
+              {trainingRequest.justification && (
+                <div className="md:col-span-2">
+                  <p className="text-xs text-slate-500 font-medium uppercase">Justificativa</p>
+                  <p className="text-sm text-slate-700 mt-1">{tf(trainingRequest.justification)}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Form */}
         <div className="card-modern p-6 space-y-5">
