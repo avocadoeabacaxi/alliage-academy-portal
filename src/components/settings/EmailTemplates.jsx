@@ -9,7 +9,7 @@ const DEFAULT_TEMPLATES = {
   },
   approval: {
     subject: '✅ Sua Solicitação foi Aprovada - ${request_id}',
-    html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 20px;"><div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"><div style="text-align: center; margin-bottom: 30px;"><div style="display: inline-block; background: #DBEAFE; border-radius: 50%; width: 60px; height: 60px; line-height: 60px; font-size: 32px;">✅</div></div><h2 style="color: #003B5C; margin-top: 0; text-align: center; font-size: 24px;">Sua Solicitação foi Aprovada!</h2><p style="color: #6B7280; line-height: 1.6; text-align: center;">Olá ${requester_name}, temos o prazer de informar que sua solicitação foi aprovada.</p><div style="background: #F0FDF4; border-left: 4px solid #10B981; padding: 16px; margin: 20px 0; border-radius: 4px;"><p style="margin: 8px 0; color: #374151;"><strong>Solicitação:</strong> ${request_id}</p><p style="margin: 8px 0; color: #374151;"><strong>Produto:</strong> ${product_name}</p><p style="margin: 8px 0; color: #374151;"><strong>Educador:</strong> ${educator_name}</p></div><p style="color: #6B7280; line-height: 1.6;">Em breve você receberá mais detalhes sobre o treinamento. Fique atento aos seus emails!</p><hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;"><p style="color: #9CA3AF; font-size: 12px; margin: 0;">Dúvidas? Entre em contato com a equipe de treinamento.</p></div></div>'
+    html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 20px;"><div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"><div style="text-align: center; margin-bottom: 30px;"><div style="display: inline-block; background: #DBEAFE; border-radius: 50%; width: 60px; height: 60px; line-height: 60px; font-size: 32px;">✅</div></div><h2 style="color: #003B5C; margin-top: 0; text-align: center; font-size: 24px;">Sua Solicitação foi Aprovada!</h2><p style="color: #6B7280; line-height: 1.6; text-align: center;">Olá ${requester_name}, temos o prazer de informar que sua solicitação foi aprovada.</p><div style="background: #F0FDF4; border-left: 4px solid #10B981; padding: 16px; margin: 20px 0; border-radius: 4px;"><p style="margin: 8px 0; color: #374151;"><strong>Solicitação:</strong> ${request_id}</p><p style="margin: 8px 0; color: #374151;"><strong>Produto:</strong> ${product_name}</p><p style="margin: 8px 0; color: #374151;"><strong>Educador:</strong> ${educator_name}</p><p style="margin: 8px 0; color: #374151;"><strong>Data:</strong> ${training_scheduled_date}</p></div><p style="color: #6B7280; line-height: 1.6;">Em breve você receberá mais detalhes sobre o treinamento. Fique atento aos seus emails!</p><hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;"><p style="color: #9CA3AF; font-size: 12px; margin: 0;">Dúvidas? Entre em contato com a equipe de treinamento.</p></div></div>'
   },
   rejection: {
     subject: '❌ Solicitação Não Aprovada - ${request_id}',
@@ -183,14 +183,14 @@ export default function EmailTemplates() {
             <div className="text-sm text-blue-700">
               <p className="font-medium mb-1">Variáveis disponíveis:</p>
               <ul className="text-xs space-y-0.5 ml-4 list-disc">
-                <li>{'${requester_name}'} - Nome de quem solicitou</li>
-                <li>{'${requester_email}'} - Email de quem solicitou</li>
-                <li>{'${product_name}'} - Nome do produto</li>
-                <li>{'${request_id}'} - ID da solicitação</li>
-                <li>{'${priority}'} - Prioridade</li>
-                <li>{'${educator_name}'} - Nome do educador</li>
-                <li>{'${training_scheduled_date}'} - Data do treinamento</li>
-                <li>{'${format}'} - Formato (Remoto/Presencial)</li>
+                <li>${'{requester_name}'} - Nome de quem solicitou</li>
+                <li>${'{requester_email}'} - Email de quem solicitou</li>
+                <li>${'{product_name}'} - Nome do produto</li>
+                <li>${'{request_id}'} - ID da solicitação</li>
+                <li>${'{priority}'} - Prioridade</li>
+                <li>${'{educator_name}'} - Nome do educador</li>
+                <li>${'{training_scheduled_date}'} - Data do treinamento</li>
+                <li>${'{format}'} - Formato (Remoto/Presencial)</li>
               </ul>
             </div>
           </div>
