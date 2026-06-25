@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import ProfileEditModal from '@/components/ProfileEditModal';
-import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList, Edit, User as UserIcon, ChevronDown, Settings } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList, Edit, User as UserIcon, ChevronDown, Settings, BarChart3 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function Layout() {
@@ -44,6 +44,12 @@ export default function Layout() {
         { path: '/requests/past', label: t('nav.pastEvent'), icon: History, roles: ['admin', 'solicitante', 'educador', 'gerente_regional'] },
       ]
     },
+    {
+      label: 'Análise',
+      items: [
+        { path: '/surveys', label: 'Pesquisas', icon: BarChart3, roles: ['admin', 'educador', 'gerente_regional'] },
+      ]
+    },
 
   ];
 
@@ -53,6 +59,7 @@ export default function Layout() {
     if (path === '/requests/past') return location.pathname === '/requests/past';
     if (path === '/requests/new') return location.pathname === '/requests/new';
     if (path === '/solicitacao') return location.pathname === '/solicitacao';
+    if (path === '/surveys') return location.pathname === '/surveys';
     return location.pathname === path;
   };
 
