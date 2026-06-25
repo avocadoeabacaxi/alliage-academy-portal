@@ -99,8 +99,8 @@ export default function Surveys() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="flex flex-col lg:flex-row gap-3 mb-6">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
@@ -113,7 +113,7 @@ export default function Surveys() {
         <select
           value={filterEducator}
           onChange={e => setFilterEducator(e.target.value)}
-          className="input-base"
+          className="input-base lg:w-48"
         >
           <option value="">Todos os Educadores</option>
           {educators.map(e => <option key={e} value={e}>{e}</option>)}
@@ -121,7 +121,7 @@ export default function Surveys() {
         <select
           value={filterStatus}
           onChange={e => setFilterStatus(e.target.value)}
-          className="input-base"
+          className="input-base lg:w-48"
         >
           <option value="">Todos os Status</option>
           <option value="pending">Pendente</option>
