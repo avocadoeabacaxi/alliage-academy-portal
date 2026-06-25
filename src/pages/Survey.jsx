@@ -16,10 +16,10 @@ export default function Survey() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    base44.entities.SatisfactionSurvey.filter({ public_token: token })
-      .then(surveys => {
-        if (surveys.length > 0) {
-          setSurvey(surveys[0]);
+    base44.functions.invoke('getSurveyByToken', { token })
+      .then(res => {
+        if (res.data?.data) {
+          setSurvey(res.data.data);
         }
       })
       .catch(() => {})
@@ -43,7 +43,7 @@ export default function Survey() {
         answer: answers[q.id] || null
       }));
 
-      await base44.entities.SurveyResponse.create({
+      await base44.functions.invoke('createSurveyResponse', {
         survey_id: survey.id,
         training_request_id: survey.training_request_id,
         respondent_name: respondentName || '',
