@@ -22,7 +22,22 @@ export default function Login() {
     setLoading(true);
     try {
       await base44.auth.loginViaEmailPassword(email, password);
-      window.location.href = "/";
+      
+      // Check authorization status
+      const authResult = await base44.functions.invoke('checkUserAuthorization', { email });
+      
+      if (authResult.data?.status === 'pending') {
+        setAuthStatus('pending');
+        setLoading(false);
+      } else if (authResult.data?.status === 'rejected') {
+        setAuthStatus('rejected');
+        setLoading(false);
+      } else if (authResult.data?.authorized) {
+        window.location.href = "/";
+      } else {
+        setError('Authorization check failed');
+        setLoading(false);
+      }
     } catch (err) {
       setError(err.message || "Invalid email or password");
       setLoading(false);
