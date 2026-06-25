@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Star, Check, Loader2, Activity } from 'lucide-react';
@@ -18,7 +17,7 @@ export default function Survey() {
   useEffect(() => {
     const fetchSurvey = async () => {
       try {
-        const res = await fetch(`${window.location.origin}/.functions/getSurveyByToken`, {
+        const res = await fetch('/.functions/getSurveyByToken', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token })
@@ -51,7 +50,7 @@ export default function Survey() {
         answer: answers[q.id] || null
       }));
 
-      const res = await fetch(`${window.location.origin}/.functions/createSurveyResponse`, {
+      const res = await fetch('/.functions/createSurveyResponse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
