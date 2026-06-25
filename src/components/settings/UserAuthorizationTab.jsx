@@ -17,8 +17,8 @@ export default function UserAuthorizationTab() {
 
   const loadData = async () => {
     try {
-      const data = await base44.entities.UserAuthorization.filter({}, '-created_date', 100);
-      setAuths(data);
+      const response = await base44.functions.invoke('listUserAuthorizations', {});
+      setAuths(response.data?.data || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -30,7 +30,8 @@ export default function UserAuthorizationTab() {
     if (!role) return;
     setUpdating(auth.id);
     try {
-      await base44.entities.UserAuthorization.update(auth.id, {
+      await base44.functions.invoke('updateUserAuthorization', {
+        id: auth.id,
         status: 'approved',
         role,
         approved_by: user.id,
@@ -49,7 +50,8 @@ export default function UserAuthorizationTab() {
     if (!reason) return;
     setUpdating(auth.id);
     try {
-      await base44.entities.UserAuthorization.update(auth.id, {
+      await base44.functions.invoke('updateUserAuthorization', {
+        id: auth.id,
         status: 'rejected',
         rejection_reason: reason
       });

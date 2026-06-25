@@ -8,7 +8,7 @@ import UserAuthorizationTab from '@/components/settings/UserAuthorizationTab';
 
 export default function Settings() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('emails');
+  const [activeTab, setActiveTab] = useState('authorization');
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -19,18 +19,18 @@ export default function Settings() {
     }).catch(() => setLoading(false));
   }, []);
 
-  if (!user?.role === 'admin') {
-    return (
-      <div className="p-6 text-center">
-        <p className="text-red-600 font-semibold">Acesso negado. Apenas admins podem acessar esta página.</p>
-      </div>
-    );
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="w-8 h-8 border-4 border-[#00A6D6]/20 border-t-[#00A6D6] rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (user?.role !== 'admin') {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-red-600 font-semibold">Acesso negado. Apenas admins podem acessar esta página.</p>
       </div>
     );
   }
