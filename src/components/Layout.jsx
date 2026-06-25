@@ -44,12 +44,7 @@ export default function Layout() {
         { path: '/requests/past', label: t('nav.pastEvent'), icon: History, roles: ['admin', 'solicitante', 'educador', 'gerente_regional'] },
       ]
     },
-    {
-      label: t('nav.section.admin'),
-      items: [
-        { path: '/users', label: t('nav.users'), icon: Users, roles: ['admin'] },
-      ]
-    },
+
   ];
 
   const isActive = (path) => {
