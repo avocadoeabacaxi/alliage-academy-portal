@@ -19,6 +19,7 @@ import Survey from '@/pages/Survey';
 import UserManagement from '@/pages/UserManagement';
 import Settings from '@/pages/Settings';
 import Surveys from '@/pages/Surveys';
+import UserAuthorization from '@/pages/UserAuthorization';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -54,6 +55,7 @@ const AuthenticatedApp = () => {
         <Route path="/surveys" element={<Surveys />} />
         <Route path="/users" element={<UserManagement />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/admin/authorizations" element={<UserAuthorization />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
