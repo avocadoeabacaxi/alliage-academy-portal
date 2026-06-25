@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { Search, Filter, Loader2, BarChart3, TrendingUp, Users, FileText } from 'lucide-react';
+import { Search, Filter, Loader2, BarChart3, TrendingUp, Users, FileText, Send } from 'lucide-react';
 
 export default function Surveys() {
   const { t, lang } = useLanguage();
@@ -11,6 +11,7 @@ export default function Surveys() {
   const [filterEducator, setFilterEducator] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [educators, setEducators] = useState([]);
+  const [resending, setResending] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -28,6 +29,22 @@ export default function Surveys() {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendSurvey = async (eval_) => {
+    setResending(eval_.id);
+    try {
+      await base44.functions.invoke('resendSurveyEmail', {
+        training_request_id: eval_.training_request_id,
+        request_id_display: eval_.request_id_display,
+        public_token: eval_.public_token
+      });
+      alert('Pesquisa reenviada com sucesso!');
+    } catch (e) {
+      alert('Erro ao reenviar: ' + e.message);
+    } finally {
+      setResending(null);
     }
   };
 
@@ -147,7 +164,8 @@ export default function Surveys() {
                   <th className="text-center px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Avaliação</th>
                   <th className="text-center px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Status</th>
                   <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Data</th>
-                </tr>
+                  <th className="text-center px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Ações</th>
+                  </tr>
               </thead>
               <tbody>
                 {filteredEvals.map(e => (
@@ -182,7 +200,17 @@ export default function Surveys() {
                     <td className="px-4 py-3 text-xs text-slate-500">
                       {e.submitted_at ? new Date(e.submitted_at).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es' : 'en-US') : '—'}
                     </td>
-                  </tr>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        onClick={() => handleResendSurvey(e)}
+                        disabled={resending === e.id}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[#00A6D6] border border-[#00A6D6]/30 hover:bg-[#00A6D6]/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {resending === e.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                        Reenviar
+                      </button>
+                    </td>
+                    </tr>
                 ))}
               </tbody>
             </table>
