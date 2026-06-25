@@ -95,14 +95,6 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
       setUser(currentUser);
-      
-      // Ensure user has an authorization record
-      try {
-        await base44.functions.invoke('ensureUserAuthorization', {});
-      } catch (e) {
-        console.warn('Could not create authorization record:', e);
-      }
-      
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
       setAuthChecked(true);

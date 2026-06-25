@@ -40,6 +40,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
+    // Ensure user has authorization record
+    base44.functions.invoke('ensureUserAuthorization', {}).catch(() => {});
     base44.entities.TrainingRequest.list('-created_date', 1000)
       .then(setRequests)
       .catch(() => {})
