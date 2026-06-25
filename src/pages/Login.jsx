@@ -14,6 +14,27 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [authStatus, setAuthStatus] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await base44.functions.invoke('checkUserAuthorization', { email });
+      if (response.data?.authorized) {
+        // Usuário aprovado, redireciona para o dashboard
+        window.location.href = "/";
+      } else {
+        // Usuário pendente ou rejeitado
+        setAuthStatus(response.data?.status || 'pending');
+        setIsLoggedIn(true);
+      }
+    } catch (err) {
+      console.error('Error checking authorization:', err);
+      setAuthStatus('pending');
+      setIsLoggedIn(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,8 +43,8 @@ export default function Login() {
     setLoading(true);
     try {
       await base44.auth.loginViaEmailPassword(email, password);
-      // Redireciona pro Dashboard que vai criar o registro de autorização
-      window.location.href = "/";
+      // Após login, verifica status de autorização
+      await checkAuthStatus();
     } catch (err) {
       setError(err.message || "Invalid email or password");
       setLoading(false);
@@ -33,6 +54,73 @@ export default function Login() {
   const handleGoogle = () => {
     base44.auth.loginWithProvider("google", "/");
   };
+
+  // Se está logado mas aguardando aprovação
+  if (isLoggedIn && authStatus === 'pending') {
+    return (
+      <AuthLayout
+        icon={LogIn}
+        title="Aguardando Aprovação"
+        subtitle="Sua conta está pendente de aprovação"
+      >
+        <div className="space-y-4">
+          <div className="p-4 rounded-xl bg-amber-50 text-amber-800 text-sm border border-amber-200">
+            <div className="flex gap-3">
+              <Clock className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Acesso Pendente</p>
+                <p className="text-xs opacity-75 mt-1">Seu acesso ao portal está aguardando aprovação do administrador. Você receberá um email quando for autorizado.</p>
+              </div>
+            </div>
+          </div>
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => {
+              base44.auth.logout();
+              setIsLoggedIn(false);
+              setAuthStatus(null);
+            }}
+          >
+            Sair
+          </Button>
+        </div>
+      </AuthLayout>
+    );
+  }
+
+  if (isLoggedIn && authStatus === 'rejected') {
+    return (
+      <AuthLayout
+        icon={LogIn}
+        title="Acesso Negado"
+        subtitle="Sua solicitação foi rejeitada"
+      >
+        <div className="space-y-4">
+          <div className="p-4 rounded-xl bg-red-50 text-red-800 text-sm border border-red-200">
+            <div className="flex gap-3">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Acesso Recusado</p>
+                <p className="text-xs opacity-75 mt-1">Sua solicitação de acesso foi rejeitada. Contate o administrador para mais informações.</p>
+              </div>
+            </div>
+          </div>
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => {
+              base44.auth.logout();
+              setIsLoggedIn(false);
+              setAuthStatus(null);
+            }}
+          >
+            Sair
+          </Button>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout
@@ -70,30 +158,6 @@ export default function Login() {
         <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-start gap-2">
           <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           {error}
-        </div>
-      )}
-
-      {authStatus === 'pending' && (
-        <div className="mb-4 p-4 rounded-xl bg-amber-50 text-amber-800 text-sm border border-amber-200">
-          <div className="flex gap-3">
-            <Clock className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold">Aguardando aprovação</p>
-              <p className="text-xs opacity-75 mt-1">Seu acesso ao portal está pendente de aprovação do administrador. Você receberá um email quando for autorizado.</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {authStatus === 'rejected' && (
-        <div className="mb-4 p-4 rounded-xl bg-red-50 text-red-800 text-sm border border-red-200">
-          <div className="flex gap-3">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold">Acesso negado</p>
-              <p className="text-xs opacity-75 mt-1">Sua solicitação de acesso foi rejeitada. Contate o administrador para mais informações.</p>
-            </div>
-          </div>
         </div>
       )}
 
