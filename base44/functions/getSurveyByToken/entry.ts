@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   try {
@@ -8,9 +8,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Token is required' }, { status: 400 });
     }
 
-    // Create service role client without request auth
-    const base44 = createClient({ role: 'service' });
-    const surveys = await base44.entities.SatisfactionSurvey.filter({
+    const base44 = createClientFromRequest(req);
+    const surveys = await base44.asServiceRole.entities.SatisfactionSurvey.filter({
       public_token: token
     });
 
