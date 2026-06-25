@@ -19,7 +19,8 @@ Deno.serve(async (req) => {
     }
 
     const survey = surveys[0];
-    const surveyUrl = `${new URL(req.url).origin}/survey/${survey.public_token}`;
+    const appId = Deno.env.get('BASE44_APP_ID');
+    const surveyUrl = `https://preview-sandbox--${appId}.base44.app/survey/${survey.public_token}`;
 
     // Send via Resend
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
