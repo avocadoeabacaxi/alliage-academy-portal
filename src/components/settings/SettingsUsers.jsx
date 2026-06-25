@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { UserPlus, Shield, Mail, MapPin, Loader2, Check, X, Search, Eye, Edit, CheckCircle2 } from 'lucide-react';
+import { UserPlus, Shield, Mail, MapPin, Loader2, Check, X, Search, Eye, Edit, CheckCircle2, Lock, ChevronDown, ChevronUp, Users as UsersIcon } from 'lucide-react';
 
 const ROLES = ['admin', 'gerente_regional', 'educador', 'solicitante'];
 const REGIONS = ['Brasil', 'LATAM', 'USA', 'ROW'];
@@ -13,8 +13,30 @@ const ROLE_STYLES = {
   solicitante: 'bg-slate-100 text-slate-600 border-slate-200',
 };
 
+const ROLE_PERMISSIONS = {
+  admin: ['dashboard', 'requests', 'newRequest', 'users', 'approveStage1', 'approveStage2', 'reject', 'execute', 'closeCycle', 'generateSurvey', 'manageUsers', 'export', 'deleteRequests'],
+  gerente_regional: ['dashboard', 'requests', 'newRequest', 'approveStage2', 'reject', 'export'],
+  educador: ['dashboard', 'requests', 'newRequest', 'approveStage1', 'reject', 'execute', 'closeCycle', 'generateSurvey'],
+  solicitante: ['dashboard', 'requests', 'newRequest']
+};
+
+const PERMISSION_LABELS = {
+  dashboard: { pt: 'Ver Dashboard', en: 'View Dashboard', es: 'Ver Panel' },
+  requests: { pt: 'Ver Solicitações', en: 'View Requests', es: 'Ver Solicitudes' },
+  newRequest: { pt: 'Criar Solicitações', en: 'Create Requests', es: 'Crear Solicitudes' },
+  approveStage1: { pt: 'Aprovar Etapa 1', en: 'Approve Stage 1', es: 'Aprobar Etapa 1' },
+  approveStage2: { pt: 'Aprovar Etapa 2', en: 'Approve Stage 2', es: 'Aprobar Etapa 2' },
+  reject: { pt: 'Rejeitar Solicitações', en: 'Reject Requests', es: 'Rechazar Solicitudes' },
+  execute: { pt: 'Registrar Execução', en: 'Record Execution', es: 'Registrar Ejecución' },
+  closeCycle: { pt: 'Fechar Ciclo', en: 'Close Cycle', es: 'Cerrar Ciclo' },
+  generateSurvey: { pt: 'Gerar Pesquisas', en: 'Generate Surveys', es: 'Generar Encuestas' },
+  manageUsers: { pt: 'Gerenciar Usuários', en: 'Manage Users', es: 'Gestionar Usuarios' },
+  export: { pt: 'Exportar Dados', en: 'Export Data', es: 'Exportar Datos' },
+  deleteRequests: { pt: 'Excluir Solicitações', en: 'Delete Requests', es: 'Eliminar Solicitudes' },
+};
+
 export default function SettingsUsers() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -25,6 +47,7 @@ export default function SettingsUsers() {
   const [showInvite, setShowInvite] = useState(false);
   const [inviteForm, setInviteForm] = useState({ email: '', role: 'solicitante', region: 'Brasil' });
   const [inviteMsg, setInviteMsg] = useState('');
+  const [showPerms, setShowPerms] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -86,6 +109,81 @@ export default function SettingsUsers() {
 
   return (
     <div className="space-y-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        {ROLES.map(r => {
+          const count = users.filter(u => u.role === r).length;
+          return (
+            <div key={r} className="card-modern p-4">
+              <div className="flex items-center justify-between mb-1">
+                <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium border ${ROLE_STYLES[r]}`}>
+                  {r}
+                </span>
+                <UsersIcon className="w-4 h-4 text-slate-400" />
+              </div>
+              <p className="text-2xl font-bold text-[#003B5C]">{count}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Permissions Toggle */}
+      <button
+        onClick={() => setShowPerms(!showPerms)}
+        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition-colors"
+      >
+        <Shield className="w-4 h-4" />
+        Matriz de Permissões
+        {showPerms ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+      </button>
+
+      {/* Permissions Matrix */}
+      {showPerms && (
+        <div className="card-modern overflow-hidden">
+          <div className="px-4 py-3 border-b border-slate-200 flex items-center gap-2">
+            <Lock className="w-4 h-4 text-slate-500" />
+            <h3 className="text-sm font-semibold text-slate-700">Permissões por Papel</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Permissão</th>
+                  {ROLES.map(r => (
+                    <th key={r} className="px-4 py-3 text-center">
+                      <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium border ${ROLE_STYLES[r]}`}>
+                        {r}
+                      </span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(PERMISSION_LABELS).map(([perm, labels]) => (
+                  <tr key={perm} className="border-b border-slate-50 hover:bg-slate-50">
+                    <td className="px-4 py-2.5 text-slate-700">{labels.pt}</td>
+                    {ROLES.map(r => (
+                      <td key={r} className="px-4 py-2.5 text-center">
+                        {ROLE_PERMISSIONS[r].includes(perm) ? (
+                          <CheckCircle2 className="w-4 h-4 text-green-500 mx-auto" />
+                        ) : (
+                          <X className="w-4 h-4 text-slate-300 mx-auto" />
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Divider */}
+      <div className="border-t border-slate-200 pt-4">
+        <h3 className="text-sm font-semibold text-slate-700 mb-4">Gerenciar Usuários</h3>
+      </div>
+
       {/* Header com Invite */}
       <div className="flex flex-col lg:flex-row gap-4 items-center">
         <div className="flex-1 flex gap-2">
