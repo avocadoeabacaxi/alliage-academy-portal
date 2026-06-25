@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import ProfileEditModal from '@/components/ProfileEditModal';
-import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList, Edit, User as UserIcon, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList, Edit, User as UserIcon, ChevronDown, Settings } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function Layout() {
@@ -145,8 +145,12 @@ export default function Layout() {
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
                 <div className="relative flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00A6D6] to-[#0088B0] flex items-center justify-center text-xs font-bold text-white ring-2 ring-white/15">
-                    {user?.full_name?.charAt(0)?.toUpperCase() || '?'}
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00A6D6] to-[#0088B0] flex items-center justify-center text-xs font-bold text-white ring-2 ring-white/15 overflow-hidden">
+                    {user?.photo_url ? (
+                      <img src={user.photo_url} alt={user.full_name} className="w-full h-full object-cover" />
+                    ) : (
+                      user?.full_name?.charAt(0)?.toUpperCase() || '?'
+                    )}
                   </div>
                   <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[#003553]" />
                 </div>
@@ -162,7 +166,13 @@ export default function Layout() {
                    <UserIcon className="w-4 h-4" />
                    {t('common.edit')} Perfil
                   </button>
-                  <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left border-t border-slate-100">
+                  {user?.role === 'admin' && (
+                    <Link to="/settings" onClick={() => setUserMenuOpen(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left border-t border-slate-100">
+                      <Settings className="w-4 h-4" />
+                      Configurações
+                    </Link>
+                  )}
+                  <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left border-t border-slate-100">
                     <LogOut className="w-4 h-4" />
                     {t('nav.logout')}
                   </button>

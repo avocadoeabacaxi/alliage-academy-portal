@@ -1,0 +1,33 @@
+{
+  "name": "EmailTemplate",
+  "type": "object",
+  "properties": {
+    "template_type": {
+      "type": "string",
+      "enum": [
+        "admin_notification",
+        "approval",
+        "rejection",
+        "training_reminder"
+      ]
+    },
+    "subject": {
+      "type": "string"
+    },
+    "html_content": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "template_type",
+    "subject",
+    "html_content"
+  ]
+}

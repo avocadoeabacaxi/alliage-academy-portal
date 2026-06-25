@@ -5,12 +5,14 @@ import { base44 } from '@/api/base44Client';
 export default function ProfileEditModal({ isOpen, onClose, user, onUpdateUser }) {
   const [name, setName] = useState(user?.full_name || '');
   const [loading, setLoading] = useState(false);
-  const [photoPreview, setPhotoPreview] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(user?.photo_url || null);
+  const [photoFile, setPhotoFile] = useState(null);
   const fileInputRef = useRef(null);
 
   const handlePhotoChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
+      setPhotoFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
         setPhotoPreview(event.target.result);
@@ -24,7 +26,14 @@ export default function ProfileEditModal({ isOpen, onClose, user, onUpdateUser }
     
     setLoading(true);
     try {
-      await base44.auth.updateMe({ full_name: name });
+      let photoUrl = user?.photo_url;
+      
+      if (photoFile) {
+        const uploadRes = await base44.integrations.Core.UploadFile({ file: photoFile });
+        photoUrl = uploadRes.file_url;
+      }
+      
+      await base44.auth.updateMe({ full_name: name, photo_url: photoUrl });
       const updatedUser = await base44.auth.me();
       onUpdateUser(updatedUser);
       onClose();

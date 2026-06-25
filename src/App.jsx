@@ -17,6 +17,7 @@ import RequestList from '@/pages/RequestList';
 import RequestDetail from '@/pages/RequestDetail';
 import Survey from '@/pages/Survey';
 import UserManagement from '@/pages/UserManagement';
+import Settings from '@/pages/Settings';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -49,6 +50,7 @@ const AuthenticatedApp = () => {
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/requests/:id" element={<RequestDetail />} />
         <Route path="/users" element={<UserManagement />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
