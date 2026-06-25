@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Star, Check, Loader2, Activity } from 'lucide-react';
@@ -17,13 +18,8 @@ export default function Survey() {
   useEffect(() => {
     const fetchSurvey = async () => {
       try {
-        const res = await fetch('/.functions/getSurveyByToken', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token })
-        });
-        const data = await res.json();
-        if (data.data) setSurvey(data.data);
+        const response = await base44.functions.invoke('getSurveyByToken', { token });
+        if (response.data?.data) setSurvey(response.data.data);
       } catch (e) {
         console.error('Error fetching survey:', e);
       } finally {
@@ -50,20 +46,15 @@ export default function Survey() {
         answer: answers[q.id] || null
       }));
 
-      const res = await fetch('/.functions/createSurveyResponse', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          survey_id: survey.id,
-          training_request_id: survey.training_request_id,
-          respondent_name: respondentName || '',
-          responses: responseEntries,
-          language: lang,
-          rating_overall: overallRating || null,
-          submitted_at: new Date().toISOString()
-        })
+      await base44.functions.invoke('createSurveyResponse', {
+        survey_id: survey.id,
+        training_request_id: survey.training_request_id,
+        respondent_name: respondentName || '',
+        responses: responseEntries,
+        language: lang,
+        rating_overall: overallRating || null,
+        submitted_at: new Date().toISOString()
       });
-      if (!res.ok) throw new Error('Erro ao enviar pesquisa');
 
       setSubmitted(true);
     } catch (e) {

@@ -50,6 +50,7 @@ const AuthenticatedApp = () => {
         <Route path="/requests/past" element={<PastEvent />} />
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/requests/:id" element={<RequestDetail />} />
+        <Route path="/survey/:token" element={<Survey />} />
         <Route path="/surveys" element={<Surveys />} />
         <Route path="/users" element={<UserManagement />} />
         <Route path="/settings" element={<Settings />} />
@@ -66,10 +67,6 @@ function App() {
         <QueryClientProvider client={queryClientInstance}>
           <Router>
             <ScrollToTop />
-            <Routes>
-              {/* Public survey route (no auth needed) */}
-              <Route path="/survey/:token" element={<Survey />} />
-            </Routes>
             <AuthenticatedApp />
           </Router>
           <Toaster />
