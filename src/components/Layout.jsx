@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import ProfileEditModal from '@/components/ProfileEditModal';
+import AuthorizationGate from '@/components/AuthorizationGate';
 import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList, Edit, User as UserIcon, ChevronDown, Settings, BarChart3 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -187,7 +188,9 @@ export default function Layout() {
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">
-          <Outlet />
+          <AuthorizationGate>
+            <Outlet />
+          </AuthorizationGate>
         </main>
       </div>
 
