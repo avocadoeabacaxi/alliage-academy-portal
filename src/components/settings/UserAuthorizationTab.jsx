@@ -37,9 +37,14 @@ export default function UserAuthorizationTab() {
         approved_by: user.id,
         approved_date: new Date().toISOString()
       });
-      // Send platform invitation so the user can create their account
-      const platformRole = role === 'admin' ? 'admin' : 'user';
-      await base44.users.inviteUser(auth.email, platformRole);
+      // With public app + login required, users self-register, so invite may fail if user already exists — that's OK
+      try {
+        const platformRole = role === 'admin' ? 'admin' : 'user';
+        await base44.users.inviteUser(auth.email, platformRole);
+      } catch (inviteErr) {
+        // User already registered — approval status is already saved, so this is fine
+        console.log('Invite skipped (user may already exist):', inviteErr.message);
+      }
       await loadData();
     } catch (e) {
       alert('Erro: ' + e.message);
