@@ -68,12 +68,12 @@ export default function Login() {
         <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-[#00A6D6]/10 blur-3xl" />
 
         <div className="relative w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-3">
-              <GraduationCap className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-white font-bold text-lg tracking-wide">ALLIAGE ACADEMY</h2>
-            <p className="text-white/50 text-xs font-medium tracking-widest uppercase">Training &amp; Education</p>
+          <div className="flex justify-center mb-8">
+            <img
+              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/4a16a00af_CapturadeTela2026-06-26as152625.png"
+              alt="Alliage Training & Education"
+              className="h-16 w-auto"
+            />
           </div>
 
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
@@ -127,14 +127,12 @@ export default function Login() {
         <div className="absolute bottom-1/3 left-10 w-1.5 h-1.5 rounded-full bg-white/25" />
 
         {/* Logo */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
-            <GraduationCap className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-white font-bold text-xl tracking-wide">ALLIAGE</h2>
-            <p className="text-white/60 text-[10px] font-medium tracking-[0.2em] uppercase">Training &amp; Education</p>
-          </div>
+        <div className="relative z-10">
+          <img
+            src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/4a16a00af_CapturadeTela2026-06-26as152625.png"
+            alt="Alliage Training & Education"
+            className="h-14 w-auto"
+          />
         </div>
 
         {/* Headline + features */}
@@ -176,14 +174,12 @@ export default function Login() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
-          <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
-            <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl" style={{ background: 'linear-gradient(135deg, #003B5C, #00A6D6)' }}>
-              <GraduationCap className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-[#003B5C] font-bold text-base tracking-wide">ALLIAGE</h2>
-              <p className="text-slate-400 text-[9px] font-medium tracking-[0.2em] uppercase">Training &amp; Education</p>
-            </div>
+          <div className="lg:hidden flex justify-center mb-8">
+            <img
+              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/4a16a00af_CapturadeTela2026-06-26as152625.png"
+              alt="Alliage Training & Education"
+              className="h-12 w-auto"
+            />
           </div>
 
           <div className="mb-8">
