@@ -70,7 +70,7 @@ export default function Login() {
         <div className="relative w-full max-w-md">
           <div className="flex justify-center mb-8">
             <img
-              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/4a16a00af_CapturadeTela2026-06-26as152625.png"
+              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png"
               alt="Alliage Training & Education"
               className="h-16 w-auto"
             />
@@ -129,7 +129,7 @@ export default function Login() {
         {/* Logo */}
         <div className="relative z-10">
           <img
-            src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/4a16a00af_CapturadeTela2026-06-26as152625.png"
+            src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png"
             alt="Alliage Training & Education"
             className="h-14 w-auto"
           />
@@ -176,7 +176,7 @@ export default function Login() {
           {/* Mobile logo */}
           <div className="lg:hidden flex justify-center mb-8">
             <img
-              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/4a16a00af_CapturadeTela2026-06-26as152625.png"
+              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png"
               alt="Alliage Training & Education"
               className="h-12 w-auto"
             />
