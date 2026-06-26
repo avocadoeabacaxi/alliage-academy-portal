@@ -55,12 +55,12 @@ export default function AuthorizationGate({ children }) {
 
         <div className="relative w-full max-w-md">
           {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-3">
-              <GraduationCap className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-white font-bold text-lg tracking-wide">ALLIAGE ACADEMY</h2>
-            <p className="text-white/50 text-xs font-medium tracking-widest uppercase">Training &amp; Education</p>
+          <div className="flex justify-center mb-8">
+            <img
+              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/4a16a00af_CapturadeTela2026-06-26as152625.png"
+              alt="Alliage Training & Education"
+              className="h-16 w-auto"
+            />
           </div>
 
           {/* Card */}
@@ -93,7 +93,7 @@ export default function AuthorizationGate({ children }) {
               )}
 
               <button
-                onClick={() => base44.auth.logout('/')}
+                onClick={() => base44.auth.logout('/login')}
                 className="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#003B5C] hover:bg-[#002D44] transition-colors shadow-lg"
               >
                 <LogOut className="w-4 h-4" />
