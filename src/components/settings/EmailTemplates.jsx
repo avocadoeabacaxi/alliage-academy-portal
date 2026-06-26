@@ -18,6 +18,10 @@ const DEFAULT_TEMPLATES = {
   training_reminder: {
     subject: '📅 Lembrete: Seu Treinamento é Amanhã!',
     html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 20px;"><div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"><div style="text-align: center; margin-bottom: 30px;"><div style="display: inline-block; background: #FEF3C7; border-radius: 50%; width: 60px; height: 60px; line-height: 60px; font-size: 32px;">📅</div></div><h2 style="color: #003B5C; margin-top: 0; text-align: center; font-size: 24px;">Seu Treinamento é Amanhã!</h2><p style="color: #6B7280; line-height: 1.6; text-align: center;">Olá ${requester_name}, este é um lembrete de que você tem um treinamento agendado para <strong>amanhã</strong>!</p><div style="background: #F3F4F6; border-left: 4px solid #F59E0B; padding: 16px; margin: 20px 0; border-radius: 4px;"><p style="margin: 8px 0; color: #374151;"><strong>Solicitação:</strong> ${request_id}</p><p style="margin: 8px 0; color: #374151;"><strong>Produto:</strong> ${product_name}</p><p style="margin: 8px 0; color: #374151;"><strong>Data e Hora:</strong> ${training_scheduled_date}</p><p style="margin: 8px 0; color: #374151;"><strong>Formato:</strong> ${format}</p></div><p style="color: #EF4444; font-weight: bold; text-align: center; margin: 20px 0;">Por favor, confirme sua presença e chegue com antecedência!</p><hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;"><p style="color: #9CA3AF; font-size: 12px; margin: 0;">Dúvidas? Entre em contato conosco.</p></div></div>'
+  },
+  survey: {
+    subject: '📋 Pesquisa de Satisfação - Treinamento ${request_id}',
+    html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 20px;"><div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"><div style="text-align: center; margin-bottom: 30px;"><div style="display: inline-block; background: #DBEAFE; border-radius: 50%; width: 60px; height: 60px; line-height: 60px; font-size: 32px;">📋</div></div><h2 style="color: #003B5C; margin-top: 0; text-align: center; font-size: 24px;">Pesquisa de Satisfação</h2><p style="color: #6B7280; line-height: 1.6; text-align: center;">Olá ${requester_name}, obrigado por participar do nosso treinamento!</p><div style="background: #F3F4F6; border-left: 4px solid #00A6D6; padding: 16px; margin: 20px 0; border-radius: 4px;"><p style="margin: 8px 0; color: #374151;"><strong>Solicitação:</strong> ${request_id}</p><p style="margin: 8px 0; color: #374151;"><strong>Produto:</strong> ${product_name}</p></div><p style="color: #6B7280; line-height: 1.6;">Gostaríamos de saber sua opinião sobre o treinamento que você participou. Sua resposta nos ajuda a melhorar continuamente nossos programas.</p><div style="margin: 30px 0; text-align: center;"><a href="${survey_url}" style="display: inline-block; padding: 12px 32px; background-color: #00A6D6; color: white; text-decoration: none; border-radius: 24px; font-weight: bold;">Responder Pesquisa</a></div><p style="color: #9CA3AF; font-size: 12px; margin: 0;">Esta pesquisa é confidencial e seus dados serão usados apenas para melhorias no programa.</p></div></div>'
   }
 };
 
@@ -25,7 +29,8 @@ const TEMPLATES = [
   { id: 'admin_notification', label: 'Notificação ao Admin', type: 'admin_notification' },
   { id: 'approval', label: 'Email de Aprovação', type: 'approval' },
   { id: 'rejection', label: 'Email de Rejeição', type: 'rejection' },
-  { id: 'training_reminder', label: 'Lembrete 1 Dia Antes', type: 'training_reminder' }
+  { id: 'training_reminder', label: 'Lembrete 1 Dia Antes', type: 'training_reminder' },
+  { id: 'survey', label: 'Pesquisa de Satisfação', type: 'survey' }
 ];
 
 export default function EmailTemplates() {
@@ -191,6 +196,7 @@ export default function EmailTemplates() {
                 <li>${'{educator_name}'} - Nome do educador</li>
                 <li>${'{training_scheduled_date}'} - Data do treinamento</li>
                 <li>${'{format}'} - Formato (Remoto/Presencial)</li>
+                <li>${'{survey_url}'} - Link da pesquisa (apenas template de pesquisa)</li>
               </ul>
             </div>
           </div>

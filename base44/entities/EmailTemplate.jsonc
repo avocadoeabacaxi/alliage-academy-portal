@@ -8,7 +8,8 @@
         "admin_notification",
         "approval",
         "rejection",
-        "training_reminder"
+        "training_reminder",
+        "survey"
       ]
     },
     "subject": {
