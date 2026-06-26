@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     const adminEmails = admins.map(a => a.email);
 
     const result = await resend.emails.send({
-      from: 'notifications@alliageacademy.com',
+      from: 'no-reply@trainning.alliage.global',
       to: adminEmails,
       subject: `[${priority}] Nova Solicitação de Treinamento - ${request_id}`,
       html: `

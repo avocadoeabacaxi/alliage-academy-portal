@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
       : 'A ser agendada';
 
     const result = await resend.emails.send({
-      from: 'training@alliageacademy.com',
+      from: 'no-reply@trainning.alliage.global',
       to: requester_email,
       subject: `✅ Solicitação Aprovada - ${request_id}`,
       html: `
