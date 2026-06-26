@@ -20,9 +20,29 @@ import UserManagement from '@/pages/UserManagement';
 import Settings from '@/pages/Settings';
 import Surveys from '@/pages/Surveys';
 import UserAuthorization from '@/pages/UserAuthorization';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
+
+const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password'];
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const pathname = window.location.pathname;
+  const isAuthRoute = AUTH_ROUTES.some(r => pathname.startsWith(r));
+
+  if (isAuthRoute) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="*" element={<Login />} />
+      </Routes>
+    );
+  }
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -43,6 +63,10 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/requests" element={<RequestList />} />
