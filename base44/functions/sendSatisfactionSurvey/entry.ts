@@ -27,8 +27,7 @@ Deno.serve(async (req) => {
     }
 
     const survey = surveys[0];
-    const appId = Deno.env.get('BASE44_APP_ID');
-    const surveyUrl = `https://preview-sandbox--${appId}.base44.app/survey/${survey.public_token}`;
+    const surveyUrl = `https://trainning.alliage.global/survey/${survey.public_token}`;
 
     // Fetch configured email template from database
     const templates = await base44.asServiceRole.entities.EmailTemplate.filter({ template_type: 'survey' });
