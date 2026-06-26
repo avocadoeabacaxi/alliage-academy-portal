@@ -138,7 +138,7 @@ export default function Login() {
         {/* Headline + features */}
         <div className="relative z-10">
           <h1 className="text-white font-bold text-4xl leading-tight mb-4">
-            Portal de<br />Treinamentos<br />Médicos
+            Portal de<br />Treinamentos<br />Alliage
           </h1>
           <p className="text-white/70 text-sm leading-relaxed mb-10 max-w-md">
             Gerencie solicitações de treinamento, acompanhe aprovações e avalie resultados em uma plataforma centralizada.
