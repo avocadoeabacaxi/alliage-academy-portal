@@ -37,6 +37,9 @@ export default function UserAuthorizationTab() {
         approved_by: user.id,
         approved_date: new Date().toISOString()
       });
+      // Send platform invitation so the user can create their account
+      const platformRole = role === 'admin' ? 'admin' : 'user';
+      await base44.users.inviteUser(auth.email, platformRole);
       await loadData();
     } catch (e) {
       alert('Erro: ' + e.message);
