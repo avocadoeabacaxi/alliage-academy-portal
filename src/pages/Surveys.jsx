@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { Search, Filter, Loader2, BarChart3, TrendingUp, Users, FileText, Send } from 'lucide-react';
+import { Search, Filter, Loader2, BarChart3, TrendingUp, Users, FileText, Send, CheckCircle2, X, Mail, Clock } from 'lucide-react';
 
 export default function Surveys() {
   const { t, lang } = useLanguage();
@@ -12,6 +12,7 @@ export default function Surveys() {
   const [filterStatus, setFilterStatus] = useState('');
   const [educators, setEducators] = useState([]);
   const [resending, setResending] = useState(null);
+  const [successModal, setSuccessModal] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -21,8 +22,6 @@ export default function Surveys() {
     try {
       const evals = await base44.entities.TrainingEvaluation.list('-created_date', 100);
       setEvaluations(evals);
-
-      // Extract unique educators
       const uniqueEducators = [...new Set(evals.map(e => e.educator_name))];
       setEducators(uniqueEducators);
     } catch (e) {
@@ -40,7 +39,13 @@ export default function Surveys() {
         request_id_display: eval_.request_id_display,
         public_token: eval_.public_token
       });
-      alert('Pesquisa reenviada com sucesso!');
+      await loadData();
+      const updated = (await base44.entities.TrainingEvaluation.filter({ id: eval_.id }))[0] || eval_;
+      setSuccessModal({
+        evaluation: updated,
+        product_name: eval_.product_name,
+        request_id_display: eval_.request_id_display
+      });
     } catch (e) {
       alert('Erro ao reenviar: ' + e.message);
     } finally {
@@ -164,8 +169,9 @@ export default function Surveys() {
                   <th className="text-center px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Avaliação</th>
                   <th className="text-center px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Status</th>
                   <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Data</th>
+                  <th className="text-center px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Reenvios</th>
                   <th className="text-center px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Ações</th>
-                  </tr>
+                </tr>
               </thead>
               <tbody>
                 {filteredEvals.map(e => (
@@ -201,22 +207,102 @@ export default function Surveys() {
                       {e.submitted_at ? new Date(e.submitted_at).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es' : 'en-US') : '—'}
                     </td>
                     <td className="px-4 py-3 text-center">
+                      {e.resend_count > 0 ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-[#00A6D6]/10 text-[#00A6D6]">
+                          <Send className="w-3 h-3" />
+                          {e.resend_count}
+                        </span>
+                      ) : (
+                        <span className="text-slate-300 text-xs">0</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
                       <button
                         onClick={() => handleResendSurvey(e)}
-                        disabled={resending === e.id}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[#00A6D6] border border-[#00A6D6]/30 hover:bg-[#00A6D6]/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={resending === e.id || e.status === 'completed'}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#00A6D6] border border-[#00A6D6]/30 hover:bg-[#00A6D6]/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {resending === e.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                        Reenviar
+                        {resending === e.id ? 'Enviando...' : 'Reenviar'}
+                        {e.resend_count > 0 && !resending && (
+                          <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-[#00A6D6]/15 text-[#00A6D6] text-[10px] font-bold leading-none">
+                            {e.resend_count}
+                          </span>
+                        )}
                       </button>
                     </td>
-                    </tr>
+                  </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
       </div>
+
+      {/* Success Modal */}
+      {successModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setSuccessModal(null)}>
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-slide-in"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setSuccessModal(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Success icon */}
+            <div className="pt-8 pb-4 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-50 mb-4">
+                <CheckCircle2 className="w-9 h-9 text-green-500" />
+              </div>
+              <h2 className="text-xl font-bold text-[#003B5C] mb-1">Email Reenviado!</h2>
+              <p className="text-sm text-slate-500">A pesquisa foi enviada com sucesso para o solicitante.</p>
+            </div>
+
+            {/* Details */}
+            <div className="px-6 pb-6 space-y-3">
+              <div className="bg-slate-50 rounded-xl p-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <Mail className="w-4 h-4 text-[#00A6D6] flex-shrink-0" />
+                  <span className="text-slate-500">Produto:</span>
+                  <span className="font-medium text-slate-900 truncate">{successModal.product_name}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <FileText className="w-4 h-4 text-[#00A6D6] flex-shrink-0" />
+                  <span className="text-slate-500">Solicitação:</span>
+                  <span className="font-medium text-slate-900">{successModal.request_id_display}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Send className="w-4 h-4 text-[#00A6D6] flex-shrink-0" />
+                  <span className="text-slate-500">Total de reenvios:</span>
+                  <span className="font-bold text-[#00A6D6]">{successModal.evaluation?.resend_count || 1}</span>
+                </div>
+                {successModal.evaluation?.last_resent_at && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="w-4 h-4 text-[#00A6D6] flex-shrink-0" />
+                    <span className="text-slate-500">Enviado em:</span>
+                    <span className="font-medium text-slate-900">
+                      {new Date(successModal.evaluation.last_resent_at).toLocaleString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es' : 'en-US')}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={() => setSuccessModal(null)}
+                className="w-full py-2.5 rounded-full bg-[#00A6D6] text-white text-sm font-semibold hover:bg-[#0094BD] transition-colors shadow-md shadow-[#00A6D6]/20"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

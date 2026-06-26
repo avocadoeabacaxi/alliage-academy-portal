@@ -58,6 +58,21 @@ Deno.serve(async (req) => {
       return Response.json({ error: result.error.message }, { status: 500 });
     }
 
+    // Increment resend count on the evaluation record
+    try {
+      const evals = await base44.asServiceRole.entities.TrainingEvaluation.filter({ training_request_id });
+      if (evals.length > 0) {
+        const ev = evals[0];
+        await base44.asServiceRole.entities.TrainingEvaluation.update(ev.id, {
+          resend_count: (ev.resend_count || 0) + 1,
+          last_resent_at: new Date().toISOString(),
+          status: 'sent'
+        });
+      }
+    } catch (e) {
+      console.error('Could not update resend count:', e);
+    }
+
     return Response.json({ success: true, email_id: result.data.id });
   } catch (error) {
     console.error('Error:', error);

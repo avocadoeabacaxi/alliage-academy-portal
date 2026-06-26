@@ -68,6 +68,14 @@
     "sent_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "resend_count": {
+      "type": "number",
+      "default": 0
+    },
+    "last_resent_at": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [
