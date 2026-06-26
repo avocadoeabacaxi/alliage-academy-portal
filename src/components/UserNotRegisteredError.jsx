@@ -58,6 +58,13 @@ const UserNotRegisteredError = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-slate-50 p-4">
         <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-lg border border-slate-100">
+          <div className="flex justify-center mb-6">
+            <img
+              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png"
+              alt="Alliage Training & Education"
+              className="h-14 w-auto"
+            />
+          </div>
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-amber-100">
               <Clock className="w-8 h-8 text-amber-600" />
@@ -82,6 +89,13 @@ const UserNotRegisteredError = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-slate-50 p-4">
         <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-lg border border-slate-100">
+          <div className="flex justify-center mb-6">
+            <img
+              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png"
+              alt="Alliage Training & Education"
+              className="h-14 w-auto"
+            />
+          </div>
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-red-100">
               <AlertCircle className="w-8 h-8 text-red-600" />
@@ -107,6 +121,13 @@ const UserNotRegisteredError = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-slate-50 p-4">
         <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-lg border border-slate-100">
+          <div className="flex justify-center mb-6">
+            <img
+              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png"
+              alt="Alliage Training & Education"
+              className="h-14 w-auto"
+            />
+          </div>
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-green-100">
               <CheckCircle2 className="w-8 h-8 text-green-600" />
@@ -135,6 +156,13 @@ const UserNotRegisteredError = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-slate-50 p-4">
       <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-lg border border-slate-100">
+        <div className="flex justify-center mb-6">
+          <img
+            src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png"
+            alt="Alliage Training & Education"
+            className="h-14 w-auto"
+          />
+        </div>
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-[#00A6D6]/10">
             <UserPlus className="w-8 h-8 text-[#00A6D6]" />
