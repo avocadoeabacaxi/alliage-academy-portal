@@ -55,8 +55,25 @@ export default function SettingsUsers() {
 
   const loadUsers = async () => {
     try {
-      const data = await base44.entities.User.list();
-      setUsers(data);
+      const [platformUsers, authResponse] = await Promise.all([
+        base44.entities.User.list('created_date', 200),
+        base44.functions.invoke('listUserAuthorizations', {})
+      ]);
+      const approvedAuths = (authResponse.data?.data || []).filter(a => a.status === 'approved');
+      const platformEmails = new Set((platformUsers || []).map(u => u.email?.toLowerCase()));
+      // approved authorizations not yet registered on the platform
+      const pendingRegistrations = approvedAuths
+        .filter(a => !platformEmails.has(a.email?.toLowerCase()))
+        .map(a => ({
+          id: `auth_${a.id}`,
+          email: a.email,
+          full_name: a.full_name || '',
+          role: a.role || 'solicitante',
+          region: '',
+          created_date: a.approved_date || a.first_login_attempt,
+          pending_registration: true,
+        }));
+      setUsers([...platformUsers, ...pendingRegistrations]);
     } catch (e) {
       console.error(e);
     } finally {
@@ -258,11 +275,16 @@ export default function SettingsUsers() {
             </thead>
             <tbody>
               {filteredUsers.map(user => (
-                <tr key={user.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                <tr key={user.id} className={`border-b border-slate-100 hover:bg-slate-50 transition-colors ${user.pending_registration ? 'bg-amber-50/30' : ''}`}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <Mail className="w-4 h-4 text-slate-400" />
                       <span className="text-sm font-medium text-slate-900">{user.email}</span>
+                      {user.pending_registration && (
+                        <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200 whitespace-nowrap">
+                          Convite pendente
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -316,6 +338,8 @@ export default function SettingsUsers() {
                           <X className="w-4 h-4" />
                         </button>
                       </div>
+                    ) : user.pending_registration ? (
+                      <span className="text-xs text-slate-300">—</span>
                     ) : (
                       <button
                         onClick={() => {
