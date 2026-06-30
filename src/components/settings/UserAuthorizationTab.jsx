@@ -37,13 +37,14 @@ export default function UserAuthorizationTab() {
         approved_by: user.id,
         approved_date: new Date().toISOString()
       });
-      // With public app + login required, users self-register, so invite may fail if user already exists — that's OK
+      // Send a "set your password" email (self-registration flow — no confusing invite email)
       try {
-        const platformRole = role === 'admin' ? 'admin' : 'user';
-        await base44.users.inviteUser(auth.email, platformRole);
-      } catch (inviteErr) {
-        // User already registered — approval status is already saved, so this is fine
-        console.log('Invite skipped (user may already exist):', inviteErr.message);
+        await base44.functions.invoke('sendPasswordReset', {
+          email: auth.email,
+          full_name: auth.full_name
+        });
+      } catch (emailErr) {
+        console.log('Set-password email skipped:', emailErr.message);
       }
       await loadData();
     } catch (e) {

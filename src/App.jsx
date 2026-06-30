@@ -24,8 +24,9 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
+import SetPassword from '@/pages/SetPassword';
 
-const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password'];
+const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/set-password'];
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -40,6 +41,7 @@ const AuthenticatedApp = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/reset-password/*" element={<ResetPassword />} />
+        <Route path="/set-password" element={<SetPassword />} />
         <Route path="*" element={<Login />} />
       </Routes>
     );

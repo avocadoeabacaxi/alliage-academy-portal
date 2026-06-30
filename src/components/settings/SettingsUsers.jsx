@@ -108,10 +108,12 @@ export default function SettingsUsers() {
     if (!inviteForm.email.trim()) return;
     
     try {
-      await base44.users.inviteUser(inviteForm.email, inviteForm.role);
-      setInviteMsg('Convite enviado com sucesso!');
+      // Send a set-password email directly (self-registration — avoids the confusing platform invite email)
+      await base44.functions.invoke('sendPasswordReset', { email: inviteForm.email });
+      setInviteMsg('Convite enviado! O usuário receberá um email para definir sua senha. Após o cadastro, ajuste o papel do usuário nesta tela.');
       setInviteForm({ email: '', role: 'solicitante', region: 'Brasil' });
-      setTimeout(() => setInviteMsg(''), 3000);
+      setTimeout(() => setInviteMsg(''), 5000);
+      loadUsers();
     } catch (e) {
       setInviteMsg('Erro: ' + e.message);
     }
