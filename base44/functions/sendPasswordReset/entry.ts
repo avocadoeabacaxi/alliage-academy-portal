@@ -13,6 +13,10 @@ Deno.serve(async (req) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
+    // Determine the app's base URL from the request origin (the admin's current domain)
+    const origin = req.headers.get('origin') || req.headers.get('referer')?.replace(/\/(admin|settings|users).*$/, '') || 'https://trainning.alliage.global';
+    const baseUrl = origin.replace(/\/$/, '');
+
     // Check if a platform user account already exists
     const existingUsers = await base44.asServiceRole.entities.User.filter({ email: normalizedEmail });
     const platformUserExists = existingUsers.length > 0;
@@ -57,13 +61,13 @@ Deno.serve(async (req) => {
                     : 'Seu acesso foi liberado! Para começar a usar o portal, você precisa definir sua senha.'}
                 </p>
                 <div style="text-align: center; margin: 28px 0;">
-                  <a href="https://trainning.alliage.global/forgot-password"
+                  <a href="${baseUrl}/forgot-password"
                      style="display: inline-block; background: #00A6D6; color: #ffffff; font-weight: 600; font-size: 14px; padding: 12px 32px; border-radius: 9999px; text-decoration: none;">
                     Redefinir minha senha
                   </a>
                 </div>
                 <p style="color: #64748b; font-size: 13px; line-height: 1.6;">
-                  Se o botão acima não funcionar, acesse diretamente: <a href="https://trainning.alliage.global/forgot-password" style="color: #00A6D6;">trainning.alliage.global/forgot-password</a>
+                  Se o botão acima não funcionar, acesse diretamente: <a href="${baseUrl}/forgot-password" style="color: #00A6D6;">${baseUrl}/forgot-password</a>
                 </p>
                 <p style="color: #94a3b8; font-size: 12px; line-height: 1.6; margin-top: 24px;">
                   Se você não solicitou esta redefinição, ignore este email.<br/>

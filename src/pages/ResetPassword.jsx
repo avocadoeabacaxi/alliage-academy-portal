@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useParams, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,13 @@ import AuthLayout from "@/components/AuthLayout";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
-  const resetToken = searchParams.get("token");
+  const params = useParams();
+  const location = useLocation();
+  // Read token from query param, path splat, or hash (platform may use any format)
+  const resetToken = searchParams.get("token")
+    || params["*"]
+    || new URLSearchParams(location.search).get("token")
+    || (location.hash.includes("=") ? location.hash.split("=")[1] : null);
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
