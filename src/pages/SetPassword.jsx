@@ -193,7 +193,6 @@ export default function SetPassword() {
   // Step: set password
   return (
     <AuthLayout
-      icon={KeyRound}
       title="Defina sua senha"
       subtitle="Seu acesso foi aprovado! Crie uma senha para acessar o portal."
       footer={
