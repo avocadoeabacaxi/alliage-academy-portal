@@ -82,11 +82,18 @@ export default function SettingsUsers() {
         base44.entities.User.list('created_date', 200),
         base44.functions.invoke('listUserAuthorizations', {})
       ]);
-      const approvedAuths = (authResponse.data?.data || []).filter(a => a.status === 'approved');
+      const allAuths = authResponse.data?.data || [];
+      const authByEmail = {};
+      allAuths.forEach(a => { if (a.email) authByEmail[a.email.toLowerCase()] = a; });
       const platformEmails = new Set((platformUsers || []).map(u => u.email?.toLowerCase()));
+      // Use UserAuthorization role as source of truth for app permissions (same as the authorization tab)
+      const mergedUsers = (platformUsers || []).map(u => {
+        const auth = authByEmail[u.email?.toLowerCase()];
+        return auth ? { ...u, role: auth.role || u.role } : u;
+      });
       // approved authorizations not yet registered on the platform
-      const pendingRegistrations = approvedAuths
-        .filter(a => !platformEmails.has(a.email?.toLowerCase()))
+      const pendingRegistrations = allAuths
+        .filter(a => a.status === 'approved' && !platformEmails.has(a.email?.toLowerCase()))
         .map(a => ({
           id: `auth_${a.id}`,
           email: a.email,
@@ -96,7 +103,7 @@ export default function SettingsUsers() {
           created_date: a.approved_date || a.first_login_attempt,
           pending_registration: true,
         }));
-      setUsers([...platformUsers, ...pendingRegistrations]);
+      setUsers([...mergedUsers, ...pendingRegistrations]);
     } catch (e) {
       console.error(e);
     } finally {
@@ -124,7 +131,19 @@ export default function SettingsUsers() {
     
     setSaving(true);
     try {
-      await base44.entities.User.update(userId, { role: editForm.role, region: editForm.region });
+      const targetUser = users.find(u => u.id === userId);
+      const email = targetUser?.email?.toLowerCase();
+      // 1. Update UserAuthorization role (source of truth) — same as the authorization tab
+      if (email) {
+        const authResponse = await base44.functions.invoke('listUserAuthorizations', {});
+        const auth = (authResponse.data?.data || []).find(a => a.email?.toLowerCase() === email);
+        if (auth) {
+          await base44.functions.invoke('updateUserAuthorization', { id: auth.id, role: editForm.role });
+        }
+      }
+      // 2. Sync platform User role (admin/user) so platform-level admin privileges match the app role
+      const platformRole = editForm.role === 'admin' ? 'admin' : 'user';
+      await base44.entities.User.update(userId, { role: platformRole, region: editForm.region });
       await loadUsers();
       setEditingUser(null);
     } catch (e) {

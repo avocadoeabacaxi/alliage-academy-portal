@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
       last_login: new Date().toISOString()
     });
 
-    return Response.json({ authorized: true, status: 'approved' });
+    return Response.json({ authorized: true, status: 'approved', role: auth.role || 'solicitante' });
   } catch (error) {
     console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });

@@ -20,7 +20,21 @@ export default function Layout() {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    const loadUser = async () => {
+      try {
+        const u = await base44.auth.me();
+        if (!u) return;
+        setUser(u);
+        // App-level role comes from UserAuthorization (source of truth), not the platform User.role
+        try {
+          const res = await base44.functions.invoke('checkUserAuthorization', { email: u.email });
+          if (res.data?.status === 'approved' && res.data?.role) {
+            setUser({ ...u, role: res.data.role });
+          }
+        } catch (e) {}
+      } catch (e) {}
+    };
+    loadUser();
     base44.entities.TrainingRequest.filter({ status: 'Pendente Análise' })
       .then(data => setPendingCount(data.length))
       .catch(() => {});
