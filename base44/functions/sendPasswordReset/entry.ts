@@ -14,9 +14,8 @@ Deno.serve(async (req) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Determine the app's base URL from the request origin (the admin's current domain)
-    const origin = req.headers.get('origin') || req.headers.get('referer')?.replace(/\/(admin|settings|users).*$/, '') || 'https://trainning.alliage.global';
-    const baseUrl = origin.replace(/\/$/, '');
+    // Always use the production domain for the set-password link
+    const baseUrl = 'https://trainning.alliage.global';
 
     // ALWAYS send the custom Portuguese email with a link to the set-password page.
     // The SetPassword page handles both new users (self-register + OTP) and existing users (password reset).
