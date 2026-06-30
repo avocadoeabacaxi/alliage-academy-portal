@@ -403,10 +403,10 @@ export default function SettingsUsers() {
 
       {/* Modal de Edição */}
       <Dialog open={!!modalUser} onOpenChange={(open) => !open && setModalUser(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-white text-slate-900 border-slate-200 [&>button]:text-slate-400 [&>button:hover]:text-slate-700">
           <DialogHeader>
-            <DialogTitle>Editar Usuário</DialogTitle>
-            <DialogDescription>Atualize o papel e a região deste usuário.</DialogDescription>
+            <DialogTitle className="text-slate-900">Editar Usuário</DialogTitle>
+            <DialogDescription className="text-slate-500">Atualize o papel e a região deste usuário.</DialogDescription>
           </DialogHeader>
           {modalUser && (
             <div className="space-y-4">
@@ -444,7 +444,7 @@ export default function SettingsUsers() {
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   onClick={() => setModalUser(null)}
-                  className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-full transition-colors"
                 >
                   Cancelar
                 </button>
