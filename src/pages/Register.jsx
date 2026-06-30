@@ -71,7 +71,6 @@ export default function Register() {
 
   return (
     <AuthLayout
-      icon={UserPlus}
       title="Solicitar Acesso"
       subtitle="Preencha seus dados para solicitar acesso ao portal"
       footer={
