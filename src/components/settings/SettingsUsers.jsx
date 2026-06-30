@@ -321,9 +321,13 @@ export default function SettingsUsers() {
                 <tr key={user.id} className={`border-b border-slate-100 hover:bg-slate-50 transition-colors ${user.pending_registration ? 'bg-amber-50/30' : ''}`}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[#00A6D6]/10 text-[#003B5C] flex items-center justify-center text-sm font-semibold shrink-0">
-                        {(user.full_name || user.email || '?').charAt(0).toUpperCase()}
-                      </div>
+                      {user.photo_url ? (
+                        <img src={user.photo_url} alt={user.full_name || user.email} className="w-9 h-9 rounded-full object-cover shrink-0 border border-slate-200" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-[#00A6D6]/10 text-[#003B5C] flex items-center justify-center text-sm font-semibold shrink-0">
+                          {(user.full_name || user.email || '?').charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-slate-900 truncate">{user.full_name || 'Sem nome'}</span>
@@ -411,9 +415,13 @@ export default function SettingsUsers() {
           {modalUser && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                <div className="w-10 h-10 rounded-full bg-[#00A6D6]/10 text-[#003B5C] flex items-center justify-center text-sm font-semibold shrink-0">
-                  {(modalUser.full_name || modalUser.email || '?').charAt(0).toUpperCase()}
-                </div>
+                {modalUser.photo_url ? (
+                  <img src={modalUser.photo_url} alt={modalUser.full_name || modalUser.email} className="w-10 h-10 rounded-full object-cover shrink-0 border border-slate-200" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-[#00A6D6]/10 text-[#003B5C] flex items-center justify-center text-sm font-semibold shrink-0">
+                    {(modalUser.full_name || modalUser.email || '?').charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-slate-900 truncate">{modalUser.full_name || 'Sem nome'}</p>
                   <p className="text-xs text-slate-400 truncate flex items-center gap-1">
