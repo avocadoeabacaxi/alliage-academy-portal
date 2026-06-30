@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { UserPlus, Shield, Mail, MapPin, Loader2, Check, X, Search, Eye, Edit, CheckCircle2, Lock, ChevronDown, ChevronUp, Users as UsersIcon } from 'lucide-react';
+import { UserPlus, Shield, Mail, MapPin, Loader2, Check, X, Search, Eye, Edit, CheckCircle2, Lock, ChevronDown, ChevronUp, Users as UsersIcon, KeyRound, Send } from 'lucide-react';
 
 const ROLES = ['admin', 'gerente_regional', 'educador', 'solicitante'];
 const REGIONS = ['Brasil', 'LATAM', 'USA', 'ROW'];
@@ -48,10 +48,41 @@ export default function SettingsUsers() {
   const [inviteForm, setInviteForm] = useState({ email: '', role: 'solicitante', region: 'Brasil' });
   const [inviteMsg, setInviteMsg] = useState('');
   const [showPerms, setShowPerms] = useState(false);
+  const [sendingReset, setSendingReset] = useState(null);
+  const [resetMsg, setResetMsg] = useState({});
 
   useEffect(() => {
     loadUsers();
   }, []);
+
+  const handleSendAccess = async (user) => {
+    setSendingReset(user.id);
+    try {
+      // For pending_registration users, ensure they have a platform account via invite first
+      if (user.pending_registration) {
+        try {
+          const platformRole = user.role === 'admin' ? 'admin' : 'user';
+          await base44.users.inviteUser(user.email, platformRole);
+        } catch (e) {
+          // User may already exist on the platform — that's fine, proceed to password reset
+        }
+      }
+      // Send password reset email
+      await base44.auth.resetPasswordRequest(user.email);
+      setResetMsg(prev => ({ ...prev, [user.id]: 'Email de redefinição de senha enviado com sucesso!' }));
+      // Remove pending_registration flag since they now have a platform account invitation
+      if (user.pending_registration) {
+        setUsers(prev => prev.map(u => u.id === user.id ? { ...u, pending_registration: false } : u));
+      }
+    } catch (e) {
+      setResetMsg(prev => ({ ...prev, [user.id]: 'Erro: ' + e.message }));
+    } finally {
+      setSendingReset(null);
+      setTimeout(() => {
+        setResetMsg(prev => { const c = { ...prev }; delete c[user.id]; return c; });
+      }, 4000);
+    }
+  };
 
   const loadUsers = async () => {
     try {
@@ -338,18 +369,45 @@ export default function SettingsUsers() {
                           <X className="w-4 h-4" />
                         </button>
                       </div>
-                    ) : user.pending_registration ? (
-                      <span className="text-xs text-slate-300">—</span>
                     ) : (
-                      <button
-                        onClick={() => {
-                          setEditingUser(user.id);
-                          setEditForm({ role: user.role, region: user.region || '' });
-                        }}
-                        className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => handleSendAccess(user)}
+                          disabled={sendingReset === user.id}
+                          title={user.pending_registration ? 'Enviar link de acesso / senha' : 'Redefinir senha (enviar por email)'}
+                          className={`p-1.5 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium ${user.pending_registration ? 'text-[#00A6D6] hover:bg-[#00A6D6]/10' : 'text-slate-500 hover:bg-slate-100'}`}
+                        >
+                          {sendingReset === user.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : user.pending_registration ? (
+                            <>
+                              <Send className="w-4 h-4" />
+                              <span className="hidden lg:inline">Liberar acesso</span>
+                            </>
+                          ) : (
+                            <>
+                              <KeyRound className="w-4 h-4" />
+                              <span className="hidden lg:inline">Redefinir senha</span>
+                            </>
+                          )}
+                        </button>
+                        {!user.pending_registration && (
+                          <button
+                            onClick={() => {
+                              setEditingUser(user.id);
+                              setEditForm({ role: user.role, region: user.region || '' });
+                            }}
+                            className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {resetMsg[user.id] && (
+                      <div className={`mt-1 text-xs ${resetMsg[user.id].includes('Erro') ? 'text-red-600' : 'text-green-600'}`}>
+                        {resetMsg[user.id]}
+                      </div>
                     )}
                   </td>
                 </tr>
