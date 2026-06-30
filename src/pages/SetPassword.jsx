@@ -36,14 +36,9 @@ export default function SetPassword() {
       setStep("otp");
     } catch (err) {
       const msg = (err.message || "").toLowerCase();
-      // User already has an account — send a password reset email instead
+      // User already has an account — show a message instead of triggering the platform's default email
       if (msg.includes("exist") || msg.includes("already") || msg.includes("registrado") || msg.includes("cadastro")) {
-        try {
-          await base44.auth.resetPasswordRequest(email);
-          setStep("reset-sent");
-        } catch (resetErr) {
-          setError("Não foi possível concluir. Tente usar 'Esqueceu a senha?' na tela de login.");
-        }
+        setStep("exists");
       } else {
         setError(err.message || "Erro ao cadastrar");
       }
@@ -159,30 +154,37 @@ export default function SetPassword() {
     );
   }
 
-  // Step: reset email sent (user already had an account)
-  if (step === "reset-sent") {
+  // Step: user already has an account
+  if (step === "exists") {
     return (
       <AuthLayout
-        icon={CheckCircle2}
-        title="Verifique seu email"
-        subtitle={`Enviamos um link de redefinição de senha para ${email}`}
+        icon={Mail}
+        title="Conta já existe"
+        subtitle={`Já existe uma conta cadastrada com ${email}`}
       >
         <div className="space-y-4">
           <div className="p-4 rounded-xl bg-blue-50 text-blue-800 text-sm border border-blue-200">
             <div className="flex gap-3">
               <Mail className="w-5 h-5 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold">Email enviado</p>
+                <p className="font-semibold">Você já tem uma conta</p>
                 <p className="text-xs opacity-75 mt-1">
-                  Como você já possui uma conta, enviamos um link para redefinir sua senha. Acesse seu email e clique no link para definir uma nova senha.
+                  Faça login com sua senha atual. Se esqueceu a senha, use a opção "Esqueceu a senha?" na tela de login para redefini-la.
                 </p>
               </div>
             </div>
           </div>
-          <Button variant="outline" className="w-full" onClick={() => window.location.href = "/login"}>
+          <Button className="w-full h-12 font-medium" onClick={() => window.location.href = "/login"}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar ao Login
+            Ir para o Login
           </Button>
+          <button
+            type="button"
+            onClick={() => window.location.href = "/forgot-password"}
+            className="w-full text-center text-sm text-primary hover:underline"
+          >
+            Esqueceu a senha?
+          </button>
         </div>
       </AuthLayout>
     );
