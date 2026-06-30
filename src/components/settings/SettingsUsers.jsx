@@ -89,7 +89,7 @@ export default function SettingsUsers() {
       // Use UserAuthorization role as source of truth for app permissions (same as the authorization tab)
       const mergedUsers = (platformUsers || []).map(u => {
         const auth = authByEmail[u.email?.toLowerCase()];
-        return auth ? { ...u, role: auth.role || u.role } : u;
+        return auth ? { ...u, role: auth.role || u.role, region: auth.region || u.region || '' } : u;
       });
       // approved authorizations not yet registered on the platform
       const pendingRegistrations = allAuths
@@ -138,7 +138,7 @@ export default function SettingsUsers() {
         const authResponse = await base44.functions.invoke('listUserAuthorizations', {});
         const auth = (authResponse.data?.data || []).find(a => a.email?.toLowerCase() === email);
         if (auth) {
-          await base44.functions.invoke('updateUserAuthorization', { id: auth.id, role: editForm.role });
+          await base44.functions.invoke('updateUserAuthorization', { id: auth.id, role: editForm.role, region: editForm.region });
         }
       }
       // 2. Sync platform User role (admin/user) so platform-level admin privileges match the app role

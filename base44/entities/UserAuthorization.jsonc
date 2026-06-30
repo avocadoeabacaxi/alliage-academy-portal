@@ -20,6 +20,15 @@
         "gerente_regional"
       ]
     },
+    "region": {
+      "type": "string",
+      "enum": [
+        "Brasil",
+        "LATAM",
+        "USA",
+        "ROW"
+      ]
+    },
     "status": {
       "type": "string",
       "enum": [
