@@ -18,25 +18,8 @@ Deno.serve(async (req) => {
     const origin = req.headers.get('origin') || req.headers.get('referer')?.replace(/\/(admin|settings|users).*$/, '') || 'https://trainning.alliage.global';
     const baseUrl = origin.replace(/\/$/, '');
 
-    // Check if a platform user account already exists
-    const existingUsers = await base44.asServiceRole.entities.User.filter({ email: normalizedEmail });
-    const platformUserExists = existingUsers.length > 0;
-
-    // If the user already has an account, trigger the platform's password reset email (direct /reset-password link)
-    if (platformUserExists) {
-      try {
-        await base44.auth.resetPasswordRequest(normalizedEmail);
-      } catch (resetErr) {
-        console.log('Reset request error:', resetErr.message);
-      }
-      return Response.json({
-        success: true,
-        account_exists: true,
-        message: 'Email de redefinição de senha enviado com sucesso!'
-      });
-    }
-
-    // New user — send a set-password email with a link to self-register
+    // ALWAYS send the custom Portuguese email with a link to the set-password page.
+    // The SetPassword page handles both new users (self-register + OTP) and existing users (password reset).
     const setpasswordLink = `${baseUrl}/set-password?email=${encodeURIComponent(normalizedEmail)}`;
 
     // Send via Resend SDK directly (Core.SendEmail only works for existing app users)
