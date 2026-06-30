@@ -58,20 +58,12 @@ export default function SettingsUsers() {
   const handleSendAccess = async (user) => {
     setSendingReset(user.id);
     try {
-      // For pending_registration users, ensure they have a platform account via invite first
-      if (user.pending_registration) {
-        try {
-          const platformRole = user.role === 'admin' ? 'admin' : 'user';
-          await base44.users.inviteUser(user.email, platformRole);
-        } catch (e) {
-          // User may already exist on the platform — that's fine, proceed to password reset
-        }
-      }
-      // Send password reset email
-      await base44.auth.resetPasswordRequest(user.email);
-      setResetMsg(prev => ({ ...prev, [user.id]: 'Email de redefinição de senha enviado com sucesso!' }));
-      // Remove pending_registration flag since they now have a platform account invitation
-      if (user.pending_registration) {
+      const response = await base44.functions.invoke('sendPasswordReset', { email: user.email });
+      const data = response.data || {};
+      const msg = data.message || 'Email enviado com sucesso!';
+      setResetMsg(prev => ({ ...prev, [user.id]: msg }));
+      // If the account didn't exist before, it's now invited — refresh to reflect status
+      if (user.pending_registration && data.success) {
         setUsers(prev => prev.map(u => u.id === user.id ? { ...u, pending_registration: false } : u));
       }
     } catch (e) {
@@ -80,7 +72,7 @@ export default function SettingsUsers() {
       setSendingReset(null);
       setTimeout(() => {
         setResetMsg(prev => { const c = { ...prev }; delete c[user.id]; return c; });
-      }, 4000);
+      }, 5000);
     }
   };
 
