@@ -35,7 +35,7 @@ export default function ProfileEditModal({ isOpen, onClose, user, onUpdateUser }
       
       await base44.auth.updateMe({ full_name: name, photo_url: photoUrl });
       const updatedUser = await base44.auth.me();
-      onUpdateUser(updatedUser);
+      onUpdateUser({ ...user, ...updatedUser, photo_url: photoUrl });
       onClose();
     } catch (error) {
       console.error('Erro ao atualizar perfil:', error);

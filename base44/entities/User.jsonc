@@ -21,6 +21,10 @@
         "USA",
         "ROW"
       ]
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "URL of the user's profile photo"
     }
   },
   "required": [
