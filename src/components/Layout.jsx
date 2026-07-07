@@ -143,7 +143,20 @@ export default function Layout() {
           })}
         </nav>
 
-
+        {/* Footer */}
+        <div className={`px-4 py-3 border-t border-white/10 ${collapsed ? 'text-center' : ''}`}>
+          <p className={`text-[10px] text-cyan-200/40 leading-relaxed ${collapsed ? 'hidden' : ''}`}>
+            Created by MKT Alliage, Avocado and{' '}
+            <a href="https://www.lab485.com" target="_blank" rel="noopener noreferrer" className="text-cyan-300/70 hover:text-cyan-200 transition-colors underline">
+              LAB485
+            </a>
+          </p>
+          {collapsed && (
+            <a href="https://www.lab485.com" target="_blank" rel="noopener noreferrer" className="text-[10px] text-cyan-300/70 hover:text-cyan-200 transition-colors">
+              LAB485
+            </a>
+          )}
+        </div>
       </aside>
 
       {/* Main content */}
