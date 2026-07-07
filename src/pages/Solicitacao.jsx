@@ -83,6 +83,7 @@ export default function Solicitacao() {
 
       const entity = {
         request_id,
+        request_category: 'Treinamento / Apoio Técnico',
         status: 'Pendente Análise',
         priority: form.priority,
         requester_name: form.requester_name,

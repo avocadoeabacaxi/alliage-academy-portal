@@ -72,8 +72,8 @@ export default function Layout() {
     if (path === '/') return location.pathname === '/';
     if (path === '/requests') return location.pathname === '/requests' || location.pathname.startsWith('/requests/');
     if (path === '/requests/past') return location.pathname === '/requests/past';
-    if (path === '/requests/new') return location.pathname === '/requests/new';
-    if (path === '/solicitacao') return location.pathname === '/solicitacao';
+    if (path === '/requests/new') return location.pathname.startsWith('/requests/new');
+    if (path === '/solicitacao') return location.pathname.startsWith('/solicitacao');
     if (path === '/surveys') return location.pathname === '/surveys';
     return location.pathname === path;
   };

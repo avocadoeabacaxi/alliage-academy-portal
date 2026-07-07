@@ -10,6 +10,8 @@ import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import Layout from '@/components/Layout';
 import Dashboard from '@/pages/Dashboard';
 import NewRequest from '@/pages/NewRequest';
+import RequestTypeSelection from '@/pages/RequestTypeSelection';
+import EventRequestPlaceholder from '@/pages/EventRequestPlaceholder';
 import PastEvent from '@/pages/PastEvent';
 import MyRequests from '@/pages/MyRequests';
 import Solicitacao from '@/pages/Solicitacao';
@@ -73,8 +75,12 @@ const AuthenticatedApp = () => {
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/requests" element={<RequestList />} />
-        <Route path="/requests/new" element={<NewRequest />} />
-        <Route path="/solicitacao" element={<Solicitacao />} />
+        <Route path="/requests/new" element={<RequestTypeSelection />} />
+        <Route path="/requests/new/training" element={<NewRequest />} />
+        <Route path="/requests/new/event" element={<EventRequestPlaceholder />} />
+        <Route path="/solicitacao" element={<RequestTypeSelection />} />
+        <Route path="/solicitacao/training" element={<Solicitacao />} />
+        <Route path="/solicitacao/event" element={<EventRequestPlaceholder />} />
         <Route path="/requests/past" element={<PastEvent />} />
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/requests/:id" element={<RequestDetail />} />

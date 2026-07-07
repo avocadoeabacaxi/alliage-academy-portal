@@ -5,6 +5,14 @@
     "request_id": {
       "type": "string"
     },
+    "request_category": {
+      "type": "string",
+      "enum": [
+        "Treinamento / Apoio T\u00e9cnico",
+        "Evento"
+      ],
+      "default": "Treinamento / Apoio T\u00e9cnico"
+    },
     "status": {
       "type": "string",
       "enum": [

@@ -86,6 +86,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       const entity = {
         ...form,
         request_id,
+        request_category: 'Treinamento / Apoio Técnico',
         status: isPast ? 'Concluído' : 'Pendente Análise',
         decision_stage1: isPast ? 'Aprovado' : 'Pendente',
         decision_stage2: isPast ? 'Aprovado' : 'Pendente',
