@@ -56,9 +56,11 @@
       "enum": [
         "Filial Alliage",
         "Distribuidor/Dealer",
-        "Cliente Final",
         "Outro"
       ]
+    },
+    "company_type_detail": {
+      "type": "string"
     },
     "position": {
       "type": "string"
@@ -67,12 +69,16 @@
       "type": "string",
       "enum": [
         "Comercial",
-        "Aplica\u00e7\u00e3o Cl\u00ednica",
-        "Educa\u00e7\u00e3o",
         "Marketing",
         "P\u00f3s-vendas",
+        "Consultor T\u00e9cnico",
+        "Engenharia",
+        "Gest\u00e3o de Pessoas",
         "Outro"
       ]
+    },
+    "area_detail": {
+      "type": "string"
     },
     "request_type": {
       "type": "string",
@@ -90,6 +96,9 @@
       "type": "string"
     },
     "product_name": {
+      "type": "string"
+    },
+    "product_obs": {
       "type": "string"
     },
     "training_focus": {

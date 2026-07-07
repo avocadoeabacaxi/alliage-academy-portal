@@ -4,7 +4,16 @@ import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ChevronLeft, ChevronRight, Check, Loader2, Globe } from 'lucide-react';
 
-const PRODUCT_CATEGORIES = ['Extraoral', 'Scanner Intraoral', 'Software', 'Consultórios', 'Raio-x', 'Sensor', 'Periféricos', 'Outro'];
+const BRAND_OPTIONS = {
+  'Extra-Oral': ['Eagle Edge', 'Saevo', 'PreXion', 'Outro'],
+  'Scanner Intraoral': ['Dabi', 'PreXion', 'Outro'],
+  'Software': ['Eagle Eye', 'Saevo Image', 'PreXion Image', 'OnDemand', 'Outro'],
+  'Sensor': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
+  'Raio-x': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
+  'Consultórios': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
+  'Periféricos': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
+  'Outro': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
+};
 const AUDIENCE_OPTIONS = ['Equipe interna', 'Distribuidor', 'Cliente final', 'Misto'];
 const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
 const IMPACT_OPTIONS = ['Aumento de vendas', 'Redução de chamados', 'Melhora de conhecimento técnico', 'Certificação da equipe', 'Suporte a lançamento', 'Outro'];
@@ -21,7 +30,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
   const [form, setForm] = useState({
     requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', company_type: 'Filial Alliage', company_type_detail: '', position: '', area: 'Comercial', area_detail: '',
     request_type: 'Novo treinamento',
-    product_category: 'Extraoral', product_name: '',
+    product_category: 'Extra-Oral', product_brand: '', product_name_detail: '', product_name: '', product_obs: '',
     training_focus: '',
     audience: [], participants_count: '6-10',
     justification: '', specific_problems: [], expected_impacts: [], consequence_60_days: '',
@@ -55,7 +64,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     switch (step) {
       case 0: return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.company_type !== 'Outro' || form.company_type_detail.trim()) && (form.area !== 'Outro' || form.area_detail.trim());
       case 1: return form.request_type;
-      case 2: return form.product_name;
+      case 2: return form.product_category && form.product_brand && (form.product_brand !== 'Outro' || form.product_name_detail.trim());
       case 3: return form.training_focus.length > 10;
       case 4: return form.audience.length > 0;
       case 5: return isPast ? form.training_completed_date : (form.priority && form.deadline_requested);
@@ -83,8 +92,10 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       const today = new Date().toISOString().split('T')[0];
       const completedDate = form.training_completed_date || today;
 
+      const { product_brand, product_name_detail, ...formData } = form;
       const entity = {
-        ...form,
+        ...formData,
+        product_name: product_brand === 'Outro' ? product_name_detail : product_brand,
         request_id,
         request_category: 'Treinamento / Apoio Técnico',
         status: isPast ? 'Concluído' : 'Pendente Análise',
@@ -215,13 +226,29 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
         {step === 2 && (
           <div className="space-y-4">
-            <Field label={t('form.productCategory')}>
-              <select value={form.product_category} onChange={e => update('product_category', e.target.value)} className="input-base">
-                {PRODUCT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            <Field label={t('form.productCategory')} required>
+              <select value={form.product_category} onChange={e => { update('product_category', e.target.value); update('product_brand', ''); update('product_name_detail', ''); }} className="input-base">
+                {Object.keys(BRAND_OPTIONS).map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </Field>
-            <Field label={t('form.productName')} required>
-              <input value={form.product_name} onChange={e => update('product_name', e.target.value)} className="input-base" placeholder="—" />
+            {form.product_category && (
+              <Field label={t('form.productBrand')} required>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {BRAND_OPTIONS[form.product_category].map(brand => (
+                    <button key={brand} onClick={() => { update('product_brand', brand); if (brand !== 'Outro') update('product_name_detail', ''); }} className={`px-3 py-2.5 text-sm rounded-lg border text-left transition-all ${form.product_brand === brand ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                      {brand}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+            )}
+            {form.product_brand === 'Outro' && (
+              <Field label={t('form.productNameDetail')} required>
+                <input value={form.product_name_detail} onChange={e => update('product_name_detail', e.target.value)} className="input-base" placeholder={t('form.productNameDetailPlaceholder')} />
+              </Field>
+            )}
+            <Field label={t('form.productObs')}>
+              <textarea value={form.product_obs} onChange={e => update('product_obs', e.target.value)} rows={2} className="input-base resize-none" placeholder={t('form.productObsPlaceholder')} />
             </Field>
           </div>
         )}
