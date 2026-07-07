@@ -29,7 +29,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
   const totalSteps = 8;
   const [form, setForm] = useState({
     requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', company_type: 'Filial Alliage', company_type_detail: '', position: '', area: 'Comercial', area_detail: '',
-    request_type: 'Novo treinamento',
+    request_type: 'Novo treinamento', request_type_detail: '',
     product_category: 'Extra-Oral', product_brand: '', product_name_detail: '', product_name: '', product_obs: '',
     training_focus: '',
     audience: [], participants_count: '6-10',
@@ -63,7 +63,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
   const canProceed = () => {
     switch (step) {
       case 0: return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.company_type !== 'Outro' || form.company_type_detail.trim()) && (form.area !== 'Outro' || form.area_detail.trim());
-      case 1: return form.request_type;
+      case 1: return form.request_type && (form.request_type !== 'Outro' || form.request_type_detail.trim());
       case 2: return form.product_category && form.product_brand && (form.product_brand !== 'Outro' || form.product_name_detail.trim());
       case 3: return form.training_focus.length > 10;
       case 4: return form.audience.length > 0;
@@ -214,13 +214,18 @@ export default function TrainingRequestForm({ mode = 'new' }) {
           <div className="space-y-3">
             <Field label={t('form.requestType')} required>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {['Novo treinamento', 'Reciclagem', 'Atualização de produto', 'Treinamento de lançamento', 'Técnico avançado', 'Clínico', 'Outro'].map(opt => (
+                {['Novo treinamento', 'Reciclagem', 'Atualização de produto', 'Treinamento de lançamento', 'Técnico avançado', 'Treinamento clínico', 'Apoio técnico', 'Consulta de mercado', 'Licitação', 'Modificação de produto', 'Treinamento de integração', 'Outro'].map(opt => (
                   <button key={opt} onClick={() => update('request_type', opt)} className={`px-3 py-2.5 text-sm rounded-lg border text-left transition-all ${form.request_type === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
                     {opt}
                   </button>
                 ))}
               </div>
             </Field>
+            {form.request_type === 'Outro' && (
+              <Field label={t('form.requestTypeDetail')} required>
+                <input value={form.request_type_detail} onChange={e => update('request_type_detail', e.target.value)} className="input-base" placeholder={t('form.requestTypeDetailPlaceholder')} />
+              </Field>
+            )}
           </div>
         )}
 
