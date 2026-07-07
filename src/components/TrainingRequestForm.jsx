@@ -17,6 +17,7 @@ const BRAND_OPTIONS = {
 const AUDIENCE_OPTIONS = ['Equipe interna', 'Distribuidor', 'Cliente final', 'Misto'];
 const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
 const IMPACT_OPTIONS = ['Aumento de vendas', 'Redução de chamados', 'Melhora de conhecimento técnico', 'Certificação da equipe', 'Suporte a lançamento', 'Outro'];
+const NO_AUDIENCE_TYPES = ['Apoio técnico', 'Consulta de mercado', 'Licitação', 'Modificação de produto'];
 
 export default function TrainingRequestForm({ mode = 'new' }) {
   const isPast = mode === 'past';
@@ -48,26 +49,30 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     });
   };
 
+  const skipAudience = NO_AUDIENCE_TYPES.includes(form.request_type);
+
   const steps = [
-    { title: t('form.step1.title'), desc: t('form.step1.desc') },
-    { title: t('form.step2.title'), desc: t('form.step2.desc') },
-    { title: t('form.step3.title'), desc: t('form.step3.desc') },
-    { title: t('form.step4.title'), desc: t('form.step4.desc') },
-    { title: t('form.step5.title'), desc: t('form.step5.desc') },
-    { title: isPast ? t('form.pastDate.title') : t('form.step7.title'), desc: isPast ? t('form.pastDate.desc') : t('form.step7.desc') },
-    { title: t('form.step8.title'), desc: t('form.step8.desc') },
+    { id: 'identification', title: t('form.step1.title'), desc: t('form.step1.desc') },
+    { id: 'request_type', title: t('form.step2.title'), desc: t('form.step2.desc') },
+    { id: 'product', title: t('form.step3.title'), desc: t('form.step3.desc') },
+    { id: 'training_focus', title: t('form.step4.title'), desc: t('form.step4.desc') },
+    ...(skipAudience ? [] : [{ id: 'audience', title: t('form.step5.title'), desc: t('form.step5.desc') }]),
+    { id: 'justification', title: isPast ? t('form.pastDate.title') : t('form.step7.title'), desc: isPast ? t('form.pastDate.desc') : t('form.step7.desc') },
+    { id: 'urgency', title: isPast ? t('form.step6.title') : t('form.step7.title'), desc: isPast ? t('form.step6.desc') : t('form.step7.desc') },
+    { id: 'specialist', title: t('form.step8.title'), desc: t('form.step8.desc') },
   ];
 
   const totalStepsAdjusted = steps.length;
 
   const canProceed = () => {
-    switch (step) {
-      case 0: return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.company_type !== 'Outro' || form.company_type_detail.trim()) && (form.area !== 'Outro' || form.area_detail.trim());
-      case 1: return form.request_type && (form.request_type !== 'Outro' || form.request_type_detail.trim());
-      case 2: return form.product_category && form.product_brand && (form.product_brand !== 'Outro' || form.product_name_detail.trim());
-      case 3: return form.training_focus.length > 10;
-      case 4: return form.audience.length > 0;
-      case 5: return isPast ? form.training_completed_date : (form.priority && form.deadline_requested);
+    const sid = steps[step]?.id;
+    switch (sid) {
+      case 'identification': return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.company_type !== 'Outro' || form.company_type_detail.trim()) && (form.area !== 'Outro' || form.area_detail.trim());
+      case 'request_type': return form.request_type && (form.request_type !== 'Outro' || form.request_type_detail.trim());
+      case 'product': return form.product_category && form.product_brand && (form.product_brand !== 'Outro' || form.product_name_detail.trim());
+      case 'training_focus': return form.training_focus.length > 10;
+      case 'audience': return form.audience.length > 0;
+      case 'justification': return isPast ? form.training_completed_date : (form.priority && form.deadline_requested);
       default: return true;
     }
   };
@@ -162,7 +167,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
       {/* Form steps */}
       <div className="card-modern p-5 mb-6 min-h-[300px]">
-        {step === 0 && (
+        {steps[step]?.id === 'identification' && (
           <div className="space-y-4">
             <Field label={t('form.requesterName')} required>
               <input value={form.requester_name} onChange={e => update('requester_name', e.target.value)} className="input-base" placeholder="—" />
@@ -210,7 +215,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
           </div>
         )}
 
-        {step === 1 && (
+        {steps[step]?.id === 'request_type' && (
           <div className="space-y-3">
             <Field label={t('form.requestType')} required>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -229,7 +234,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
           </div>
         )}
 
-        {step === 2 && (
+        {steps[step]?.id === 'product' && (
           <div className="space-y-4">
             <Field label={t('form.productCategory')} required>
               <select value={form.product_category} onChange={e => { update('product_category', e.target.value); update('product_brand', ''); update('product_name_detail', ''); }} className="input-base">
@@ -258,7 +263,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
           </div>
         )}
 
-        {step === 3 && (
+        {steps[step]?.id === 'training_focus' && (
           <Field label={t('form.trainingFocus')} required>
             <textarea value={form.training_focus} onChange={e => update('training_focus', e.target.value)} rows={8} className="input-base resize-none" placeholder={t('form.trainingFocusPlaceholder')} />
             <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-1">
@@ -267,7 +272,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
           </Field>
         )}
 
-        {step === 4 && (
+        {steps[step]?.id === 'audience' && (
           <div className="space-y-4">
             <Field label={t('form.audience')}>
               <div className="grid grid-cols-2 gap-2">
@@ -290,7 +295,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
           </div>
         )}
 
-        {step === 5 && isPast ? (
+        {steps[step]?.id === 'justification' && isPast ? (
           <div className="space-y-4">
             <Field label={t('form.trainingCompletedDate')} required>
               <input type="date" value={form.training_completed_date} onChange={e => update('training_completed_date', e.target.value)} className="input-base" />
@@ -305,7 +310,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
               </div>
             </Field>
           </div>
-        ) : step === 5 && !isPast && (
+        ) : steps[step]?.id === 'justification' && !isPast && (
           <div className="space-y-4">
             <Field label={t('form.justification')} required>
               <textarea value={form.justification} onChange={e => update('justification', e.target.value)} rows={4} className="input-base resize-none" placeholder={t('form.justificationPlaceholder')} />
@@ -335,7 +340,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
         )}
 
         {isPast ? (
-          step === 6 && (
+          steps[step]?.id === 'urgency' && (
             <div className="space-y-4">
               <Field label={t('form.justification')} required>
                 <textarea value={form.justification} onChange={e => update('justification', e.target.value)} rows={4} className="input-base resize-none" placeholder={t('form.justificationPlaceholder')} />
@@ -361,7 +366,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
             </div>
           )
         ) : (
-          step === 6 && (
+          steps[step]?.id === 'urgency' && (
             <div className="space-y-4">
               <Field label={t('form.priority')}>
                 <div className="grid grid-cols-4 gap-2">
@@ -382,7 +387,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
           )
         )}
 
-        {step === totalStepsAdjusted - 1 && (
+        {steps[step]?.id === 'specialist' && (
           <div className="space-y-4">
             <Field label={t('form.hasMultiplier')}>
               <div className="flex gap-2">
