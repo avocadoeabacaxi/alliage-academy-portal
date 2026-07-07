@@ -59,7 +59,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     ...(skipAudience ? [] : [{ id: 'audience', title: t('form.step5.title'), desc: t('form.step5.desc') }]),
     { id: 'justification_urgency', title: t('form.step6.title'), desc: t('form.step6.desc') },
     { id: 'specialist', title: t('form.stepSpecialist.title'), desc: t('form.stepSpecialist.desc') },
-    { id: 'logistics', title: t('form.step8.title'), desc: t('form.step8.desc') },
+    ...(skipAudience ? [] : [{ id: 'logistics', title: t('form.step8.title'), desc: t('form.step8.desc') }]),
   ];
 
   const totalStepsAdjusted = steps.length;
