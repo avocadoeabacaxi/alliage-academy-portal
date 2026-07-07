@@ -19,7 +19,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
   const totalSteps = 8;
   const [form, setForm] = useState({
-    requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', company_type: 'Filial Alliage', company_type_detail: '', position: '', area: 'Comercial',
+    requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', company_type: 'Filial Alliage', company_type_detail: '', position: '', area: 'Comercial', area_detail: '',
     request_type: 'Novo treinamento',
     product_category: 'Extraoral', product_name: '',
     training_focus: '',
@@ -53,7 +53,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
   const canProceed = () => {
     switch (step) {
-      case 0: return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.company_type !== 'Outro' || form.company_type_detail.trim());
+      case 0: return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.company_type !== 'Outro' || form.company_type_detail.trim()) && (form.area !== 'Outro' || form.area_detail.trim());
       case 1: return form.request_type;
       case 2: return form.product_name;
       case 3: return form.training_focus.length > 10;
@@ -187,9 +187,14 @@ export default function TrainingRequestForm({ mode = 'new' }) {
               </Field>
               <Field label={t('form.area')}>
                 <select value={form.area} onChange={e => update('area', e.target.value)} className="input-base">
-                  {['Comercial', 'Aplicação Clínica', 'Educação', 'Marketing', 'Pós-vendas', 'Outro'].map(r => <option key={r} value={r}>{r}</option>)}
+                  {['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'].map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </Field>
+              {form.area === 'Outro' && (
+                <Field label={t('form.areaDetail')} required>
+                  <input value={form.area_detail} onChange={e => update('area_detail', e.target.value)} className="input-base" placeholder={t('form.areaDetailPlaceholder')} />
+                </Field>
+              )}
             </div>
           </div>
         )}
