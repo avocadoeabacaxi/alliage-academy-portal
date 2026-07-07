@@ -15,7 +15,7 @@ const BRAND_OPTIONS = {
   'Outro': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
 };
 const AUDIENCE_OPTIONS = ['Equipe interna', 'Distribuidor', 'Cliente final', 'Misto'];
-const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
+const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Dificuldade de posicionamento comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
 const IMPACT_OPTIONS = ['Aumento de vendas', 'Redução de chamados', 'Melhora de conhecimento técnico', 'Certificação da equipe', 'Suporte a lançamento', 'Outro'];
 const NO_AUDIENCE_TYPES = ['Apoio técnico', 'Consulta de mercado', 'Licitação', 'Modificação de produto'];
 
@@ -27,15 +27,15 @@ export default function TrainingRequestForm({ mode = 'new' }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState('');
 
-  const totalSteps = 8;
   const [form, setForm] = useState({
     requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', company_type: 'Filial Alliage', company_type_detail: '', position: '', area: 'Comercial', area_detail: '',
     request_type: 'Novo treinamento', request_type_detail: '',
     product_category: 'Extra-Oral', product_brand: '', product_name_detail: '', product_name: '', product_obs: '',
     training_focus: '',
     audience: [], participants_count: '6-10',
-    justification: '', specific_problems: [], expected_impacts: [], consequence_60_days: '',
-    priority: 'Média', deadline_requested: '', deadline_reason: '',
+    justification: '', specific_problems: [], expected_impacts: [],
+    needs_deadline: false, deadline_requested: '', deadline_reason: '',
+    priority: 'Média',
     has_multiplier: false, specialist_name: '', specialist_role: '', specialist_email: '',
     format: 'Remoto', format_details: '', location_country: '', location_city: '', location_specific: '',
     training_completed_date: ''
@@ -57,8 +57,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     { id: 'product', title: t('form.step3.title'), desc: t('form.step3.desc') },
     { id: 'training_focus', title: t('form.step4.title'), desc: t('form.step4.desc') },
     ...(skipAudience ? [] : [{ id: 'audience', title: t('form.step5.title'), desc: t('form.step5.desc') }]),
-    { id: 'justification', title: isPast ? t('form.pastDate.title') : t('form.step7.title'), desc: isPast ? t('form.pastDate.desc') : t('form.step7.desc') },
-    { id: 'urgency', title: isPast ? t('form.step6.title') : t('form.step7.title'), desc: isPast ? t('form.step6.desc') : t('form.step7.desc') },
+    { id: 'justification_urgency', title: t('form.step6.title'), desc: t('form.step6.desc') },
     { id: 'specialist', title: t('form.step8.title'), desc: t('form.step8.desc') },
   ];
 
@@ -72,7 +71,9 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       case 'product': return form.product_category && form.product_brand && (form.product_brand !== 'Outro' || form.product_name_detail.trim());
       case 'training_focus': return form.training_focus.length > 10;
       case 'audience': return form.audience.length > 0;
-      case 'justification': return isPast ? form.training_completed_date : (form.priority && form.deadline_requested);
+      case 'justification_urgency':
+        if (isPast) return form.training_completed_date && form.justification.length > 10;
+        return form.justification.length > 10 && form.priority && (!form.needs_deadline || form.deadline_requested);
       default: return true;
     }
   };
@@ -88,7 +89,6 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       const textsToTranslate = {
         training_focus: form.training_focus,
         justification: form.justification,
-        consequence_60_days: form.consequence_60_days,
         deadline_reason: form.deadline_reason
       };
       const transResp = await base44.functions.invoke('translateContent', { texts: textsToTranslate, source_lang: lang });
@@ -112,7 +112,6 @@ export default function TrainingRequestForm({ mode = 'new' }) {
         original_language: lang,
         training_focus: translations.training_focus || { [lang]: form.training_focus },
         justification: translations.justification || { [lang]: form.justification },
-        consequence_60_days: translations.consequence_60_days || { [lang]: form.consequence_60_days },
         deadline_reason: translations.deadline_reason || { [lang]: form.deadline_reason },
       };
 
@@ -133,6 +132,18 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       </div>
     );
   }
+
+  const priorityField = (
+    <Field label={t('form.priority')}>
+      <div className="grid grid-cols-4 gap-2">
+        {['Baixa', 'Média', 'Alta', 'Crítica'].map(opt => (
+          <button key={opt} onClick={() => update('priority', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.priority === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+            {t(`priority.${opt.toLowerCase()}`)}
+          </button>
+        ))}
+      </div>
+    </Field>
+  );
 
   return (
     <div className="p-4 lg:p-6 max-w-3xl mx-auto">
@@ -295,25 +306,19 @@ export default function TrainingRequestForm({ mode = 'new' }) {
           </div>
         )}
 
-        {steps[step]?.id === 'justification' && isPast ? (
+        {steps[step]?.id === 'justification_urgency' && (
           <div className="space-y-4">
-            <Field label={t('form.trainingCompletedDate')} required>
-              <input type="date" value={form.training_completed_date} onChange={e => update('training_completed_date', e.target.value)} className="input-base" />
-            </Field>
-            <Field label={t('form.priority')}>
-              <div className="grid grid-cols-4 gap-2">
-                {['Baixa', 'Média', 'Alta', 'Crítica'].map(opt => (
-                  <button key={opt} onClick={() => update('priority', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.priority === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                    {t(`priority.${opt.toLowerCase()}`)}
-                  </button>
-                ))}
-              </div>
-            </Field>
-          </div>
-        ) : steps[step]?.id === 'justification' && !isPast && (
-          <div className="space-y-4">
+            {isPast && (
+              <>
+                <Field label={t('form.trainingCompletedDate')} required>
+                  <input type="date" value={form.training_completed_date} onChange={e => update('training_completed_date', e.target.value)} className="input-base" />
+                </Field>
+                {priorityField}
+              </>
+            )}
             <Field label={t('form.justification')} required>
               <textarea value={form.justification} onChange={e => update('justification', e.target.value)} rows={4} className="input-base resize-none" placeholder={t('form.justificationPlaceholder')} />
+              <p className="text-xs text-slate-400 mt-1">{t('form.justificationHint')}</p>
             </Field>
             <Field label={t('form.specificProblems')}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -323,6 +328,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
                   </button>
                 ))}
               </div>
+              <p className="text-xs text-slate-400 mt-1">{t('form.problemsHint')}</p>
             </Field>
             <Field label={t('form.expectedImpacts')}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -333,58 +339,33 @@ export default function TrainingRequestForm({ mode = 'new' }) {
                 ))}
               </div>
             </Field>
-            <Field label={t('form.consequence60')}>
-              <textarea value={form.consequence_60_days} onChange={e => update('consequence_60_days', e.target.value)} rows={3} className="input-base resize-none" placeholder={t('form.consequence60Placeholder')} />
-            </Field>
+            {!isPast && (
+              <>
+                {priorityField}
+                <Field label={t('form.needDeadline')}>
+                  <div className="flex gap-2">
+                    <button onClick={() => update('needs_deadline', true)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${form.needs_deadline ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
+                      {t('common.yes')}
+                    </button>
+                    <button onClick={() => update('needs_deadline', false)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${!form.needs_deadline ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
+                      {t('common.no')}
+                    </button>
+                  </div>
+                </Field>
+                {form.needs_deadline && (
+                  <div className="space-y-4 pl-3 border-l-2 border-[#00A6D6]/20">
+                    <Field label={t('form.deadlineRequested')} required>
+                      <input type="date" value={form.deadline_requested} onChange={e => update('deadline_requested', e.target.value)} className="input-base" />
+                    </Field>
+                    <Field label={t('form.deadlineReason')}>
+                      <textarea value={form.deadline_reason} onChange={e => update('deadline_reason', e.target.value)} rows={3} className="input-base resize-none" placeholder={t('form.deadlineReasonPlaceholder')} />
+                      <p className="text-xs text-slate-400 mt-1">{t('form.deadlineReasonHint')}</p>
+                    </Field>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        )}
-
-        {isPast ? (
-          steps[step]?.id === 'urgency' && (
-            <div className="space-y-4">
-              <Field label={t('form.justification')} required>
-                <textarea value={form.justification} onChange={e => update('justification', e.target.value)} rows={4} className="input-base resize-none" placeholder={t('form.justificationPlaceholder')} />
-              </Field>
-              <Field label={t('form.specificProblems')}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {PROBLEM_OPTIONS.map(opt => (
-                    <button key={opt} onClick={() => toggleArrayItem('specific_problems', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.specific_problems.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </Field>
-              <Field label={t('form.expectedImpacts')}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {IMPACT_OPTIONS.map(opt => (
-                    <button key={opt} onClick={() => toggleArrayItem('expected_impacts', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.expected_impacts.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </Field>
-            </div>
-          )
-        ) : (
-          steps[step]?.id === 'urgency' && (
-            <div className="space-y-4">
-              <Field label={t('form.priority')}>
-                <div className="grid grid-cols-4 gap-2">
-                  {['Baixa', 'Média', 'Alta', 'Crítica'].map(opt => (
-                    <button key={opt} onClick={() => update('priority', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.priority === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                      {t(`priority.${opt.toLowerCase()}`)}
-                    </button>
-                  ))}
-                </div>
-              </Field>
-              <Field label={t('form.deadlineRequested')} required>
-                <input type="date" value={form.deadline_requested} onChange={e => update('deadline_requested', e.target.value)} className="input-base" />
-              </Field>
-              <Field label={t('form.deadlineReason')}>
-                <textarea value={form.deadline_reason} onChange={e => update('deadline_reason', e.target.value)} rows={3} className="input-base resize-none" placeholder={t('form.deadlineReasonPlaceholder')} />
-              </Field>
-            </div>
-          )
         )}
 
         {steps[step]?.id === 'specialist' && (
