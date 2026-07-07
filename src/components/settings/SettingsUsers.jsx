@@ -178,7 +178,7 @@ export default function SettingsUsers() {
             <div key={r} className="card-modern p-4">
               <div className="flex items-center justify-between mb-1">
                 <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium border ${ROLE_STYLES[r]}`}>
-                  {r}
+                  {t(`role.${r}`)}
                 </span>
                 <UsersIcon className="w-4 h-4 text-slate-400" />
               </div>
@@ -213,7 +213,7 @@ export default function SettingsUsers() {
                   {ROLES.map(r => (
                     <th key={r} className="px-4 py-3 text-center">
                       <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium border ${ROLE_STYLES[r]}`}>
-                        {r}
+                        {t(`role.${r}`)}
                       </span>
                     </th>
                   ))}
@@ -260,7 +260,7 @@ export default function SettingsUsers() {
           </div>
           <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className="input-base w-40">
             <option value="">Todos os papéis</option>
-            {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+            {ROLES.map(r => <option key={r} value={r}>{t(`role.${r}`)}</option>)}
           </select>
         </div>
         <button
@@ -284,7 +284,7 @@ export default function SettingsUsers() {
               className="input-base"
             />
             <select value={inviteForm.role} onChange={e => setInviteForm({ ...inviteForm, role: e.target.value })} className="input-base">
-              {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+              {ROLES.map(r => <option key={r} value={r}>{t(`role.${r}`)}</option>)}
             </select>
             <select value={inviteForm.region} onChange={e => setInviteForm({ ...inviteForm, region: e.target.value })} className="input-base">
               {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
@@ -343,7 +343,7 @@ export default function SettingsUsers() {
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-block px-2.5 py-1 text-xs font-semibold rounded-full border ${ROLE_STYLES[user.role] || ROLE_STYLES.solicitante}`}>
-                      {user.role}
+                      {t(`role.${user.role}`)}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -436,7 +436,7 @@ export default function SettingsUsers() {
                   onChange={e => setEditForm({ ...editForm, role: e.target.value })}
                   className="input-base"
                 >
-                  {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                  {ROLES.map(r => <option key={r} value={r}>{t(`role.${r}`)}</option>)}
                 </select>
               </div>
               <div className="space-y-1.5">
