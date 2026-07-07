@@ -48,6 +48,9 @@
         "ROW"
       ]
     },
+    "region_detail": {
+      "type": "string"
+    },
     "company_type": {
       "type": "string",
       "enum": [

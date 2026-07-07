@@ -19,7 +19,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
   const totalSteps = 8;
   const [form, setForm] = useState({
-    requester_name: '', requester_email: '', region: 'Brasil', company_type: 'Filial Alliage', position: '', area: 'Comercial',
+    requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', company_type: 'Filial Alliage', position: '', area: 'Comercial',
     request_type: 'Novo treinamento',
     product_category: 'Extraoral', product_name: '',
     training_focus: '',
@@ -53,7 +53,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
   const canProceed = () => {
     switch (step) {
-      case 0: return form.requester_name && form.requester_email && form.region;
+      case 0: return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim());
       case 1: return form.request_type;
       case 2: return form.product_name;
       case 3: return form.training_focus.length > 10;
@@ -165,6 +165,11 @@ export default function TrainingRequestForm({ mode = 'new' }) {
                   {['Brasil', 'LATAM', 'USA', 'ROW'].map(r => <option key={r} value={r}>{t(`region.${r.toLowerCase()}`)}</option>)}
                 </select>
               </Field>
+              {form.region !== 'USA' && (
+                <Field label={form.region === 'Brasil' ? t('form.regionDetailBrasil') : t('form.regionDetailLatam')} required>
+                  <input value={form.region_detail} onChange={e => update('region_detail', e.target.value)} className="input-base" placeholder={form.region === 'Brasil' ? t('form.regionDetailBrasilPlaceholder') : t('form.regionDetailLatamPlaceholder')} />
+                </Field>
+              )}
               <Field label={t('form.companyType')}>
                 <select value={form.company_type} onChange={e => update('company_type', e.target.value)} className="input-base">
                   {['Filial Alliage', 'Distribuidor/Dealer', 'Cliente Final', 'Outro'].map(r => <option key={r} value={r}>{t(`company.${r === 'Filial Alliage' ? 'filial' : r === 'Distribuidor/Dealer' ? 'distribuidor' : r === 'Cliente Final' ? 'cliente' : 'outro'}`)}</option>)}

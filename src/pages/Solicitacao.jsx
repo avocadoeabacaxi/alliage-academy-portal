@@ -13,6 +13,7 @@ export default function Solicitacao() {
 
   const [form, setForm] = useState({
     region: 'Brasil',
+    region_detail: '',
     requester_name: '',
     requester_email: '',
     deadline_requested: '',
@@ -37,6 +38,7 @@ export default function Solicitacao() {
       `${t('form.solicitacaoTitle')}`,
       '',
       `${t('form.regionalSolicitante')}: ${t(`region.${form.region.toLowerCase()}`)}`,
+      ...(form.region !== 'USA' ? [`${form.region === 'Brasil' ? t('form.regionDetailBrasil') : t('form.regionDetailLatam')}: ${form.region_detail || '—'}`] : []),
       `${t('form.requesterName')}: ${form.requester_name || '—'}`,
       `${t('form.requesterEmail')}: ${form.requester_email || '—'}`,
       `${t('form.ateQuando')}: ${formatDate(form.deadline_requested)}`,
@@ -67,7 +69,7 @@ export default function Solicitacao() {
     });
   };
 
-  const canSubmit = form.requester_name && form.requester_email && form.region && form.product_name && form.deadline_requested && form.justification;
+  const canSubmit = form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail) && form.product_name && form.deadline_requested && form.justification;
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -89,6 +91,7 @@ export default function Solicitacao() {
         requester_name: form.requester_name,
         requester_email: form.requester_email,
         region: form.region,
+        region_detail: form.region_detail,
         company_type: 'Filial Alliage',
         area: 'Comercial',
         request_type: 'Novo treinamento',
@@ -151,6 +154,12 @@ export default function Solicitacao() {
                   {['Brasil', 'LATAM', 'USA', 'ROW'].map(r => <option key={r} value={r}>{t(`region.${r.toLowerCase()}`)}</option>)}
                 </select>
               </Field>
+
+              {form.region !== 'USA' && (
+                <Field label={form.region === 'Brasil' ? t('form.regionDetailBrasil') : t('form.regionDetailLatam')} required>
+                  <input value={form.region_detail} onChange={e => update('region_detail', e.target.value)} className="input-base" placeholder={form.region === 'Brasil' ? t('form.regionDetailBrasilPlaceholder') : t('form.regionDetailLatamPlaceholder')} />
+                </Field>
+              )}
 
               <Field label={t('form.requesterName')} required>
                 <input value={form.requester_name} onChange={e => update('requester_name', e.target.value)} className="input-base" placeholder="Ex.: João Silva" />
