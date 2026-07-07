@@ -18,7 +18,8 @@ const EVENT_TYPES = [
 const AUDIENCE_OPTIONS = ['Equipe interna', 'Distribuidor', 'Cliente final', 'Misto'];
 const VISITOR_OPTIONS = ['1-50', '51-100', '101-300', '301-500', '500+'];
 
-export default function EventRequestForm() {
+export default function EventRequestForm({ mode = 'new' }) {
+  const isPast = mode === 'past';
   const { t, lang } = useLanguage();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
@@ -39,6 +40,7 @@ export default function EventRequestForm() {
     needs_deadline: false, deadline_requested: '', deadline_reason: '',
     format: 'Presencial', format_details: '',
     location_country: '', location_city: '', location_specific: '',
+    training_completed_date: '',
   });
 
   const update = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
@@ -72,6 +74,7 @@ export default function EventRequestForm() {
       case 'event_type':
         return form.event_type && (form.event_type !== 'Outro' || form.event_type_detail.trim());
       case 'event_details':
+        if (isPast) return form.event_name.trim() && form.event_description.trim() && form.training_completed_date;
         return form.event_name.trim() && form.event_description.trim() && form.event_start_date;
       case 'location':
         return form.format && (form.format === 'Remoto' || (form.location_country.trim() && form.location_city.trim()));
@@ -103,15 +106,21 @@ export default function EventRequestForm() {
       const transResp = await base44.functions.invoke('translateContent', { texts: textsToTranslate, source_lang: lang });
       const translations = transResp.data.translations || {};
 
+      const today = new Date().toISOString().split('T')[0];
+      const completedDate = form.training_completed_date || today;
+
       const entity = {
         ...form,
         request_id,
         request_category: 'Evento',
         request_type: 'Outro',
         request_type_detail: form.event_type,
-        status: 'Pendente Análise',
-        decision_stage1: 'Pendente',
-        decision_stage2: 'Pendente',
+        status: isPast ? 'Concluído' : 'Pendente Análise',
+        decision_stage1: isPast ? 'Aprovado' : 'Pendente',
+        decision_stage2: isPast ? 'Aprovado' : 'Pendente',
+        date_stage1: isPast ? completedDate : undefined,
+        date_stage2: isPast ? completedDate : undefined,
+        training_completed_date: isPast ? completedDate : undefined,
         original_language: lang,
         event_description: translations.event_description || { [lang]: form.event_description },
         training_focus: translations.training_focus || (form.training_focus ? { [lang]: form.training_focus } : {}),
@@ -155,7 +164,7 @@ export default function EventRequestForm() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#003B5C] flex items-center gap-2">
           <CalendarDays className="w-6 h-6 text-[#00A6D6]" />
-          {t('event.title')}
+          {isPast ? t('event.pastTitle') : t('event.title')}
         </h1>
         <div className="flex items-center gap-1.5 mt-1 text-sm text-slate-500">
           <Globe className="w-3.5 h-3.5" />
@@ -254,6 +263,11 @@ export default function EventRequestForm() {
 
         {steps[step]?.id === 'event_details' && (
           <div className="space-y-4">
+            {isPast && (
+              <Field label={t('form.trainingCompletedDate')} required>
+                <input type="date" value={form.training_completed_date} onChange={e => update('training_completed_date', e.target.value)} className="input-base" />
+              </Field>
+            )}
             <Field label={t('event.name')} required>
               <input value={form.event_name} onChange={e => update('event_name', e.target.value)} className="input-base" placeholder={t('event.namePlaceholder')} />
             </Field>

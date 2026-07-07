@@ -56,7 +56,7 @@ export default function Layout() {
       items: [
         { path: '/requests/new', label: t('nav.newRequest'), icon: PlusCircle, roles: ['admin', 'educador', 'gerente_regional'] },
         { path: '/solicitacao', label: t('nav.newRequest'), icon: PlusCircle, roles: ['solicitante'] },
-        { path: '/requests/past', label: t('nav.pastEvent'), icon: History, roles: ['admin', 'solicitante', 'educador', 'gerente_regional'] },
+        { path: '/requests/past', label: t('nav.pastEvent'), icon: History, roles: ['admin', 'educador', 'gerente_regional'] },
       ]
     },
     {

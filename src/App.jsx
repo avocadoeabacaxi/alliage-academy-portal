@@ -13,6 +13,8 @@ import NewRequest from '@/pages/NewRequest';
 import RequestTypeSelection from '@/pages/RequestTypeSelection';
 import EventRequestPlaceholder from '@/pages/EventRequestPlaceholder';
 import PastEvent from '@/pages/PastEvent';
+import PastEventSelection from '@/pages/PastEventSelection';
+import PastEventForm from '@/pages/PastEventForm';
 import MyRequests from '@/pages/MyRequests';
 import Solicitacao from '@/pages/Solicitacao';
 import RequestList from '@/pages/RequestList';
@@ -81,7 +83,9 @@ const AuthenticatedApp = () => {
         <Route path="/solicitacao" element={<RequestTypeSelection />} />
         <Route path="/solicitacao/training" element={<Solicitacao />} />
         <Route path="/solicitacao/event" element={<EventRequestPlaceholder />} />
-        <Route path="/requests/past" element={<PastEvent />} />
+        <Route path="/requests/past" element={<PastEventSelection />} />
+        <Route path="/requests/past/training" element={<PastEvent />} />
+        <Route path="/requests/past/event" element={<PastEventForm />} />
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/requests/:id" element={<RequestDetail />} />
         <Route path="/survey/:token" element={<Survey />} />
