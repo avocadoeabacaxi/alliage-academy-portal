@@ -58,7 +58,8 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     { id: 'training_focus', title: t('form.step4.title'), desc: t('form.step4.desc') },
     ...(skipAudience ? [] : [{ id: 'audience', title: t('form.step5.title'), desc: t('form.step5.desc') }]),
     { id: 'justification_urgency', title: t('form.step6.title'), desc: t('form.step6.desc') },
-    { id: 'specialist', title: t('form.step8.title'), desc: t('form.step8.desc') },
+    { id: 'specialist', title: t('form.stepSpecialist.title'), desc: t('form.stepSpecialist.desc') },
+    { id: 'logistics', title: t('form.step8.title'), desc: t('form.step8.desc') },
   ];
 
   const totalStepsAdjusted = steps.length;
@@ -72,8 +73,10 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       case 'training_focus': return form.training_focus.length > 10;
       case 'audience': return form.audience.length > 0;
       case 'justification_urgency':
-        if (isPast) return form.training_completed_date && form.justification.length > 10;
-        return form.justification.length > 10 && form.priority && (!form.needs_deadline || form.deadline_requested);
+        if (isPast) return form.training_completed_date && form.justification.trim().length > 0;
+        return form.justification.trim().length > 0 && form.priority && (!form.needs_deadline || form.deadline_requested);
+      case 'specialist':
+        return !form.has_multiplier || (form.specialist_name.trim() && form.specialist_role.trim() && form.specialist_email.trim());
       default: return true;
     }
   };
@@ -370,7 +373,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
         {steps[step]?.id === 'specialist' && (
           <div className="space-y-4">
-            <Field label={t('form.hasMultiplier')}>
+            <Field label={t('form.specialistQuestion')} required>
               <div className="flex gap-2">
                 <button onClick={() => update('has_multiplier', true)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${form.has_multiplier ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
                   {t('common.yes')}
@@ -380,13 +383,19 @@ export default function TrainingRequestForm({ mode = 'new' }) {
                 </button>
               </div>
             </Field>
+            <p className="text-xs text-slate-500 bg-[#00A6D6]/5 border border-[#00A6D6]/15 rounded-lg p-3">{t('form.specialistNote')}</p>
             {form.has_multiplier && (
               <div className="space-y-4 pl-3 border-l-2 border-[#00A6D6]/20">
-                <Field label={t('form.specialistName')}><input value={form.specialist_name} onChange={e => update('specialist_name', e.target.value)} className="input-base" /></Field>
-                <Field label={t('form.specialistRole')}><input value={form.specialist_role} onChange={e => update('specialist_role', e.target.value)} className="input-base" /></Field>
-                <Field label={t('form.specialistEmail')}><input type="email" value={form.specialist_email} onChange={e => update('specialist_email', e.target.value)} className="input-base" /></Field>
+                <Field label={t('form.specialistName')} required><input value={form.specialist_name} onChange={e => update('specialist_name', e.target.value)} className="input-base" /></Field>
+                <Field label={t('form.specialistRole')} required><input value={form.specialist_role} onChange={e => update('specialist_role', e.target.value)} className="input-base" /></Field>
+                <Field label={t('form.specialistEmail')} required><input type="email" value={form.specialist_email} onChange={e => update('specialist_email', e.target.value)} className="input-base" /></Field>
               </div>
             )}
+          </div>
+        )}
+
+        {steps[step]?.id === 'logistics' && (
+          <div className="space-y-4">
             <Field label={t('form.format')}>
               <div className="flex gap-2">
                 {['Remoto', 'Presencial'].map(opt => (
