@@ -19,7 +19,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
   const totalSteps = 8;
   const [form, setForm] = useState({
-    requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', company_type: 'Filial Alliage', position: '', area: 'Comercial',
+    requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', company_type: 'Filial Alliage', company_type_detail: '', position: '', area: 'Comercial',
     request_type: 'Novo treinamento',
     product_category: 'Extraoral', product_name: '',
     training_focus: '',
@@ -53,7 +53,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
   const canProceed = () => {
     switch (step) {
-      case 0: return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim());
+      case 0: return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.company_type !== 'Outro' || form.company_type_detail.trim());
       case 1: return form.request_type;
       case 2: return form.product_name;
       case 3: return form.training_focus.length > 10;
@@ -172,9 +172,14 @@ export default function TrainingRequestForm({ mode = 'new' }) {
               )}
               <Field label={t('form.companyType')}>
                 <select value={form.company_type} onChange={e => update('company_type', e.target.value)} className="input-base">
-                  {['Filial Alliage', 'Distribuidor/Dealer', 'Cliente Final', 'Outro'].map(r => <option key={r} value={r}>{t(`company.${r === 'Filial Alliage' ? 'filial' : r === 'Distribuidor/Dealer' ? 'distribuidor' : r === 'Cliente Final' ? 'cliente' : 'outro'}`)}</option>)}
+                  {['Filial Alliage', 'Distribuidor/Dealer', 'Outro'].map(r => <option key={r} value={r}>{t(`company.${r === 'Filial Alliage' ? 'filial' : r === 'Distribuidor/Dealer' ? 'distribuidor' : 'outro'}`)}</option>)}
                 </select>
               </Field>
+              {form.company_type === 'Outro' && (
+                <Field label={t('form.companyTypeDetail')} required>
+                  <input value={form.company_type_detail} onChange={e => update('company_type_detail', e.target.value)} className="input-base" placeholder={t('form.companyTypeDetailPlaceholder')} />
+                </Field>
+              )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label={t('form.position')}>
