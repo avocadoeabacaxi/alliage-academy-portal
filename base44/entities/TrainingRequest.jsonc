@@ -110,6 +110,8 @@
         "Lan\u00e7amento de produto",
         "Treinamento em evento",
         "Reuni\u00e3o comercial",
+        "Palestra",
+        "Evento Comercial",
         "Outro"
       ]
     },
@@ -142,6 +144,63 @@
     },
     "booth_space": {
       "type": "string"
+    },
+    "event_organizer": {
+      "type": "string"
+    },
+    "event_website": {
+      "type": "string"
+    },
+    "alliage_role": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "alliage_role_detail": {
+      "type": "string"
+    },
+    "who_invited": {
+      "type": "string"
+    },
+    "who_invited_detail": {
+      "type": "string"
+    },
+    "strategic_objectives": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "strategic_objectives_detail": {
+      "type": "string"
+    },
+    "costs_covered_by_requester": {
+      "type": "boolean"
+    },
+    "costs_covered_detail": {
+      "type": "string"
+    },
+    "professionals_needed": {
+      "type": "string"
+    },
+    "professionals_names": {
+      "type": "string"
+    },
+    "professionals_equipment": {
+      "type": "string"
+    },
+    "event_history": {
+      "type": "object"
+    },
+    "additional_notes": {
+      "type": "object"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "product_category": {
       "type": "string"
