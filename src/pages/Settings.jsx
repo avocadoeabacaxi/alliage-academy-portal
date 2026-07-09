@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { ArrowLeft, Mail, Users as UsersIcon, AlertCircle, Loader2, Lock } from 'lucide-react';
+import { ArrowLeft, Mail, Users as UsersIcon, AlertCircle, Loader2, Lock, Route } from 'lucide-react';
 import EmailTemplates from '@/components/settings/EmailTemplates';
 import SettingsUsers from '@/components/settings/SettingsUsers';
 import UserAuthorizationTab from '@/components/settings/UserAuthorizationTab';
+import RoutingTab from '@/components/settings/RoutingTab';
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -79,6 +80,17 @@ export default function Settings() {
           <UsersIcon className="w-4 h-4" />
           Usuários
         </button>
+        <button
+          onClick={() => setActiveTab('routing')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
+            activeTab === 'routing'
+              ? 'border-[#00A6D6] text-[#00A6D6]'
+              : 'border-transparent text-slate-600 hover:text-slate-800'
+          }`}
+        >
+          <Route className="w-4 h-4" />
+          Roteamento
+        </button>
       </div>
 
       {/* Content */}
@@ -86,6 +98,7 @@ export default function Settings() {
         {activeTab === 'authorization' && <UserAuthorizationTab />}
         {activeTab === 'emails' && <EmailTemplates />}
         {activeTab === 'users' && <SettingsUsers />}
+        {activeTab === 'routing' && <RoutingTab />}
       </div>
     </div>
   );
