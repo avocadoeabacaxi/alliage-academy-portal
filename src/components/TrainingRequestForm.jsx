@@ -56,6 +56,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
   };
 
   const skipAudience = NO_AUDIENCE_TYPES.includes(form.request_type);
+  const skipLogistics = NO_AUDIENCE_TYPES.includes(form.request_type);
 
   const steps = [
     { id: 'identification', title: t('form.step1.title'), desc: t('form.step1.desc') },
@@ -65,7 +66,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     ...(skipAudience ? [] : [{ id: 'audience', title: t('form.step5.title'), desc: t('form.step5.desc') }]),
     { id: 'justification_urgency', title: t('form.step6.title'), desc: t('form.step6.desc') },
     { id: 'specialist', title: t('form.stepSpecialist.title'), desc: t('form.stepSpecialist.desc') },
-    ...(skipAudience ? [] : [{ id: 'logistics', title: t('form.step8.title'), desc: t('form.step8.desc') }]),
+    ...(skipLogistics ? [] : [{ id: 'logistics', title: t('form.step8.title'), desc: t('form.step8.desc') }]),
   ];
 
   const totalStepsAdjusted = steps.length;
