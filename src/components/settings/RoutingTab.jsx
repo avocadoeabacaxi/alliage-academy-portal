@@ -16,6 +16,11 @@ const PRODUCT_CATEGORIES = [
 
 const ALL_PRODUCTS = '*';
 
+// Dev — nunca aparece como responsável de roteamento (não recebe solicitações)
+const EXCLUDED_EMAILS = ['fernando@avocado.buzz'];
+// Aprovador final da 2ª etapa — sempre recebe o pedido final
+const FINAL_APPROVER_EMAIL = 'caio.monteiro@alliage-global.com';
+
 export default function RoutingTab() {
   const [rules, setRules] = useState([]);
   const [admins, setAdmins] = useState([]);
@@ -35,7 +40,7 @@ export default function RoutingTab() {
       setRules(rulesData || []);
       const auths = adminsResp.data?.data || [];
       const adminEmails = auths
-        .filter(a => a.role === 'admin' && a.status === 'approved')
+        .filter(a => a.role === 'admin' && a.status === 'approved' && !EXCLUDED_EMAILS.includes(a.email))
         .map(a => ({ email: a.email, name: a.full_name || a.email.split('@')[0] }));
       setAdmins(adminEmails);
     } catch (e) {
@@ -94,6 +99,7 @@ export default function RoutingTab() {
         <p>
           Defina quem recebe a notificação de novas solicitações para cada <strong>tipo de solicitação</strong> e <strong>produto</strong>.
           Marque um ou mais responsáveis. Combinações sem responsável definido notificam <strong>todos os admins</strong>.
+          O aprovador final da 2ª etapa recebe <strong>todas</strong> as solicitações automaticamente.
         </p>
       </div>
 

@@ -46,6 +46,16 @@ Deno.serve(async (req) => {
       recipientEmails = (admins || []).map(a => a.email).filter(Boolean);
     }
 
+    // Caio é o aprovador final da 2ª etapa — sempre recebe o pedido
+    const FINAL_APPROVER_EMAIL = 'caio.monteiro@alliage-global.com';
+    if (!recipientEmails.includes(FINAL_APPROVER_EMAIL)) {
+      recipientEmails.push(FINAL_APPROVER_EMAIL);
+    }
+
+    // Fernando é o dev — nunca recebe solicitações
+    const EXCLUDED_EMAILS = ['fernando@avocado.buzz'];
+    recipientEmails = recipientEmails.filter(e => !EXCLUDED_EMAILS.includes(e));
+
     if (recipientEmails.length === 0) {
       return Response.json({ error: 'No recipients found' }, { status: 404 });
     }
