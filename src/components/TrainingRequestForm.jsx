@@ -10,12 +10,12 @@ const BRAND_OPTIONS = {
   'Scanner Intraoral': ['Dabi', 'PreXion', 'Outro'],
   'Software': ['Eagle Eye / Saevo Image / PreXion Image', 'OnDemand3D', 'Outro'],
   'Consultórios': ['Dabi', 'Saevo', 'D700', 'Denimed', 'Outro'],
-  'Raio-x': ['Dabi', 'Saevo', 'Outro'],
-  'Raio-x portátil': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
-  'Sensor': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
+  'Raios X': ['Dabi', 'Saevo', 'Outro'],
+  'Raios X portátil': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
+  'Sensor intraoral': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
   'Periféricos': ['Dabi', 'Saevo', 'Denimed', 'Outro'],
-  'Eagle PS': ['Outro'],
-  'Peças de Mão': ['Dabi', 'Saevo', 'Outro'],
+  'Eagle PS': [],
+  'Peças de mão': ['Dabi', 'Saevo', 'Outro'],
   'Outro': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
 };
 const AREA_OPTIONS = ['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'];
@@ -23,6 +23,7 @@ const AUDIENCE_OPTIONS = ['Equipe interna', 'Distribuidor', 'Cliente final', 'Mi
 const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Dificuldade de posicionamento comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
 const IMPACT_OPTIONS = ['Aumento de vendas', 'Redução de chamados', 'Melhora de conhecimento técnico', 'Certificação da equipe', 'Suporte a lançamento', 'Outro'];
 const NO_AUDIENCE_TYPES = ['Apoio técnico', 'Consulta de mercado', 'Licitação', 'Modificação de produto'];
+const PRIORITY_KEYS = { 'Baixa': 'baixa', 'Média': 'media', 'Alta': 'alta', 'Crítica': 'critica' };
 
 export default function TrainingRequestForm({ mode = 'new' }) {
   const isPast = mode === 'past';
@@ -43,7 +44,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     needs_deadline: false, deadline_requested: '', deadline_reason: '',
     priority: 'Média',
     has_multiplier: false, specialist_name: '', specialist_role: '', specialist_email: '',
-    format: 'Remoto', format_details: '', location_country: '', location_city: '', location_specific: '',
+    format: 'Remoto', format_details: '', presencial_mode: 'local', location_country: '', location_city: '', location_specific: '',
     training_completed_date: ''
   });
 
@@ -60,8 +61,8 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
   const steps = [
     { id: 'identification', title: t('form.step1.title'), desc: t('form.step1.desc') },
-    { id: 'request_type', title: t('form.step2.title'), desc: t('form.step2.desc') },
     { id: 'product', title: t('form.step3.title'), desc: t('form.step3.desc') },
+    { id: 'request_type', title: t('form.step2.title'), desc: t('form.step2.desc') },
     { id: 'training_focus', title: t('form.step4.title'), desc: t('form.step4.desc') },
     ...(skipAudience ? [] : [{ id: 'audience', title: t('form.step5.title'), desc: t('form.step5.desc') }]),
     { id: 'justification_urgency', title: t('form.step6.title'), desc: t('form.step6.desc') },
@@ -76,7 +77,11 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     switch (sid) {
       case 'identification': return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.company_type !== 'Outro' || form.company_type_detail.trim()) && (form.area !== 'Outro' || form.area_detail.trim());
       case 'request_type': return form.request_type && (form.request_type !== 'Outro' || form.request_type_detail.trim());
-      case 'product': return form.product_category && form.product_brand && (form.product_brand !== 'Outro' || form.product_name_detail.trim());
+      case 'product': {
+        const brands = BRAND_OPTIONS[form.product_category] || [];
+        if (brands.length === 0) return !!form.product_category;
+        return form.product_category && form.product_brand && (form.product_brand !== 'Outro' || form.product_name_detail.trim());
+      }
       case 'training_focus': return form.training_focus.length > 10;
       case 'audience': return form.audience.length > 0;
       case 'justification_urgency':
@@ -107,12 +112,17 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       const today = new Date().toISOString().split('T')[0];
       const completedDate = form.training_completed_date || today;
 
-      const { product_brand, product_name_detail, audience_detail, ...formData } = form;
+      const { product_brand, product_name_detail, audience_detail, presencial_mode, ...formData } = form;
       const audienceFinal = form.audience.map(a => a === 'Misto' && audience_detail ? `Misto: ${audience_detail}` : a);
+      const presencialLabel = presencial_mode === 'ribeirao' ? t('form.presencialModeRibeirao') : t('form.presencialModeLocal');
+      const formatDetailsFinal = form.format === 'Presencial'
+        ? [presencialLabel, form.format_details].filter(Boolean).join(' — ')
+        : form.format_details;
       const entity = {
         ...formData,
+        format_details: formatDetailsFinal,
         audience: audienceFinal,
-        product_name: product_brand === 'Outro' ? product_name_detail : product_brand,
+        product_name: (BRAND_OPTIONS[form.product_category] || []).length === 0 ? form.product_category : (product_brand === 'Outro' ? product_name_detail : product_brand),
         request_id,
         request_category: 'Treinamento / Apoio Técnico',
         status: isPast ? 'Concluído' : 'Pendente Análise',
@@ -159,7 +169,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       <div className="grid grid-cols-4 gap-2">
         {['Baixa', 'Média', 'Alta', 'Crítica'].map(opt => (
           <button key={opt} onClick={() => update('priority', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.priority === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-            {t(`priority.${opt.toLowerCase()}`)}
+            {t(`priority.${PRIORITY_KEYS[opt]}`)}
           </button>
         ))}
       </div>
@@ -273,7 +283,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
                 {Object.keys(BRAND_OPTIONS).map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </Field>
-            {form.product_category && (
+            {form.product_category && (BRAND_OPTIONS[form.product_category] || []).length > 0 && (
               <Field label={t('form.productBrand')} required>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {BRAND_OPTIONS[form.product_category].map(brand => (
@@ -427,10 +437,24 @@ export default function TrainingRequestForm({ mode = 'new' }) {
               </div>
             </Field>
             {form.format === 'Presencial' && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pl-3 border-l-2 border-[#00A6D6]/20">
-                <Field label={t('form.locationCountry')}><input value={form.location_country} onChange={e => update('location_country', e.target.value)} className="input-base" /></Field>
-                <Field label={t('form.locationCity')}><input value={form.location_city} onChange={e => update('location_city', e.target.value)} className="input-base" /></Field>
-                <Field label={t('form.locationSpecific')}><input value={form.location_specific} onChange={e => update('location_specific', e.target.value)} className="input-base" /></Field>
+              <div className="space-y-4 pl-3 border-l-2 border-[#00A6D6]/20">
+                <Field label={t('form.presencialModeQuestion')}>
+                  <div className="grid grid-cols-1 gap-2">
+                    <button onClick={() => update('presencial_mode', 'local')} className={`px-3 py-2.5 text-sm rounded-lg border text-left transition-all ${form.presencial_mode === 'local' ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                      {t('form.presencialModeLocal')}
+                    </button>
+                    <button onClick={() => update('presencial_mode', 'ribeirao')} className={`px-3 py-2.5 text-sm rounded-lg border text-left transition-all ${form.presencial_mode === 'ribeirao' ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                      {t('form.presencialModeRibeirao')}
+                    </button>
+                  </div>
+                </Field>
+                {form.presencial_mode === 'local' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <Field label={t('form.locationCountry')}><input value={form.location_country} onChange={e => update('location_country', e.target.value)} className="input-base" placeholder={t('form.locationCountryPlaceholder')} /></Field>
+                    <Field label={t('form.locationCity')}><input value={form.location_city} onChange={e => update('location_city', e.target.value)} className="input-base" /></Field>
+                    <Field label={t('form.locationSpecific')}><input value={form.location_specific} onChange={e => update('location_specific', e.target.value)} className="input-base" placeholder={t('form.locationSpecificPlaceholder')} /></Field>
+                  </div>
+                )}
               </div>
             )}
             <Field label={t('form.formatDetails')}>
