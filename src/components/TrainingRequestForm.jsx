@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ChevronLeft, ChevronRight, Check, Loader2, Globe } from 'lucide-react';
+import RequestSuccessScreen from '@/components/RequestSuccessScreen';
 
 const BRAND_OPTIONS = {
   'Extraoral': ['Eagle Edge', 'Saevo', 'PreXion', 'Outro'],
@@ -30,6 +31,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState('');
+  const [successId, setSuccessId] = useState(null);
 
   const [form, setForm] = useState({
     requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', company_type: 'Filial Alliage', company_type_detail: '', position: '', area: 'Comercial', area_detail: '',
@@ -125,13 +127,22 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       };
 
       const created = await base44.entities.TrainingRequest.create(entity);
-      navigate(`/requests/${created.id}`);
+      if (isPast) {
+        navigate(`/requests/${created.id}`);
+      } else {
+        setSubmitting(false);
+        setSuccessId(request_id);
+      }
     } catch (error) {
       setSubmitMsg('');
       setSubmitting(false);
       alert(t('form.submitError') + ': ' + error.message);
     }
   };
+
+  if (successId) {
+    return <RequestSuccessScreen requestId={successId} />;
+  }
 
   if (submitting) {
     return (
