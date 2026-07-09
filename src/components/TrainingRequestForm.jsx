@@ -5,15 +5,19 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ChevronLeft, ChevronRight, Check, Loader2, Globe } from 'lucide-react';
 
 const BRAND_OPTIONS = {
-  'Extra-Oral': ['Eagle Edge', 'Saevo', 'PreXion', 'Outro'],
+  'Extraoral': ['Eagle Edge', 'Saevo', 'PreXion', 'Outro'],
   'Scanner Intraoral': ['Dabi', 'PreXion', 'Outro'],
-  'Software': ['Eagle Eye', 'Saevo Image', 'PreXion Image', 'OnDemand', 'Outro'],
+  'Software': ['Eagle Eye / Saevo Image / PreXion Image', 'OnDemand3D', 'Outro'],
+  'Consultórios': ['Dabi', 'Saevo', 'D700', 'Denimed', 'Outro'],
+  'Raio-x': ['Dabi', 'Saevo', 'Outro'],
+  'Raio-x portátil': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
   'Sensor': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
-  'Raio-x': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
-  'Consultórios': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
-  'Periféricos': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
+  'Periféricos': ['Dabi', 'Saevo', 'Denimed', 'Outro'],
+  'Eagle PS': ['Outro'],
+  'Peças de Mão': ['Dabi', 'Saevo', 'Outro'],
   'Outro': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
 };
+const AREA_OPTIONS = ['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'];
 const AUDIENCE_OPTIONS = ['Equipe interna', 'Distribuidor', 'Cliente final', 'Misto'];
 const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Dificuldade de posicionamento comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
 const IMPACT_OPTIONS = ['Aumento de vendas', 'Redução de chamados', 'Melhora de conhecimento técnico', 'Certificação da equipe', 'Suporte a lançamento', 'Outro'];
@@ -30,9 +34,9 @@ export default function TrainingRequestForm({ mode = 'new' }) {
   const [form, setForm] = useState({
     requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', company_type: 'Filial Alliage', company_type_detail: '', position: '', area: 'Comercial', area_detail: '',
     request_type: 'Novo treinamento', request_type_detail: '',
-    product_category: 'Extra-Oral', product_brand: '', product_name_detail: '', product_name: '', product_obs: '',
+    product_category: 'Extraoral', product_brand: '', product_name_detail: '', product_name: '', product_obs: '',
     training_focus: '',
-    audience: [], participants_count: '6-10',
+    audience: [], audience_detail: '', participants_count: '6-10',
     justification: '', specific_problems: [], expected_impacts: [],
     needs_deadline: false, deadline_requested: '', deadline_reason: '',
     priority: 'Média',
@@ -100,9 +104,11 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       const today = new Date().toISOString().split('T')[0];
       const completedDate = form.training_completed_date || today;
 
-      const { product_brand, product_name_detail, ...formData } = form;
+      const { product_brand, product_name_detail, audience_detail, ...formData } = form;
+      const audienceFinal = form.audience.map(a => a === 'Misto' && audience_detail ? `Misto: ${audience_detail}` : a);
       const entity = {
         ...formData,
+        audience: audienceFinal,
         product_name: product_brand === 'Outro' ? product_name_detail : product_brand,
         request_id,
         request_category: 'Treinamento / Apoio Técnico',
@@ -217,7 +223,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
               </Field>
               <Field label={t('form.area')}>
                 <select value={form.area} onChange={e => update('area', e.target.value)} className="input-base">
-                  {['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'].map(r => <option key={r} value={r}>{r}</option>)}
+                  {AREA_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </Field>
               {form.area === 'Outro' && (
@@ -296,6 +302,9 @@ export default function TrainingRequestForm({ mode = 'new' }) {
                   </button>
                 ))}
               </div>
+              {form.audience.includes('Misto') && (
+                <input value={form.audience_detail} onChange={e => update('audience_detail', e.target.value)} className="input-base mt-2" placeholder={t('form.audienceDetailPlaceholder')} />
+              )}
             </Field>
             <Field label={t('form.participantsCount')}>
               <div className="grid grid-cols-4 gap-2">
