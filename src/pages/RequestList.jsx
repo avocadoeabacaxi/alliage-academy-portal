@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
@@ -7,6 +7,7 @@ import { Search, PlusCircle, FileText, ChevronRight } from 'lucide-react';
 
 export default function RequestList() {
   const { t, tf, tv } = useLanguage();
+  const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -110,7 +111,7 @@ export default function RequestList() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filtered.map(r => (
-              <tr key={r.id} className="hover:bg-slate-50 transition-colors cursor-pointer group" onClick={() => window.location.href = `/requests/${r.id}`}>
+              <tr key={r.id} className="hover:bg-slate-50 transition-colors cursor-pointer group" onClick={() => navigate(`/requests/${r.id}`)}>
                 <td className="px-4 py-3">
                   <span className="text-sm font-semibold text-[#00A6D6]">{r.request_id}</span>
                   <p className="text-xs text-slate-400">{r.created_date?.split('T')[0]}</p>

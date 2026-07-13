@@ -32,7 +32,10 @@ export default function RequestDetail() {
 
   const loadData = async () => {
     try {
-      const r = await base44.entities.TrainingRequest.get(id);
+      const [r, surveys] = await Promise.all([
+        base44.entities.TrainingRequest.get(id),
+        base44.entities.SatisfactionSurvey.filter({ training_request_id: id }).catch(() => [])
+      ]);
       setReq(r);
       setEducatorAnalysis(tf(r.educator_analysis) || '');
       setManagerAnalysis(tf(r.manager_analysis) || '');
@@ -40,15 +43,12 @@ export default function RequestDetail() {
       setExecutionNotes(tf(r.execution_notes) || '');
       setFinalNotes(tf(r.final_notes) || '');
       setTrainingCompletedDate(r.training_completed_date || '');
+      setLoading(false);
 
-      try {
-        const surveys = await base44.entities.SatisfactionSurvey.filter({ training_request_id: id });
-        if (surveys.length > 0) {
-          setSurvey(surveys[0]);
-          const resp = await base44.entities.SurveyResponse.filter({ survey_id: surveys[0].id });
-          setResponses(resp);
-        }
-      } catch (e) {}
+      if (surveys.length > 0) {
+        setSurvey(surveys[0]);
+        base44.entities.SurveyResponse.filter({ survey_id: surveys[0].id }).then(setResponses).catch(() => {});
+      }
     } catch (e) {
       console.error(e);
     } finally {
