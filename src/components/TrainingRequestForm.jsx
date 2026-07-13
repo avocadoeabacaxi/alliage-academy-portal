@@ -224,8 +224,8 @@ export default function TrainingRequestForm({ mode = 'new' }) {
                 </select>
               </Field>
               {form.region !== 'USA' && (
-                <Field label={form.region === 'Brasil' ? t('form.regionDetailBrasil') : t('form.regionDetailLatam')} required>
-                  <input value={form.region_detail} onChange={e => update('region_detail', e.target.value)} className="input-base" placeholder={form.region === 'Brasil' ? t('form.regionDetailBrasilPlaceholder') : t('form.regionDetailLatamPlaceholder')} />
+                <Field label={form.region === 'Brasil' ? t('form.regionDetailBrasil') : form.region === 'ROW' ? t('form.regionDetailRow') : t('form.regionDetailLatam')} required>
+                  <input value={form.region_detail} onChange={e => update('region_detail', e.target.value)} className="input-base" placeholder={form.region === 'Brasil' ? t('form.regionDetailBrasilPlaceholder') : form.region === 'ROW' ? t('form.regionDetailRowPlaceholder') : t('form.regionDetailLatamPlaceholder')} />
                 </Field>
               )}
               <Field label={t('form.companyType')}>
