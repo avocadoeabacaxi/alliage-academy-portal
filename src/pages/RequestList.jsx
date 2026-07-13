@@ -6,7 +6,7 @@ import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
 import { Search, PlusCircle, FileText, ChevronRight } from 'lucide-react';
 
 export default function RequestList() {
-  const { t, tf } = useLanguage();
+  const { t, tf, tv } = useLanguage();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -82,7 +82,7 @@ export default function RequestList() {
         </div>
         <select value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})} className="input-base w-auto">
           <option value="">{t('dash.allStatuses')}</option>
-          {['Pendente Análise', 'Aprovado Etapa 1', 'Aprovado Etapa 2', 'Concluído', 'Rejeitado'].map(s => <option key={s} value={s}>{s}</option>)}
+          {['Pendente Análise', 'Aprovado Etapa 1', 'Aprovado Etapa 2', 'Concluído', 'Rejeitado'].map(s => <option key={s} value={s}>{tv(s)}</option>)}
         </select>
         <select value={filters.region} onChange={e => setFilters({...filters, region: e.target.value})} className="input-base w-auto">
           <option value="">{t('dash.allRegions')}</option>
@@ -117,7 +117,7 @@ export default function RequestList() {
                 </td>
                 <td className="px-4 py-3">
                   <p className="text-sm font-medium text-slate-900 truncate max-w-[200px]">{r.product_name}</p>
-                  <p className="text-xs text-slate-400">{r.request_type}</p>
+                  <p className="text-xs text-slate-400">{tv(r.request_type)}</p>
                 </td>
                 <td className="px-4 py-3 text-sm text-slate-700">{r.requester_name}</td>
                 <td className="px-4 py-3 text-sm text-slate-600">{t(`region.${(r.region || '').toLowerCase()}`)}</td>

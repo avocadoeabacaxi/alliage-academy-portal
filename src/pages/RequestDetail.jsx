@@ -8,7 +8,7 @@ import { ArrowLeft, Check, X, Clock, MapPin, User, Mail, Building, Calendar, Sta
 export default function RequestDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t, tf, lang } = useLanguage();
+  const { t, tf, tv, lang } = useLanguage();
   const [req, setReq] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -238,15 +238,15 @@ export default function RequestDetail() {
           <InfoRow label={t('form.requesterName')} value={req.requester_name} icon={User} />
           <InfoRow label={t('form.requesterEmail')} value={req.requester_email} icon={Mail} />
           <InfoRow label={t('form.region')} value={t(`region.${(req.region || '').toLowerCase()}`)} icon={MapPin} />
-          <InfoRow label={t('form.companyType')} value={req.company_type} icon={Building} />
+          <InfoRow label={t('form.companyType')} value={tv(req.company_type)} icon={Building} />
           <InfoRow label={t('form.position')} value={req.position} />
-          <InfoRow label={t('form.area')} value={req.area} />
+          <InfoRow label={t('form.area')} value={tv(req.area)} />
         </div>
       </Section>
 
       <Section title={t('detail.trainingDetails')} icon={FileText}>
         <div className="space-y-3">
-          <InfoRow label={t('form.requestType')} value={req.request_type} />
+          <InfoRow label={t('form.requestType')} value={tv(req.request_type)} />
           {Array.isArray(req.products) && req.products.length > 0 ? (
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t('form.productsLabel')}</p>
@@ -273,7 +273,7 @@ export default function RequestDetail() {
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t('form.audience')}</p>
               <div className="flex flex-wrap gap-1">
-                {(req.audience || []).map(a => <span key={a} className="tag-cyan">{a}</span>)}
+                {(req.audience || []).map(a => <span key={a} className="tag-cyan">{tv(a)}</span>)}
               </div>
             </div>
             <InfoRow label={t('form.participantsCount')} value={req.participants_count} />
@@ -293,7 +293,7 @@ export default function RequestDetail() {
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t('form.specificProblems')}</p>
               <div className="flex flex-wrap gap-1">
-                {req.specific_problems.map(p => <span key={p} className="px-2.5 py-1 text-xs font-medium bg-amber-50 text-amber-700 rounded-full">{p}</span>)}
+                {req.specific_problems.map(p => <span key={p} className="px-2.5 py-1 text-xs font-medium bg-amber-50 text-amber-700 rounded-full">{tv(p)}</span>)}
               </div>
             </div>
           )}
@@ -301,7 +301,7 @@ export default function RequestDetail() {
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t('form.expectedImpacts')}</p>
               <div className="flex flex-wrap gap-1">
-                {req.expected_impacts.map(p => <span key={p} className="px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-full">{p}</span>)}
+                {req.expected_impacts.map(p => <span key={p} className="px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-full">{tv(p)}</span>)}
               </div>
             </div>
           )}
@@ -363,7 +363,7 @@ export default function RequestDetail() {
             <div className="flex items-center gap-4 text-sm">
               <span className="text-slate-500">{t('detail.decision')}:</span>
               <span className={`font-medium ${req.decision_stage1 === 'Aprovado' ? 'text-green-600' : req.decision_stage1 === 'Rejeitado' ? 'text-red-600' : 'text-slate-400'}`}>
-                {req.decision_stage1}
+                {tv(req.decision_stage1)}
               </span>
               <span className="text-slate-300">·</span>
               <span className="text-slate-500">{t('detail.date')}: {req.date_stage1?.split('T')[0]}</span>
@@ -413,7 +413,7 @@ export default function RequestDetail() {
               <div className="flex items-center gap-4 text-sm">
                 <span className="text-slate-500">{t('detail.decision')}:</span>
                 <span className={`font-medium ${req.decision_stage2 === 'Aprovado' ? 'text-green-600' : req.decision_stage2 === 'Rejeitado' ? 'text-red-600' : 'text-slate-400'}`}>
-                  {req.decision_stage2}
+                  {tv(req.decision_stage2)}
                 </span>
                 <span className="text-slate-300">·</span>
                 <span className="text-slate-500">{t('detail.date')}: {req.date_stage2?.split('T')[0]}</span>

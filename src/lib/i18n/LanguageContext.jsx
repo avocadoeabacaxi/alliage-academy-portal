@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { translations } from './translations';
+import { translateOption } from './optionValues';
 
 const LanguageContext = createContext();
 
@@ -34,8 +35,10 @@ export function LanguageProvider({ children }) {
     return field[lang] || field.pt || field.en || field.es || '';
   }, [lang]);
 
+  const tv = useCallback((value) => translateOption(value, lang), [lang]);
+
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t, tf }}>
+    <LanguageContext.Provider value={{ lang, setLang, t, tf, tv }}>
       {children}
     </LanguageContext.Provider>
   );
