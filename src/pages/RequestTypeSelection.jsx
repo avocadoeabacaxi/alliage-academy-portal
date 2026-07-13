@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { GraduationCap, CalendarDays, ChevronRight, ArrowLeft } from 'lucide-react';
+import { GraduationCap, CalendarDays, ChevronRight } from 'lucide-react';
 
 export default function RequestTypeSelection() {
   const { t } = useLanguage();
@@ -30,15 +30,6 @@ export default function RequestTypeSelection() {
 
   return (
     <div className="p-4 lg:p-6 max-w-4xl mx-auto animate-fade-in">
-      {/* Back button */}
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors mb-4"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        {t('common.back')}
-      </button>
-
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#003B5C] mb-1">{t('selection.title')}</h1>
