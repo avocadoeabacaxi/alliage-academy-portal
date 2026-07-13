@@ -24,6 +24,15 @@ Deno.serve(async (req) => {
       region, priority, request_category, request_type, product_category,
     } = record;
 
+    // Resolve internal record id for the detail page link
+    let recordId = record.id || body?.event?.entity_id || null;
+    if (!recordId && request_id) {
+      const found = await base44.asServiceRole.entities.TrainingRequest.filter({ request_id });
+      if (found && found.length > 0) recordId = found[0].id;
+    }
+    const APP_URL = 'https://trainning.alliage.global';
+    const reviewUrl = recordId ? `${APP_URL}/requests/${recordId}` : `${APP_URL}/requests`;
+
     // Resolve recipients via routing rules
     const isEvent = request_category === 'Evento';
     const ruleType = isEvent ? 'Evento' : request_type;
@@ -79,7 +88,7 @@ Deno.serve(async (req) => {
             <p><strong>Prioridade:</strong> ${priority || '—'}</p>
           </div>
           <p>
-            <a href="${new URL(req.url).origin}/requests/${request_id}" style="display: inline-block; padding: 12px 24px; background-color: #00A6D6; color: white; text-decoration: none; border-radius: 24px; font-weight: bold;">
+            <a href="${reviewUrl}" style="display: inline-block; padding: 12px 24px; background-color: #00A6D6; color: white; text-decoration: none; border-radius: 24px; font-weight: bold;">
               Revisar Solicitação
             </a>
           </p>
