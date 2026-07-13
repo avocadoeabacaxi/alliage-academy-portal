@@ -90,7 +90,7 @@ export default function RequestList() {
         </select>
         <select value={filters.priority} onChange={e => setFilters({...filters, priority: e.target.value})} className="input-base w-auto">
           <option value="">{t('dash.allPriorities')}</option>
-          {['Baixa', 'Média', 'Alta', 'Crítica'].map(p => <option key={p} value={p}>{t(`priority.${p.toLowerCase()}`)}</option>)}
+          {['Baixa', 'Média', 'Alta', 'Crítica'].map(p => <option key={p} value={p}>{tv(p)}</option>)}
         </select>
       </div>
 

@@ -26,8 +26,11 @@ export function StatusBadge({ status, t }) {
   );
 }
 
+const PRIORITY_KEYS = { 'Baixa': 'baixa', 'Média': 'media', 'Alta': 'alta', 'Crítica': 'critica' };
+
 export function PriorityBadge({ priority, t }) {
-  const label = priority || 'Média';
+  const p = priority || 'Média';
+  const label = t ? t(`priority.${PRIORITY_KEYS[p] || 'media'}`) : p;
   return (
     <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${PRIORITY_CONFIG[priority] || PRIORITY_CONFIG['Média']}`}>
       {label}
