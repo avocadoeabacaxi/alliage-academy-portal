@@ -208,6 +208,21 @@
     "product_name": {
       "type": "string"
     },
+    "products": {
+      "type": "array",
+      "description": "Lista de produtos selecionados, cada um com categoria e marca",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "product_obs": {
       "type": "string"
     },

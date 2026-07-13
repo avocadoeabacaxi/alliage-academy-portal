@@ -247,8 +247,22 @@ export default function RequestDetail() {
       <Section title={t('detail.trainingDetails')} icon={FileText}>
         <div className="space-y-3">
           <InfoRow label={t('form.requestType')} value={req.request_type} />
-          <InfoRow label={t('form.productCategory')} value={req.product_category} />
-          <InfoRow label={t('form.productName')} value={req.product_name} />
+          {Array.isArray(req.products) && req.products.length > 0 ? (
+            <div>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t('form.productsLabel')}</p>
+              <div className="flex flex-wrap gap-1">
+                {req.products.map((p, i) => {
+                  const brand = p.brand === 'Outro' ? (p.brand_detail || '') : p.brand;
+                  return <span key={i} className="tag-cyan">{brand ? `${p.category} — ${brand}` : p.category}</span>;
+                })}
+              </div>
+            </div>
+          ) : (
+            <>
+              <InfoRow label={t('form.productCategory')} value={req.product_category} />
+              <InfoRow label={t('form.productName')} value={req.product_name} />
+            </>
+          )}
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
               <Globe className="w-3 h-3" /> {t('form.trainingFocus')}

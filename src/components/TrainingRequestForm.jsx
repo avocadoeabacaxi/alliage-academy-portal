@@ -5,20 +5,8 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ChevronLeft, ChevronRight, Check, Loader2, Globe } from 'lucide-react';
 import RequestSuccessScreen from '@/components/RequestSuccessScreen';
 import ParticipantsList from '@/components/ParticipantsList';
+import ProductSelector, { resolveProductName, BRAND_OPTIONS } from '@/components/ProductSelector';
 
-const BRAND_OPTIONS = {
-  'Extraoral': ['Eagle Edge', 'Saevo', 'PreXion', 'Outro'],
-  'Scanner Intraoral': ['Dabi', 'PreXion', 'Outro'],
-  'Software': ['Eagle Eye / Saevo Image / PreXion Image', 'OnDemand3D', 'Outro'],
-  'Consultórios': ['Dabi', 'Saevo', 'D700', 'Denimed', 'Outro'],
-  'Raios X': ['Dabi', 'Saevo', 'Outro'],
-  'Raios X portátil': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
-  'Sensor intraoral': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
-  'Periféricos': ['Dabi', 'Saevo', 'Denimed', 'Outro'],
-  'Eagle PS': [],
-  'Peças de mão': ['Dabi', 'Saevo', 'Outro'],
-  'Outro': ['Dabi', 'Saevo', 'PreXion', 'Outro'],
-};
 const AREA_OPTIONS = ['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'];
 const AUDIENCE_OPTIONS = ['Equipe interna', 'Distribuidor', 'Cliente final', 'Misto'];
 const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Dificuldade de posicionamento comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
@@ -38,7 +26,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
   const [form, setForm] = useState({
     requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', company_type: 'Filial Alliage', company_type_detail: '', position: '', area: 'Comercial', area_detail: '',
     request_type: 'Novo treinamento', request_type_detail: '',
-    product_category: 'Extraoral', product_brand: '', product_name_detail: '', product_name: '', product_obs: '',
+    products: [{ category: 'Extraoral', brand: '', brand_detail: '' }], product_obs: '',
     training_focus: '',
     audience: [], audience_detail: '', participants_count: '6-10', participants_list: [],
     justification: '', specific_problems: [], expected_impacts: [],
@@ -79,9 +67,14 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       case 'identification': return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.company_type !== 'Outro' || form.company_type_detail.trim()) && (form.area !== 'Outro' || form.area_detail.trim());
       case 'request_type': return form.request_type && (form.request_type !== 'Outro' || form.request_type_detail.trim());
       case 'product': {
-        const brands = BRAND_OPTIONS[form.product_category] || [];
-        if (brands.length === 0) return !!form.product_category;
-        return form.product_category && form.product_brand && (form.product_brand !== 'Outro' || form.product_name_detail.trim());
+        const list = form.products || [];
+        if (list.length === 0) return false;
+        return list.every(p => {
+          if (!p.category) return false;
+          const brands = BRAND_OPTIONS[p.category] || [];
+          if (brands.length === 0) return true;
+          return p.brand && (p.brand !== 'Outro' || (p.brand_detail || '').trim());
+        });
       }
       case 'training_focus': return form.training_focus.length > 10;
       case 'audience': return form.audience.length > 0;
@@ -113,17 +106,21 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       const today = new Date().toISOString().split('T')[0];
       const completedDate = form.training_completed_date || today;
 
-      const { product_brand, product_name_detail, audience_detail, presencial_mode, ...formData } = form;
+      const { audience_detail, presencial_mode, ...formData } = form;
       const audienceFinal = form.audience.map(a => a === 'Misto' && audience_detail ? `Misto: ${audience_detail}` : a);
       const presencialLabel = presencial_mode === 'ribeirao' ? t('form.presencialModeRibeirao') : t('form.presencialModeLocal');
       const formatDetailsFinal = form.format === 'Presencial'
         ? [presencialLabel, form.format_details].filter(Boolean).join(' — ')
         : form.format_details;
+      const productsList = (form.products || []).filter(p => p.category);
+      const productNameFinal = productsList.map(resolveProductName).join(', ');
       const entity = {
         ...formData,
         format_details: formatDetailsFinal,
         audience: audienceFinal,
-        product_name: (BRAND_OPTIONS[form.product_category] || []).length === 0 ? form.product_category : (product_brand === 'Outro' ? product_name_detail : product_brand),
+        products: productsList,
+        product_name: productNameFinal,
+        product_category: productsList[0]?.category || '',
         request_id,
         request_category: 'Treinamento / Apoio Técnico',
         status: isPast ? 'Concluído' : 'Pendente Análise',
@@ -279,27 +276,11 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
         {steps[step]?.id === 'product' && (
           <div className="space-y-4">
-            <Field label={t('form.productCategory')} required>
-              <select value={form.product_category} onChange={e => { update('product_category', e.target.value); update('product_brand', ''); update('product_name_detail', ''); }} className="input-base">
-                {Object.keys(BRAND_OPTIONS).map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </Field>
-            {form.product_category && (BRAND_OPTIONS[form.product_category] || []).length > 0 && (
-              <Field label={t('form.productBrand')} required>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {BRAND_OPTIONS[form.product_category].map(brand => (
-                    <button key={brand} onClick={() => { update('product_brand', brand); if (brand !== 'Outro') update('product_name_detail', ''); }} className={`px-3 py-2.5 text-sm rounded-lg border text-left transition-all ${form.product_brand === brand ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                      {brand}
-                    </button>
-                  ))}
-                </div>
-              </Field>
-            )}
-            {form.product_brand === 'Outro' && (
-              <Field label={t('form.productNameDetail')} required>
-                <input value={form.product_name_detail} onChange={e => update('product_name_detail', e.target.value)} className="input-base" placeholder={t('form.productNameDetailPlaceholder')} />
-              </Field>
-            )}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('form.productsLabel')} <span className="text-red-500">*</span></label>
+              <p className="text-xs text-slate-400 mb-3">{t('form.productsHint')}</p>
+              <ProductSelector products={form.products} onChange={(list) => update('products', list)} />
+            </div>
             <Field label={t('form.productObs')}>
               <textarea value={form.product_obs} onChange={e => update('product_obs', e.target.value)} rows={2} className="input-base resize-none" placeholder={t('form.productObsPlaceholder')} />
             </Field>

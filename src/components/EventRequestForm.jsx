@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ChevronLeft, ChevronRight, Check, Loader2, Globe, CalendarDays, Upload, X, Paperclip } from 'lucide-react';
 import RequestSuccessScreen from '@/components/RequestSuccessScreen';
+import ProductSelector, { resolveProductName, BRAND_OPTIONS } from '@/components/ProductSelector';
 
 const EVENT_TYPES = ['Feira / Congresso', 'Palestra', 'Lançamento de produto', 'Evento Comercial', 'Outro'];
 const ALLIAGE_ROLE_OPTIONS = ['Palestrante/Apresentador', 'Instrutor hands-on', 'Moderador', 'Consultor técnico', 'Demonstração de produtos', 'Outro'];
@@ -39,6 +40,7 @@ export default function EventRequestForm({ mode = 'new' }) {
     company_type: 'Filial Alliage', company_type_detail: '', position: '',
     event_type: 'Feira / Congresso', event_type_detail: '',
     event_name: '', event_description: '', event_organizer: '', event_website: '',
+    products: [{ category: 'Extraoral', brand: '', brand_detail: '' }],
     event_start_date: '', event_end_date: '', format: 'Presencial',
     location_country: '', location_city: '', location_specific: '',
     alliage_role: [], alliage_role_detail: '', who_invited: '', who_invited_detail: '',
@@ -97,9 +99,17 @@ export default function EventRequestForm({ mode = 'new' }) {
         return form.requester_name && form.requester_email && form.region &&
           (form.region === 'USA' || form.region_detail.trim()) &&
           (form.company_type !== 'Outro' || form.company_type_detail.trim());
-      case 'sec2':
-        if (isPast) return form.event_name.trim() && form.event_type && (form.event_type !== 'Outro' || form.event_type_detail.trim()) && form.training_completed_date;
-        return form.event_name.trim() && form.event_type && (form.event_type !== 'Outro' || form.event_type_detail.trim()) && form.event_start_date && form.event_end_date;
+      case 'sec2': {
+        const productsOk = (form.products || []).length > 0 && form.products.every(p => {
+          if (!p.category) return false;
+          const brands = BRAND_OPTIONS[p.category] || [];
+          if (brands.length === 0) return true;
+          return p.brand && (p.brand !== 'Outro' || (p.brand_detail || '').trim());
+        });
+        const base = form.event_name.trim() && form.event_type && (form.event_type !== 'Outro' || form.event_type_detail.trim()) && productsOk;
+        if (isPast) return base && form.training_completed_date;
+        return base && form.event_start_date && form.event_end_date;
+      }
       case 'sec3':
         return form.format && (form.format === 'Remoto' || (form.location_country.trim() && form.location_city.trim()));
       case 'sec4':
@@ -142,12 +152,15 @@ export default function EventRequestForm({ mode = 'new' }) {
       const today = new Date().toISOString().split('T')[0];
       const completedDate = form.training_completed_date || today;
 
+      const productsList = (form.products || []).filter(p => p.category);
       const entity = {
         ...form,
         request_id,
         request_category: 'Evento',
         request_type: 'Outro',
         request_type_detail: form.event_type,
+        products: productsList,
+        product_category: productsList[0]?.category || '',
         product_name: form.event_name,
         status: isPast ? 'Concluído' : 'Pendente Análise',
         decision_stage1: isPast ? 'Aprovado' : 'Pendente',
@@ -287,6 +300,11 @@ export default function EventRequestForm({ mode = 'new' }) {
                 <input value={form.event_type_detail} onChange={e => update('event_type_detail', e.target.value)} className="input-base" placeholder={t('event.typeDetailPlaceholder')} />
               </Field>
             )}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('form.productsLabel')} <span className="text-red-500">*</span></label>
+              <p className="text-xs text-slate-400 mb-3">{t('form.productsHint')}</p>
+              <ProductSelector products={form.products} onChange={(list) => update('products', list)} />
+            </div>
             <Field label={t('event.organizer')}>
               <input value={form.event_organizer} onChange={e => update('event_organizer', e.target.value)} className="input-base" />
             </Field>
