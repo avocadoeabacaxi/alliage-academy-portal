@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ChevronLeft, ChevronRight, Check, Loader2, Globe } from 'lucide-react';
 import RequestSuccessScreen from '@/components/RequestSuccessScreen';
+import ParticipantsList from '@/components/ParticipantsList';
 
 const BRAND_OPTIONS = {
   'Extraoral': ['Eagle Edge', 'Saevo', 'PreXion', 'Outro'],
@@ -39,7 +40,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     request_type: 'Novo treinamento', request_type_detail: '',
     product_category: 'Extraoral', product_brand: '', product_name_detail: '', product_name: '', product_obs: '',
     training_focus: '',
-    audience: [], audience_detail: '', participants_count: '6-10',
+    audience: [], audience_detail: '', participants_count: '6-10', participants_list: [],
     justification: '', specific_problems: [], expected_impacts: [],
     needs_deadline: false, deadline_requested: '', deadline_reason: '',
     priority: 'Média',
@@ -337,6 +338,9 @@ export default function TrainingRequestForm({ mode = 'new' }) {
                 ))}
               </div>
             </Field>
+            <div className="pt-2 border-t border-slate-100">
+              <ParticipantsList participants={form.participants_list} onChange={(list) => update('participants_list', list)} />
+            </div>
           </div>
         )}
 

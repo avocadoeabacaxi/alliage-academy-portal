@@ -229,6 +229,29 @@
         "20+"
       ]
     },
+    "participants_list": {
+      "type": "array",
+      "description": "Lista de participantes que ser\u00e3o notificados 24h antes do treinamento",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "reminder_sent": {
+      "type": "boolean",
+      "description": "Indica se o lembrete de 24h j\u00e1 foi enviado aos participantes",
+      "default": false
+    },
     "justification": {
       "type": "object"
     },
