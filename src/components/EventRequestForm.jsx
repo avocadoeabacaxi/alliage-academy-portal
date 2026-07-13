@@ -12,6 +12,7 @@ const VISITOR_OPTIONS = ['1-50', '51-100', '101-300', '301-500', '500+'];
 const STRATEGIC_OBJECTIVES = ['Relacionamento com cliente estratégico', 'Prospecção', 'Lançamento/divulgação de produto', 'Posicionamento de marca', 'Networking', 'Outro'];
 const IMPACT_OPTIONS = ['Leads qualificados', 'Vendas', 'Fidelização', 'Parcerias', 'Visibilidade', 'Outro'];
 const PROFESSIONALS_OPTIONS = ['1', '2', '3+'];
+const PRIORITY_KEYS = { 'Baixa': 'baixa', 'Média': 'media', 'Alta': 'alta', 'Crítica': 'critica' };
 
 export default function EventRequestForm({ mode = 'new' }) {
   const isPast = mode === 'past';
@@ -111,7 +112,7 @@ export default function EventRequestForm({ mode = 'new' }) {
       case 'sec7':
         return form.costs_covered_by_requester === true || form.costs_covered_detail.trim();
       case 'sec8':
-        return form.professionals_needed;
+        return form.professionals_needed && form.professionals_names.trim() && form.professionals_equipment.trim();
       case 'sec9':
         return form.priority && (isPast || form.deadline_requested);
       case 'sec10':
@@ -451,10 +452,10 @@ export default function EventRequestForm({ mode = 'new' }) {
                 ))}
               </div>
             </Field>
-            <Field label={t('event.professionalsNames')}>
+            <Field label={t('event.professionalsNames')} required>
               <textarea value={form.professionals_names} onChange={e => update('professionals_names', e.target.value)} rows={2} className="input-base resize-none" placeholder={t('event.professionalsNamesPlaceholder')} />
             </Field>
-            <Field label={t('event.professionalsEquipment')}>
+            <Field label={t('event.professionalsEquipment')} required>
               <textarea value={form.professionals_equipment} onChange={e => update('professionals_equipment', e.target.value)} rows={3} className="input-base resize-none" placeholder={t('event.professionalsEquipmentPlaceholder')} />
             </Field>
           </div>
@@ -467,7 +468,7 @@ export default function EventRequestForm({ mode = 'new' }) {
               <div className="grid grid-cols-4 gap-2">
                 {['Baixa', 'Média', 'Alta', 'Crítica'].map(opt => (
                   <button key={opt} onClick={() => update('priority', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.priority === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                    {t(`priority.${opt.toLowerCase()}`)}
+                    {t(`priority.${PRIORITY_KEYS[opt]}`)}
                   </button>
                 ))}
               </div>
