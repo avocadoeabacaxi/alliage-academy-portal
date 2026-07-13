@@ -15,42 +15,138 @@ function fillTemplate(template, vars) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const body = await req.json();
 
-    const { training_request_id, requester_email, requester_name, request_id_display, product_name } = await req.json();
-
-    // Get survey
-    const surveys = await base44.asServiceRole.entities.SatisfactionSurvey.filter({ training_request_id });
-    if (!surveys || surveys.length === 0) {
-      return Response.json({ error: 'Survey not found' }, { status: 404 });
+    // Resolve training request — supports entity-automation payload ({ event, data, old_data }) and direct calls
+    let request = null;
+    if (body?.event?.entity_name === 'TrainingRequest') {
+      request = body.data || await base44.asServiceRole.entities.TrainingRequest.get(body.event.entity_id);
+      // Only fire when the request has just been completed
+      if (request?.status !== 'Concluído') {
+        return Response.json({ skipped: true, reason: 'status is not Concluído' });
+      }
+      if (body.old_data && body.old_data.status === 'Concluído') {
+        return Response.json({ skipped: true, reason: 'already completed before' });
+      }
+    } else if (body?.training_request_id) {
+      request = await base44.asServiceRole.entities.TrainingRequest.get(body.training_request_id);
     }
 
-    const survey = surveys[0];
+    if (!request) {
+      return Response.json({ error: 'Training request not found' }, { status: 404 });
+    }
+    if (!request.requester_email) {
+      return Response.json({ error: 'No requester email on request' }, { status: 400 });
+    }
+
+    const training_request_id = request.id;
+
+    // Find existing personalized survey — or generate one (unique questions per training, stored)
+    const existing = await base44.asServiceRole.entities.SatisfactionSurvey.filter({ training_request_id });
+    let survey = existing[0] || null;
+
+    if (!survey) {
+      const focusText = typeof request.training_focus === 'object'
+        ? (request.training_focus?.pt || request.training_focus?.en || request.training_focus?.es || '')
+        : (request.training_focus || '');
+
+      const prompt = `You are creating a satisfaction survey for a corporate training session at Alliage (medical devices). Based on the training details below, generate 6-8 relevant questions in Portuguese (pt), English (en), and Spanish (es).
+
+Training Type: ${request.request_type || '—'}
+Product: ${request.product_name || '—'}
+Training Focus: ${focusText}
+
+Guidelines:
+- Include 1 overall satisfaction question (rating 1-5)
+- Include questions about content quality, instructor effectiveness, practical application, and knowledge improvement
+- Include 1 open-ended question for suggestions
+- Each question must have all 3 language versions
+- Question types: "rating" (1-5 scale) or "text" (open-ended)
+
+Return a JSON object with a "questions" array.`;
+
+      const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            questions: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  text: {
+                    type: 'object',
+                    properties: {
+                      pt: { type: 'string' },
+                      en: { type: 'string' },
+                      es: { type: 'string' }
+                    },
+                    required: ['pt', 'en', 'es']
+                  },
+                  type: { type: 'string', enum: ['rating', 'text'] }
+                },
+                required: ['id', 'text', 'type']
+              }
+            }
+          },
+          required: ['questions']
+        }
+      });
+
+      survey = await base44.asServiceRole.entities.SatisfactionSurvey.create({
+        training_request_id,
+        request_id_display: request.request_id || '',
+        questions: result.questions,
+        public_token: crypto.randomUUID(),
+        is_active: true
+      });
+    }
+
     const surveyUrl = `https://trainning.alliage.global/survey/${survey.public_token}`;
+
+    // Keep the TrainingEvaluation report record in sync (same token as the survey)
+    const evals = await base44.asServiceRole.entities.TrainingEvaluation.filter({ training_request_id });
+    if (evals.length === 0) {
+      await base44.asServiceRole.entities.TrainingEvaluation.create({
+        training_request_id,
+        request_id_display: request.request_id || '',
+        educator_name: request.educator_name || 'A Definir',
+        educator_id: request.educator_id,
+        product_name: request.product_name || '—',
+        training_date: request.training_completed_date || request.training_scheduled_date,
+        questions: survey.questions,
+        status: 'sent',
+        public_token: survey.public_token,
+        sent_at: new Date().toISOString()
+      });
+    } else {
+      await base44.asServiceRole.entities.TrainingEvaluation.update(evals[0].id, {
+        status: evals[0].status === 'completed' ? 'completed' : 'sent',
+        public_token: survey.public_token,
+        sent_at: new Date().toISOString()
+      });
+    }
 
     // Fetch configured email template from database
     const templates = await base44.asServiceRole.entities.EmailTemplate.filter({ template_type: 'survey' });
     const tpl = templates.length > 0 ? templates[0] : null;
 
-    const subject = fillTemplate(tpl?.subject || DEFAULT_SURVEY_SUBJECT, {
-      request_id: request_id_display,
-      requester_name,
-      product_name,
+    const tplVars = {
+      request_id: request.request_id || '',
+      requester_name: request.requester_name || '',
+      product_name: request.product_name || '',
       survey_url: surveyUrl
-    });
-    const html = fillTemplate(tpl?.html_content || DEFAULT_SURVEY_HTML, {
-      request_id: request_id_display,
-      requester_name,
-      product_name,
-      survey_url: surveyUrl
-    });
+    };
 
-    // Send via Resend
+    const subject = fillTemplate(tpl?.subject || DEFAULT_SURVEY_SUBJECT, tplVars);
+    const html = fillTemplate(tpl?.html_content || DEFAULT_SURVEY_HTML, tplVars);
+
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
     const result = await resend.emails.send({
       from: 'no-reply@trainning.alliage.global',
-      to: requester_email,
+      to: request.requester_email,
       subject,
       html
     });
@@ -60,7 +156,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: result.error.message }, { status: 500 });
     }
 
-    return Response.json({ success: true, email_id: result.data.id });
+    return Response.json({ success: true, email_id: result.data.id, survey_url: surveyUrl });
   } catch (error) {
     console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });

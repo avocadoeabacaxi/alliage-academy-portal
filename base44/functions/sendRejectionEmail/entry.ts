@@ -5,7 +5,18 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
-    const { request_id, requester_email, requester_name, product_name, rejection_reason } = await req.json();
+    const body = await req.json();
+    // Support entity-automation payload ({ event, data, old_data }) and direct calls
+    let record = body?.event ? (body.data || await base44.asServiceRole.entities.TrainingRequest.get(body.event.entity_id)) : body;
+    if (body?.event) {
+      if (record?.status !== 'Rejeitado' || body?.old_data?.status === 'Rejeitado') {
+        return Response.json({ skipped: true, reason: 'status not newly rejected' });
+      }
+    }
+    const { request_id, requester_email, requester_name, product_name } = record || {};
+    if (!requester_email) return Response.json({ error: 'No requester email' }, { status: 400 });
+    const rawReason = record?.rejection_reason;
+    const rejection_reason = (rawReason && typeof rawReason === 'object') ? (rawReason.pt || rawReason.en || rawReason.es || '') : (rawReason || '');
 
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 

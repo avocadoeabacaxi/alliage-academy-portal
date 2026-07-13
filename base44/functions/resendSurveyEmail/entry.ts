@@ -26,7 +26,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Request not found' }, { status: 404 });
     }
 
-    const surveyUrl = `https://trainning.alliage.global/survey/${public_token}`;
+    // Always use the SatisfactionSurvey token — the /survey/:token page resolves only these
+    const surveys = await base44.asServiceRole.entities.SatisfactionSurvey.filter({ training_request_id });
+    const validToken = surveys[0]?.public_token || public_token;
+    const surveyUrl = `https://trainning.alliage.global/survey/${validToken}`;
 
     // Fetch configured email template from database
     const templates = await base44.asServiceRole.entities.EmailTemplate.filter({ template_type: 'survey' });
