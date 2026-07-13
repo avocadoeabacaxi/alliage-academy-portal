@@ -19,12 +19,12 @@ export default function PastEventSelection() {
       </button>
 
       {/* Header */}
-      <div className="bg-[#003B5C] rounded-2xl p-6 mb-6 text-center shadow-lg shadow-[#003B5C]/10">
-        <div className="flex items-center justify-center gap-2 mb-1">
-          <History className="w-5 h-5 text-cyan-300" />
-          <h1 className="text-xl lg:text-2xl font-bold text-white">{t('selection.pastTitle')}</h1>
-        </div>
-        <p className="text-sm text-cyan-200/70 mt-1.5 max-w-2xl mx-auto">{t('selection.pastSubtitle')}</p>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-[#003B5C] mb-1 flex items-center gap-2">
+          <History className="w-6 h-6 text-[#00A6D6]" />
+          {t('selection.pastTitle')}
+        </h1>
+        <p className="text-sm text-slate-500">{t('selection.pastSubtitle')}</p>
       </div>
 
       {/* Cards */}

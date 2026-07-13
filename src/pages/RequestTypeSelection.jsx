@@ -40,9 +40,9 @@ export default function RequestTypeSelection() {
       </button>
 
       {/* Header */}
-      <div className="bg-[#003B5C] rounded-2xl p-6 mb-6 text-center shadow-lg shadow-[#003B5C]/10">
-        <h1 className="text-xl lg:text-2xl font-bold text-white">{t('selection.title')}</h1>
-        <p className="text-sm text-cyan-200/70 mt-1.5 max-w-2xl mx-auto">{t('selection.subtitle')}</p>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-[#003B5C] mb-1">{t('selection.title')}</h1>
+        <p className="text-sm text-slate-500">{t('selection.subtitle')}</p>
       </div>
 
       {/* Cards */}
