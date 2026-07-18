@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
+import RequestParticipants from '@/components/RequestParticipants';
 import { ArrowLeft, Check, X, Clock, MapPin, User, Mail, Building, Calendar, Star, Copy, FileText, Loader2, Globe, Activity } from 'lucide-react';
 
 export default function RequestDetail() {
@@ -513,6 +514,8 @@ export default function RequestDetail() {
           </div>
         </Section>
       )}
+
+      <RequestParticipants request={req} onUpdated={loadData} />
 
       {req.decision_stage2 === 'Aprovado' && canGenerateSurvey && (
         <Section title={t('detail.survey')} icon={Star}>
