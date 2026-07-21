@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { inviteAuthorizedUser } from '@/lib/inviteAuthorizedUser';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { UserPlus, Shield, Mail, MapPin, Loader2, Check, X, Search, Eye, Edit, CheckCircle2, Lock, ChevronDown, ChevronUp, Users as UsersIcon, KeyRound, Send } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -114,16 +115,17 @@ export default function SettingsUsers() {
 
   const handleInvite = async () => {
     if (!inviteForm.email.trim()) return;
-    
+    setSaving(true);
     try {
-      // Send a set-password email directly (self-registration — avoids the confusing platform invite email)
-      await base44.functions.invoke('sendPasswordReset', { email: inviteForm.email });
-      setInviteMsg('Convite enviado! O usuário receberá um email para definir sua senha. Após o cadastro, ajuste o papel do usuário nesta tela.');
+      await inviteAuthorizedUser(inviteForm);
+      setInviteMsg('Convite enviado. O usuário receberá um link para criar a senha e acessar o portal.');
       setInviteForm({ email: '', role: 'solicitante', region: 'Brasil' });
       setTimeout(() => setInviteMsg(''), 5000);
-      loadUsers();
+      await loadUsers();
     } catch (e) {
       setInviteMsg('Erro: ' + e.message);
+    } finally {
+      setSaving(false);
     }
   };
 

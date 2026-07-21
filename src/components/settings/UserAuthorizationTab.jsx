@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { inviteAuthorizedUser } from '@/lib/inviteAuthorizedUser';
 import { Check, X, Loader2, Search } from 'lucide-react';
 
 export default function UserAuthorizationTab() {
@@ -30,22 +31,12 @@ export default function UserAuthorizationTab() {
     if (!role) return;
     setUpdating(auth.id);
     try {
-      await base44.functions.invoke('updateUserAuthorization', {
-        id: auth.id,
-        status: 'approved',
+      await inviteAuthorizedUser({
+        email: auth.email,
+        full_name: auth.full_name,
         role,
-        approved_by: user.id,
-        approved_date: new Date().toISOString()
+        region: auth.region || 'Brasil'
       });
-      // Send a "set your password" email (self-registration flow — no confusing invite email)
-      try {
-        await base44.functions.invoke('sendPasswordReset', {
-          email: auth.email,
-          full_name: auth.full_name
-        });
-      } catch (emailErr) {
-        console.log('Set-password email skipped:', emailErr.message);
-      }
       await loadData();
     } catch (e) {
       alert('Erro: ' + e.message);

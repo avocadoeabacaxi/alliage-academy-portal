@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { inviteAuthorizedUser } from '@/lib/inviteAuthorizedUser';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { UserPlus, Shield, Mail, MapPin, Loader2, Check, X, Search, ChevronDown, ChevronUp, Lock, Eye, Edit, CheckCircle2, Users as UsersIcon } from 'lucide-react';
 
@@ -99,8 +100,8 @@ export default function UserManagement() {
     setInviteMsg('');
     setError('');
     try {
-      await base44.users.inviteUser(inviteForm.email, inviteForm.role);
-      setInviteMsg(t('users.inviteSuccess'));
+      await inviteAuthorizedUser(inviteForm);
+      setInviteMsg('Convite enviado. O usuário receberá o link para criar sua senha.');
       setInviteForm({ email: '', role: 'solicitante', region: 'Brasil' });
       setTimeout(() => { setShowInvite(false); setInviteMsg(''); }, 2000);
       loadUsers();

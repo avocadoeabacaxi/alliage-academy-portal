@@ -51,6 +51,10 @@ export default function Login() {
     base44.auth.loginWithProvider("google", "/");
   };
 
+  const handleMicrosoft = () => {
+    base44.auth.loginWithProvider("microsoft", "/");
+  };
+
   const handleLogout = () => {
     base44.auth.logout();
     setIsLoggedIn(false);
@@ -196,6 +200,15 @@ export default function Login() {
             Continuar com Google
           </Button>
 
+          <Button
+            variant="outline"
+            className="w-full h-11 text-sm font-medium mb-4 border-slate-200 hover:bg-slate-50"
+            onClick={handleMicrosoft}
+          >
+            <LogIn className="w-5 h-5 mr-2 text-[#0078D4]" />
+            Continuar com Microsoft
+          </Button>
+
           <div className="relative mb-4">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-100" />
@@ -272,10 +285,7 @@ export default function Login() {
           </form>
 
           <p className="text-center text-sm text-slate-500 mt-6">
-            Novo por aqui?{" "}
-            <Link to="/register" className="text-[#00A6D6] font-semibold hover:underline">
-              Criar uma conta
-            </Link>
+            Seu acesso é liberado pelo administrador. Use o e-mail que recebeu o convite.
           </p>
         </div>
       </div>
