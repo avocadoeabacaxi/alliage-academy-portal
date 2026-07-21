@@ -219,6 +219,9 @@
           },
           "brand": {
             "type": "string"
+          },
+          "brand_detail": {
+            "type": "string"
           }
         }
       }
@@ -258,6 +261,13 @@
           },
           "email": {
             "type": "string"
+          },
+          "attendance_mode": {
+            "type": "string",
+            "enum": [
+              "Online",
+              "Presencial"
+            ]
           }
         }
       }
@@ -311,8 +321,34 @@
       "type": "string",
       "enum": [
         "Remoto",
-        "Presencial"
+        "Presencial",
+        "H\u00edbrido"
       ]
+    },
+    "guest_participation_mode": {
+      "type": "string",
+      "enum": [
+        "Online",
+        "Presencial",
+        "H\u00edbrido"
+      ],
+      "default": "Presencial"
+    },
+    "online_platform": {
+      "type": "string",
+      "enum": [
+        "Google Meet",
+        "Microsoft Teams",
+        "Zoom",
+        "Outro"
+      ]
+    },
+    "online_access_link": {
+      "type": "string"
+    },
+    "needs_educator_link": {
+      "type": "boolean",
+      "default": false
     },
     "format_details": {
       "type": "string"

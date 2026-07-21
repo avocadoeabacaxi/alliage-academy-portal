@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
 import RequestParticipants from '@/components/RequestParticipants';
+import AccessDetailsEditor from '@/components/AccessDetailsEditor';
 import { ArrowLeft, Check, X, Clock, MapPin, User, Mail, Building, Calendar, Star, Copy, FileText, Loader2, Globe, Activity } from 'lucide-react';
 
 export default function RequestDetail() {
@@ -64,6 +65,7 @@ export default function RequestDetail() {
   const canEditExecution = userRole === 'educador' || userRole === 'admin';
   const canCloseCycle = userRole === 'gerente_regional' || userRole === 'admin';
   const canGenerateSurvey = userRole === 'educador' || userRole === 'admin';
+  const canEditAccess = userRole === 'admin' || userRole === 'educador' || user?.email === req?.requester_email;
 
   const handleDecision = async (stage, decision) => {
     setSaving(true);
@@ -338,6 +340,8 @@ export default function RequestDetail() {
           </div>
         )}
       </Section>
+
+      <AccessDetailsEditor request={req} canEdit={canEditAccess} onUpdated={loadData} />
 
       {req.has_multiplier && (req.specialist_name || req.specialist_role) && (
         <Section title={t('detail.specialist')} icon={User}>

@@ -10,7 +10,7 @@ export default function ParticipantsList({ participants = [], onChange }) {
     onChange(next);
   };
 
-  const add = () => onChange([...participants, { name: '', phone: '', email: '' }]);
+  const add = () => onChange([...participants, { name: '', phone: '', email: '', attendance_mode: 'Presencial' }]);
   const remove = (index) => onChange(participants.filter((_, i) => i !== index));
 
   return (
@@ -37,7 +37,7 @@ export default function ParticipantsList({ participants = [], onChange }) {
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
               <input
                 value={p.name || ''}
                 onChange={(e) => update(i, 'name', e.target.value)}
@@ -57,6 +57,10 @@ export default function ParticipantsList({ participants = [], onChange }) {
                 className="input-base"
                 placeholder={t('form.participantEmail')}
               />
+              <select value={p.attendance_mode || 'Presencial'} onChange={(e) => update(i, 'attendance_mode', e.target.value)} className="input-base">
+                <option value="Online">{t('format.online')}</option>
+                <option value="Presencial">{t('format.presencial')}</option>
+              </select>
             </div>
           </div>
         ))}

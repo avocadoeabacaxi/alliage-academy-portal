@@ -4,6 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ChevronLeft, ChevronRight, Check, Loader2, Globe, CalendarDays, Upload, X, Paperclip } from 'lucide-react';
 import RequestSuccessScreen from '@/components/RequestSuccessScreen';
+import ParticipationAccessFields from '@/components/ParticipationAccessFields';
+import ParticipantsList from '@/components/ParticipantsList';
 
 const EVENT_TYPES = ['Feira / Congresso', 'Palestra', 'Lançamento de produto', 'Evento Comercial', 'Outro'];
 const ALLIAGE_ROLE_OPTIONS = ['Palestrante/Apresentador', 'Instrutor hands-on', 'Moderador', 'Consultor técnico', 'Demonstração de produtos', 'Outro'];
@@ -40,9 +42,10 @@ export default function EventRequestForm({ mode = 'new' }) {
     event_type: 'Feira / Congresso', event_type_detail: '',
     event_name: '', event_description: '', event_organizer: '', event_website: '',
     event_start_date: '', event_end_date: '', format: 'Presencial',
+    guest_participation_mode: 'Presencial', online_platform: 'Google Meet', online_access_link: '', needs_educator_link: false,
     location_country: '', location_city: '', location_specific: '',
     alliage_role: [], alliage_role_detail: '', who_invited: '', who_invited_detail: '',
-    audience: [], expected_visitors: '51-100',
+    audience: [], expected_visitors: '51-100', participants_list: [],
     justification: '', strategic_objectives: [], strategic_objectives_detail: '',
     expected_impacts: [],
     costs_covered_by_requester: true, costs_covered_detail: '',
@@ -107,8 +110,10 @@ export default function EventRequestForm({ mode = 'new' }) {
       case 'sec4':
         return form.alliage_role.length > 0 && (!form.alliage_role.includes('Outro') || form.alliage_role_detail.trim()) &&
           form.who_invited && (form.who_invited !== 'Outro' || form.who_invited_detail.trim());
-      case 'sec5':
-        return form.audience.length > 0 && (!form.audience.includes('Outro') || true);
+      case 'sec5': {
+        const onlineReady = !['Online', 'Híbrido'].includes(form.guest_participation_mode) || form.online_access_link || form.needs_educator_link;
+        return form.audience.length > 0 && onlineReady;
+      }
       case 'sec6':
         return form.justification.trim() && form.strategic_objectives.length >= 2 && form.expected_impacts.length > 0;
       case 'sec7':
@@ -383,6 +388,7 @@ export default function EventRequestForm({ mode = 'new' }) {
                 ))}
               </div>
             </Field>
+            {!isPast && <><ParticipationAccessFields data={form} update={update} /><ParticipantsList participants={form.participants_list} onChange={(list) => update('participants_list', list)} /></>}
           </div>
         )}
 

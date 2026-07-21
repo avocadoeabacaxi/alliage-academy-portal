@@ -5,6 +5,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ChevronLeft, ChevronRight, Check, Loader2, Globe } from 'lucide-react';
 import RequestSuccessScreen from '@/components/RequestSuccessScreen';
 import ParticipantsList from '@/components/ParticipantsList';
+import ParticipationAccessFields from '@/components/ParticipationAccessFields';
 import ProductSelector, { resolveProductName, BRAND_OPTIONS } from '@/components/ProductSelector';
 
 const AREA_OPTIONS = ['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'];
@@ -33,7 +34,8 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     needs_deadline: false, deadline_requested: '', deadline_reason: '',
     priority: 'Média',
     has_multiplier: false, specialist_name: '', specialist_role: '', specialist_email: '',
-    format: 'Remoto', format_details: '', presencial_mode: 'local', location_country: '', location_city: '', location_specific: '',
+    format: 'Presencial', guest_participation_mode: 'Presencial', online_platform: 'Google Meet', online_access_link: '', needs_educator_link: false,
+    format_details: '', presencial_mode: 'local', location_country: '', location_city: '', location_specific: '',
     training_completed_date: ''
   });
 
@@ -46,7 +48,6 @@ export default function TrainingRequestForm({ mode = 'new' }) {
   };
 
   const skipAudience = NO_AUDIENCE_TYPES.includes(form.request_type);
-  const skipLogistics = NO_AUDIENCE_TYPES.includes(form.request_type);
 
   const steps = [
     { id: 'identification', title: t('form.step1.title'), desc: t('form.step1.desc') },
@@ -56,7 +57,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     ...(skipAudience ? [] : [{ id: 'audience', title: t('form.step5.title'), desc: t('form.step5.desc') }]),
     { id: 'justification_urgency', title: t('form.step6.title'), desc: t('form.step6.desc') },
     { id: 'specialist', title: t('form.stepSpecialist.title'), desc: t('form.stepSpecialist.desc') },
-    ...(skipLogistics ? [] : [{ id: 'logistics', title: t('form.step8.title'), desc: t('form.step8.desc') }]),
+    { id: 'logistics', title: t('form.step8.title'), desc: t('form.step8.desc') },
   ];
 
   const totalStepsAdjusted = steps.length;
@@ -83,6 +84,8 @@ export default function TrainingRequestForm({ mode = 'new' }) {
         return form.justification.trim().length > 0 && form.priority && (!form.needs_deadline || form.deadline_requested);
       case 'specialist':
         return !form.has_multiplier || (form.specialist_name.trim() && form.specialist_role.trim() && form.specialist_email.trim());
+      case 'logistics':
+        return !['Online', 'Híbrido'].includes(form.guest_participation_mode) || !!form.online_access_link || form.needs_educator_link;
       default: return true;
     }
   };
@@ -116,6 +119,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       const productNameFinal = productsList.map(resolveProductName).join(', ');
       const entity = {
         ...formData,
+        format: form.guest_participation_mode === 'Online' ? 'Remoto' : form.guest_participation_mode,
         format_details: formatDetailsFinal,
         audience: audienceFinal,
         products: productsList,
@@ -412,16 +416,8 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
         {steps[step]?.id === 'logistics' && (
           <div className="space-y-4">
-            <Field label={t('form.format')}>
-              <div className="flex gap-2">
-                {['Remoto', 'Presencial'].map(opt => (
-                  <button key={opt} onClick={() => update('format', opt)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${form.format === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
-                    {t(`format.${opt.toLowerCase()}`)}
-                  </button>
-                ))}
-              </div>
-            </Field>
-            {form.format === 'Presencial' && (
+            <ParticipationAccessFields data={form} update={update} />
+            {form.guest_participation_mode !== 'Online' && (
               <div className="space-y-4 pl-3 border-l-2 border-[#00A6D6]/20">
                 <Field label={t('form.presencialModeQuestion')}>
                   <div className="grid grid-cols-1 gap-2">
