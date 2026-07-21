@@ -14,8 +14,11 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.auth.me().then(u => {
-      setUser(u);
+    base44.auth.me().then(async u => {
+      const response = await base44.functions.invoke('checkUserAuthorization', { email: u.email });
+      const appRole = response.data?.status === 'approved' ? response.data.role : u.role;
+      setUser({ ...u, role: appRole });
+      if (appRole !== 'admin') setActiveTab('users');
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
@@ -28,10 +31,13 @@ export default function Settings() {
     );
   }
 
-  if (user?.role !== 'admin') {
+  const canManage = user?.role === 'admin';
+  const canViewUsers = canManage || user?.role === 'gerente_regional' || user?.role === 'educador';
+
+  if (!canViewUsers) {
     return (
       <div className="p-6 text-center">
-        <p className="text-red-600 font-semibold">Acesso negado. Apenas admins podem acessar esta página.</p>
+        <p className="text-red-600 font-semibold">Acesso negado.</p>
       </div>
     );
   }
@@ -47,59 +53,32 @@ export default function Settings() {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 border-b border-slate-200">
-        <button
-          onClick={() => setActiveTab('authorization')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
-            activeTab === 'authorization'
-              ? 'border-[#00A6D6] text-[#00A6D6]'
-              : 'border-transparent text-slate-600 hover:text-slate-800'
-          }`}
-        >
-          <Lock className="w-4 h-4" />
-          Autorizações
-        </button>
-        <button
-          onClick={() => setActiveTab('emails')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
-            activeTab === 'emails'
-              ? 'border-[#00A6D6] text-[#00A6D6]'
-              : 'border-transparent text-slate-600 hover:text-slate-800'
-          }`}
-        >
-          <Mail className="w-4 h-4" />
-          Templates de Email
-        </button>
-        <button
-          onClick={() => setActiveTab('users')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
-            activeTab === 'users'
-              ? 'border-[#00A6D6] text-[#00A6D6]'
-              : 'border-transparent text-slate-600 hover:text-slate-800'
-          }`}
-        >
-          <UsersIcon className="w-4 h-4" />
-          Usuários
-        </button>
-        <button
-          onClick={() => setActiveTab('routing')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
-            activeTab === 'routing'
-              ? 'border-[#00A6D6] text-[#00A6D6]'
-              : 'border-transparent text-slate-600 hover:text-slate-800'
-          }`}
-        >
-          <Route className="w-4 h-4" />
-          Roteamento
-        </button>
+        {canManage && (
+          <>
+            <TabButton active={activeTab === 'authorization'} onClick={() => setActiveTab('authorization')} icon={Lock} label="Autorizações" />
+            <TabButton active={activeTab === 'emails'} onClick={() => setActiveTab('emails')} icon={Mail} label="Templates de Email" />
+          </>
+        )}
+        <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')} icon={UsersIcon} label="Usuários" />
+        {canManage && <TabButton active={activeTab === 'routing'} onClick={() => setActiveTab('routing')} icon={Route} label="Roteamento" />}
       </div>
 
       {/* Content */}
       <div>
-        {activeTab === 'authorization' && <UserAuthorizationTab />}
-        {activeTab === 'emails' && <EmailTemplates />}
-        {activeTab === 'users' && <SettingsUsers />}
-        {activeTab === 'routing' && <RoutingTab />}
+        {canManage && activeTab === 'authorization' && <UserAuthorizationTab />}
+        {canManage && activeTab === 'emails' && <EmailTemplates />}
+        {activeTab === 'users' && <SettingsUsers canManage={canManage} />}
+        {canManage && activeTab === 'routing' && <RoutingTab />}
       </div>
     </div>
+  );
+}
+
+function TabButton({ active, onClick, icon: Icon, label }) {
+  return (
+    <button onClick={onClick} className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${active ? 'border-[#00A6D6] text-[#00A6D6]' : 'border-transparent text-slate-600 hover:text-slate-800'}`}>
+      <Icon className="w-4 h-4" />
+      {label}
+    </button>
   );
 }

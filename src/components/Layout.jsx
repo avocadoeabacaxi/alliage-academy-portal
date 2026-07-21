@@ -194,7 +194,7 @@ export default function Layout() {
                      {t('common.edit')} Perfil
                     </button>
                   )}
-                  {user?.role === 'admin' && (
+                  {['admin', 'gerente_regional', 'educador'].includes(user?.role) && (
                     <Link to="/settings" onClick={() => setUserMenuOpen(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left border-t border-slate-100">
                       <Settings className="w-4 h-4" />
                       Configurações

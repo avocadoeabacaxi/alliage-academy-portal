@@ -17,8 +17,8 @@ const ROLE_STYLES = {
 
 const ROLE_PERMISSIONS = {
   admin: ['dashboard', 'requests', 'newRequest', 'users', 'approveStage1', 'approveStage2', 'reject', 'execute', 'closeCycle', 'generateSurvey', 'manageUsers', 'export', 'deleteRequests'],
-  gerente_regional: ['dashboard', 'requests', 'newRequest', 'approveStage2', 'reject', 'export'],
-  educador: ['dashboard', 'requests', 'newRequest', 'approveStage1', 'reject', 'execute', 'closeCycle', 'generateSurvey'],
+  gerente_regional: ['dashboard', 'requests', 'newRequest', 'users', 'approveStage2', 'reject', 'export'],
+  educador: ['dashboard', 'requests', 'newRequest', 'users', 'approveStage1', 'reject', 'execute', 'closeCycle', 'generateSurvey'],
   solicitante: ['dashboard', 'requests', 'newRequest']
 };
 
@@ -26,6 +26,7 @@ const PERMISSION_LABELS = {
   dashboard: { pt: 'Ver Dashboard', en: 'View Dashboard', es: 'Ver Panel' },
   requests: { pt: 'Ver Solicitações', en: 'View Requests', es: 'Ver Solicitudes' },
   newRequest: { pt: 'Criar Solicitações', en: 'Create Requests', es: 'Crear Solicitudes' },
+  users: { pt: 'Visualizar Usuários', en: 'View Users', es: 'Ver Usuarios' },
   approveStage1: { pt: 'Aprovar Etapa 1', en: 'Approve Stage 1', es: 'Aprobar Etapa 1' },
   approveStage2: { pt: 'Aprovar Etapa 2', en: 'Approve Stage 2', es: 'Aprobar Etapa 2' },
   reject: { pt: 'Rejeitar Solicitações', en: 'Reject Requests', es: 'Rechazar Solicitudes' },
@@ -37,7 +38,7 @@ const PERMISSION_LABELS = {
   deleteRequests: { pt: 'Excluir Solicitações', en: 'Delete Requests', es: 'Eliminar Solicitudes' },
 };
 
-export default function SettingsUsers() {
+export default function SettingsUsers({ canManage = false }) {
   const { t, lang } = useLanguage();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -80,20 +81,20 @@ export default function SettingsUsers() {
 
   const loadUsers = async () => {
     try {
-      const [platformUsers, authResponse] = await Promise.all([
-        base44.entities.User.list('created_date', 200),
-        base44.functions.invoke('listUserAuthorizations', {})
-      ]);
+      const authResponse = await base44.functions.invoke('listUserAuthorizations', {});
       const allAuths = authResponse.data?.data || [];
+      if (!canManage) {
+        setUsers(allAuths.filter(a => a.status === 'approved').map(a => ({ ...a, role: a.role || 'solicitante' })));
+        return;
+      }
+      const platformUsers = await base44.entities.User.list('created_date', 200);
       const authByEmail = {};
       allAuths.forEach(a => { if (a.email) authByEmail[a.email.toLowerCase()] = a; });
       const platformEmails = new Set((platformUsers || []).map(u => u.email?.toLowerCase()));
-      // Use UserAuthorization role as source of truth for app permissions (same as the authorization tab)
       const mergedUsers = (platformUsers || []).map(u => {
         const auth = authByEmail[u.email?.toLowerCase()];
         return auth ? { ...u, role: auth.role || u.role, region: auth.region || u.region || '' } : u;
       });
-      // approved authorizations not yet registered on the platform
       const pendingRegistrations = allAuths
         .filter(a => a.status === 'approved' && !platformEmails.has(a.email?.toLowerCase()))
         .map(a => ({
@@ -101,7 +102,7 @@ export default function SettingsUsers() {
           email: a.email,
           full_name: a.full_name || '',
           role: a.role || 'solicitante',
-          region: '',
+          region: a.region || '',
           created_date: a.approved_date || a.first_login_attempt,
           pending_registration: true,
         }));
@@ -244,7 +245,7 @@ export default function SettingsUsers() {
 
       {/* Divider */}
       <div className="border-t border-slate-200 pt-4">
-        <h3 className="text-sm font-semibold text-slate-700 mb-4">Gerenciar Usuários</h3>
+        <h3 className="text-sm font-semibold text-slate-700 mb-4">{canManage ? 'Gerenciar Usuários' : 'Visualizar Usuários'}</h3>
       </div>
 
       {/* Header com Invite */}
@@ -265,13 +266,15 @@ export default function SettingsUsers() {
             {ROLES.map(r => <option key={r} value={r}>{t(`role.${r}`)}</option>)}
           </select>
         </div>
-        <button
-          onClick={() => setShowInvite(!showInvite)}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#00A6D6] rounded-full hover:bg-[#0094BD] transition-colors whitespace-nowrap"
-        >
-          <UserPlus className="w-4 h-4" />
-          Convidar Usuário
-        </button>
+        {canManage && (
+          <button
+            onClick={() => setShowInvite(!showInvite)}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#00A6D6] rounded-full hover:bg-[#0094BD] transition-colors whitespace-nowrap"
+          >
+            <UserPlus className="w-4 h-4" />
+            Convidar Usuário
+          </button>
+        )}
       </div>
 
       {/* Invite Form */}
@@ -315,7 +318,7 @@ export default function SettingsUsers() {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Nome</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Papel</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Região</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-700">Ações</th>
+                {canManage && <th className="px-4 py-3 text-right text-xs font-semibold text-slate-700">Ações</th>}
               </tr>
             </thead>
             <tbody>
@@ -354,47 +357,21 @@ export default function SettingsUsers() {
                       {user.region || '—'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        onClick={() => handleSendAccess(user)}
-                        disabled={sendingReset === user.id}
-                        title={user.pending_registration ? 'Enviar link de acesso / senha' : 'Redefinir senha (enviar por email)'}
-                        className={`p-1.5 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium ${user.pending_registration ? 'text-[#00A6D6] hover:bg-[#00A6D6]/10' : 'text-slate-500 hover:bg-slate-100'}`}
-                      >
-                        {sendingReset === user.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : user.pending_registration ? (
-                          <>
-                            <Send className="w-4 h-4" />
-                            <span className="hidden lg:inline">Liberar acesso</span>
-                          </>
-                        ) : (
-                          <>
-                            <KeyRound className="w-4 h-4" />
-                            <span className="hidden lg:inline">Redefinir senha</span>
-                          </>
-                        )}
-                      </button>
-                      {!user.pending_registration && (
-                        <button
-                          onClick={() => {
-                            setModalUser(user);
-                            setEditForm({ role: user.role, region: user.region || '' });
-                          }}
-                          className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors"
-                          title="Editar usuário"
-                        >
-                          <Edit className="w-4 h-4" />
+                  {canManage && (
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button onClick={() => handleSendAccess(user)} disabled={sendingReset === user.id} title={user.pending_registration ? 'Enviar link de acesso / senha' : 'Redefinir senha (enviar por email)'} className={`p-1.5 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium ${user.pending_registration ? 'text-[#00A6D6] hover:bg-[#00A6D6]/10' : 'text-slate-500 hover:bg-slate-100'}`}>
+                          {sendingReset === user.id ? <Loader2 className="w-4 h-4 animate-spin" /> : user.pending_registration ? <><Send className="w-4 h-4" /><span className="hidden lg:inline">Liberar acesso</span></> : <><KeyRound className="w-4 h-4" /><span className="hidden lg:inline">Redefinir senha</span></>}
                         </button>
-                      )}
-                    </div>
-                    {resetMsg[user.id] && (
-                      <div className={`mt-1 text-xs ${resetMsg[user.id].includes('Erro') ? 'text-red-600' : 'text-green-600'}`}>
-                        {resetMsg[user.id]}
+                        {!user.pending_registration && (
+                          <button onClick={() => { setModalUser(user); setEditForm({ role: user.role, region: user.region || '' }); }} className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors" title="Editar usuário">
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
-                    )}
-                  </td>
+                      {resetMsg[user.id] && <div className={`mt-1 text-xs ${resetMsg[user.id].includes('Erro') ? 'text-red-600' : 'text-green-600'}`}>{resetMsg[user.id]}</div>}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
