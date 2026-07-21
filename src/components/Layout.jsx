@@ -188,10 +188,12 @@ export default function Layout() {
                     <p className="text-sm font-semibold text-slate-900">{user?.full_name || '—'}</p>
                     <p className="text-xs text-slate-500">{user?.email}</p>
                   </div>
-                  <button onClick={() => { setProfileModalOpen(true); setUserMenuOpen(false); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left">
-                   <UserIcon className="w-4 h-4" />
-                   {t('common.edit')} Perfil
-                  </button>
+                  {user?.role === 'admin' && (
+                    <button onClick={() => { setProfileModalOpen(true); setUserMenuOpen(false); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left">
+                     <UserIcon className="w-4 h-4" />
+                     {t('common.edit')} Perfil
+                    </button>
+                  )}
                   {user?.role === 'admin' && (
                     <Link to="/settings" onClick={() => setUserMenuOpen(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left border-t border-slate-100">
                       <Settings className="w-4 h-4" />
