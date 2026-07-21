@@ -87,26 +87,7 @@ export default function SettingsUsers({ canManage = false }) {
         setUsers(allAuths.filter(a => a.status === 'approved').map(a => ({ ...a, role: a.role || 'solicitante' })));
         return;
       }
-      const platformUsers = await base44.entities.User.list('created_date', 200);
-      const authByEmail = {};
-      allAuths.forEach(a => { if (a.email) authByEmail[a.email.toLowerCase()] = a; });
-      const platformEmails = new Set((platformUsers || []).map(u => u.email?.toLowerCase()));
-      const mergedUsers = (platformUsers || []).map(u => {
-        const auth = authByEmail[u.email?.toLowerCase()];
-        return auth ? { ...u, role: auth.role || u.role, region: auth.region || u.region || '' } : u;
-      });
-      const pendingRegistrations = allAuths
-        .filter(a => a.status === 'approved' && !platformEmails.has(a.email?.toLowerCase()))
-        .map(a => ({
-          id: `auth_${a.id}`,
-          email: a.email,
-          full_name: a.full_name || '',
-          role: a.role || 'solicitante',
-          region: a.region || '',
-          created_date: a.approved_date || a.first_login_attempt,
-          pending_registration: true,
-        }));
-      setUsers([...mergedUsers, ...pendingRegistrations]);
+      setUsers(authResponse.data?.users || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -146,8 +127,10 @@ export default function SettingsUsers({ canManage = false }) {
         }
       }
       // 2. Sync platform User role (admin/user) so platform-level admin privileges match the app role
-      const platformRole = editForm.role === 'admin' ? 'admin' : 'user';
-      await base44.entities.User.update(userId, { role: platformRole, region: editForm.region });
+      if (!targetUser?.pending_registration) {
+        const platformRole = editForm.role === 'admin' ? 'admin' : 'user';
+        await base44.entities.User.update(userId, { role: platformRole, region: editForm.region });
+      }
       await loadUsers();
     } catch (e) {
       alert('Erro ao atualizar: ' + e.message);
