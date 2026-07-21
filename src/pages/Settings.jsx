@@ -9,7 +9,8 @@ import RoutingTab from '@/components/settings/RoutingTab';
 
 export default function Settings() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('authorization');
+  const requestedTab = new URLSearchParams(window.location.search).get('tab');
+  const [activeTab, setActiveTab] = useState(requestedTab === 'users' ? 'users' : 'authorization');
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
