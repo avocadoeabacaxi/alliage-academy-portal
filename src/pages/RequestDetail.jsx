@@ -353,6 +353,8 @@ export default function RequestDetail() {
         </Section>
       )}
 
+      <RequestParticipants request={req} onUpdated={loadData} />
+
       {/* Workflow - Stage 1 */}
       <Section title={t('detail.stage1')} icon={Clock}>
         <div className="space-y-3">
@@ -518,8 +520,6 @@ export default function RequestDetail() {
           </div>
         </Section>
       )}
-
-      <RequestParticipants request={req} onUpdated={loadData} />
 
       {req.decision_stage2 === 'Aprovado' && canGenerateSurvey && (
         <Section title={t('detail.survey')} icon={Star}>
