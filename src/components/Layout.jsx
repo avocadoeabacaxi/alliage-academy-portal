@@ -24,20 +24,16 @@ export default function Layout() {
       try {
         const u = await base44.auth.me();
         if (!u) return;
-        setUser(u);
-        // App-level role comes from UserAuthorization (source of truth), not the platform User.role
-        try {
-          const res = await base44.functions.invoke('checkUserAuthorization', { email: u.email });
-          if (res.data?.status === 'approved' && res.data?.role) {
-            setUser({ ...u, role: res.data.role });
-          }
-        } catch (e) {}
+        const res = await base44.functions.invoke('checkUserAuthorization', { email: u.email });
+        const appUser = res.data?.status === 'approved' && res.data?.role ? { ...u, role: res.data.role } : u;
+        setUser(appUser);
+        if (appUser.role !== 'solicitante') {
+          const requests = await base44.entities.TrainingRequest.filter({ status: 'Pendente Análise' });
+          setPendingCount(requests.length);
+        }
       } catch (e) {}
     };
     loadUser();
-    base44.entities.TrainingRequest.filter({ status: 'Pendente Análise' })
-      .then(data => setPendingCount(data.length))
-      .catch(() => {});
   }, []);
 
   const userRole = user?.role || 'solicitante';
@@ -46,9 +42,9 @@ export default function Layout() {
     {
       label: t('nav.section.general'),
       items: [
-        { path: '/', label: t('nav.dashboard'), icon: LayoutDashboard, roles: ['admin', 'solicitante', 'educador', 'gerente_regional'] },
-        { path: '/requests', label: t('nav.requests'), icon: FileText, roles: ['admin', 'solicitante', 'educador', 'gerente_regional'], badge: pendingCount },
-        { path: '/my-requests', label: t('nav.myRequests'), icon: ClipboardList, roles: ['admin', 'solicitante', 'educador', 'gerente_regional'] },
+        { path: '/', label: t('nav.dashboard'), icon: LayoutDashboard, roles: ['admin', 'educador', 'gerente_regional'] },
+        { path: '/requests', label: t('nav.requests'), icon: FileText, roles: ['admin', 'educador', 'gerente_regional'], badge: pendingCount },
+        { path: '/my-requests', label: t('nav.requests'), icon: ClipboardList, roles: ['solicitante'] },
       ]
     },
     {

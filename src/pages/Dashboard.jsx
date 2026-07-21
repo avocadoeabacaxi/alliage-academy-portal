@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
@@ -32,6 +32,7 @@ const STATUS_KEYS = {
 
 export default function Dashboard() {
   const { t, tf } = useLanguage();
+  const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -42,18 +43,19 @@ export default function Dashboard() {
     const loadData = async () => {
       try {
         const currentUser = await base44.auth.me();
-        setUser(currentUser);
-        // Ensure user has authorization record
-        await base44.functions.invoke('ensureUserAuthorization', {});
-      } catch (e) {
-        console.error('Error loading user:', e);
-      }
-      
-      try {
+        const authorization = await base44.functions.invoke('checkUserAuthorization', { email: currentUser.email });
+        const appUser = authorization.data?.status === 'approved' && authorization.data?.role
+          ? { ...currentUser, role: authorization.data.role }
+          : currentUser;
+        setUser(appUser);
+        if (appUser.role === 'solicitante') {
+          navigate('/my-requests', { replace: true });
+          return;
+        }
         const requests = await base44.entities.TrainingRequest.list('-created_date', 1000);
         setRequests(requests);
       } catch (e) {
-        console.error('Error loading requests:', e);
+        console.error('Error loading dashboard:', e);
       } finally {
         setLoading(false);
       }

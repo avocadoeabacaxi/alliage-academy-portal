@@ -36,7 +36,7 @@ export default function MyRequests() {
           <h1 className="text-2xl font-bold text-[#003B5C]">{t('myRequests.title')}</h1>
           <p className="text-sm text-slate-500 mt-0.5">{t('myRequests.subtitle')}</p>
         </div>
-        <Link to="/requests/new" className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#00A6D6] rounded-full hover:bg-[#0094BD] shadow-md shadow-[#00A6D6]/20 transition-colors">
+        <Link to="/solicitacao" className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#00A6D6] rounded-full hover:bg-[#0094BD] shadow-md shadow-[#00A6D6]/20 transition-colors">
           <PlusCircle className="w-4 h-4" />
           {t('nav.newRequest')}
         </Link>
