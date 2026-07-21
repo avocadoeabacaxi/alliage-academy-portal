@@ -363,6 +363,24 @@
     "location_specific": {
       "type": "string"
     },
+    "location_postal_code": {
+      "type": "string"
+    },
+    "location_street": {
+      "type": "string"
+    },
+    "location_number": {
+      "type": "string"
+    },
+    "location_complement": {
+      "type": "string"
+    },
+    "location_formatted_address": {
+      "type": "string"
+    },
+    "location_place_id": {
+      "type": "string"
+    },
     "educator_name": {
       "type": "string"
     },

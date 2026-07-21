@@ -28,7 +28,11 @@ Deno.serve(async (req) => {
       if (participants.length === 0) continue;
 
       const productName = training.product_name || 'Treinamento Alliage';
-      const location = [training.location_specific, training.location_city, training.location_country].filter(Boolean).join(', ');
+      const streetAddress = [training.location_street, training.location_number].filter(Boolean).join(', ');
+      const cityAddress = [training.location_specific, training.location_city, training.location_postal_code].filter(Boolean).join(', ');
+      const location = streetAddress
+        ? [streetAddress, training.location_complement, cityAddress, training.location_country].filter(Boolean).join(' — ')
+        : training.location_formatted_address || [cityAddress, training.location_country].filter(Boolean).join(' — ');
       const roomLink = training.online_access_link || (training.format_details || '').match(/https?:\/\/[^\s<]+/i)?.[0] || '';
       const scheduledDate = training.training_scheduled_date || training.event_start_date || targetDate;
       const finalDate = training.event_end_date || scheduledDate;

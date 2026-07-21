@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Check, Loader2, Globe, CalendarDays, Upload,
 import RequestSuccessScreen from '@/components/RequestSuccessScreen';
 import ParticipationAccessFields from '@/components/ParticipationAccessFields';
 import ParticipantsList from '@/components/ParticipantsList';
+import AddressFields from '@/components/AddressFields';
 
 const EVENT_TYPES = ['Feira / Congresso', 'Palestra', 'Lançamento de produto', 'Evento Comercial', 'Outro'];
 const ALLIAGE_ROLE_OPTIONS = ['Palestrante/Apresentador', 'Instrutor hands-on', 'Moderador', 'Consultor técnico', 'Demonstração de produtos', 'Outro'];
@@ -43,7 +44,7 @@ export default function EventRequestForm({ mode = 'new' }) {
     event_name: '', event_description: '', event_organizer: '', event_website: '',
     event_start_date: '', event_end_date: '', format: 'Presencial',
     guest_participation_mode: 'Presencial', online_platform: 'Google Meet', online_access_link: '', needs_educator_link: false,
-    location_country: '', location_city: '', location_specific: '',
+    location_country: '', location_city: '', location_specific: '', location_postal_code: '', location_street: '', location_number: '', location_complement: '', location_formatted_address: '', location_place_id: '',
     alliage_role: [], alliage_role_detail: '', who_invited: '', who_invited_detail: '',
     audience: [], expected_visitors: '51-100', participants_list: [],
     justification: '', strategic_objectives: [], strategic_objectives_detail: '',
@@ -106,7 +107,7 @@ export default function EventRequestForm({ mode = 'new' }) {
         return base && form.event_start_date && form.event_end_date;
       }
       case 'sec3':
-        return form.format && (form.format === 'Remoto' || (form.location_country.trim() && form.location_city.trim()));
+        return form.format && (form.format === 'Remoto' || (form.location_country.trim() && form.location_city.trim() && form.location_street.trim() && form.location_number.trim() && form.location_postal_code.trim()));
       case 'sec4':
         return form.alliage_role.length > 0 && (!form.alliage_role.includes('Outro') || form.alliage_role_detail.trim()) &&
           form.who_invited && (form.who_invited !== 'Outro' || form.who_invited_detail.trim());
@@ -310,7 +311,7 @@ export default function EventRequestForm({ mode = 'new' }) {
             </div>
             <Field label={t('event.format')}>
               <div className="flex gap-2">
-                {['Presencial', 'Remoto'].map(opt => (
+                {['Presencial', 'Remoto', 'Híbrido'].map(opt => (
                   <button key={opt} onClick={() => update('format', opt)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${form.format === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
                     {t(`format.${opt.toLowerCase()}`)}
                   </button>
@@ -323,17 +324,7 @@ export default function EventRequestForm({ mode = 'new' }) {
         {/* Seção 3 — Localização e Logística */}
         {steps[step]?.id === 'sec3' && (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label={t('form.locationCountry')} required={form.format === 'Presencial'}>
-                <input value={form.location_country} onChange={e => update('location_country', e.target.value)} className="input-base" />
-              </Field>
-              <Field label={t('form.locationCity')} required={form.format === 'Presencial'}>
-                <input value={form.location_city} onChange={e => update('location_city', e.target.value)} className="input-base" />
-              </Field>
-            </div>
-            <Field label={t('form.locationSpecific')}>
-              <input value={form.location_specific} onChange={e => update('location_specific', e.target.value)} className="input-base" placeholder={t('event.locationSpecificPlaceholder')} />
-            </Field>
+            {form.format !== 'Remoto' && <AddressFields data={form} update={update} />}
           </div>
         )}
 

@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Check, Loader2, Globe } from 'lucide-react';
 import RequestSuccessScreen from '@/components/RequestSuccessScreen';
 import ParticipantsList from '@/components/ParticipantsList';
 import ParticipationAccessFields from '@/components/ParticipationAccessFields';
+import AddressFields from '@/components/AddressFields';
 import ProductSelector, { resolveProductName, BRAND_OPTIONS } from '@/components/ProductSelector';
 
 const AREA_OPTIONS = ['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'];
@@ -36,6 +37,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     has_multiplier: false, specialist_name: '', specialist_role: '', specialist_email: '',
     format: 'Presencial', guest_participation_mode: 'Presencial', online_platform: 'Google Meet', online_access_link: '', needs_educator_link: false,
     format_details: '', presencial_mode: 'local', location_country: '', location_city: '', location_specific: '',
+    location_postal_code: '', location_street: '', location_number: '', location_complement: '', location_formatted_address: '', location_place_id: '',
     training_completed_date: ''
   });
 
@@ -84,8 +86,11 @@ export default function TrainingRequestForm({ mode = 'new' }) {
         return form.justification.trim().length > 0 && form.priority && (!form.needs_deadline || form.deadline_requested);
       case 'specialist':
         return !form.has_multiplier || (form.specialist_name.trim() && form.specialist_role.trim() && form.specialist_email.trim());
-      case 'logistics':
-        return !['Online', 'Híbrido'].includes(form.guest_participation_mode) || !!form.online_access_link || form.needs_educator_link;
+      case 'logistics': {
+        const onlineReady = !['Online', 'Híbrido'].includes(form.guest_participation_mode) || !!form.online_access_link || form.needs_educator_link;
+        const addressReady = form.guest_participation_mode === 'Online' || (form.location_country && form.location_city && form.location_street && form.location_number && form.location_postal_code);
+        return onlineReady && addressReady;
+      }
       default: return true;
     }
   };
@@ -429,13 +434,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
                     </button>
                   </div>
                 </Field>
-                {form.presencial_mode === 'local' && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <Field label={t('form.locationCountry')}><input value={form.location_country} onChange={e => update('location_country', e.target.value)} className="input-base" placeholder={t('form.locationCountryPlaceholder')} /></Field>
-                    <Field label={t('form.locationCity')}><input value={form.location_city} onChange={e => update('location_city', e.target.value)} className="input-base" /></Field>
-                    <Field label={t('form.locationSpecific')}><input value={form.location_specific} onChange={e => update('location_specific', e.target.value)} className="input-base" placeholder={t('form.locationSpecificPlaceholder')} /></Field>
-                  </div>
-                )}
+                <AddressFields data={form} update={update} />
               </div>
             )}
             <Field label={t('form.formatDetails')}>
