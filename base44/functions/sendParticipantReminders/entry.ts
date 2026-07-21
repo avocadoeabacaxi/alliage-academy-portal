@@ -4,19 +4,14 @@ import { Resend } from 'npm:resend@3.2.0';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-
-    // Data de amanhã (YYYY-MM-DD) — lembrete enviado 24h antes
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const targetDate = tomorrow.toISOString().split('T')[0];
-
-    // Treinamentos agendados para amanhã que ainda não tiveram lembrete enviado
     const requests = await base44.asServiceRole.entities.TrainingRequest.filter({
       training_scheduled_date: targetDate,
     });
-
     const toRemind = (requests || []).filter(
-      (r) => !r.reminder_sent && Array.isArray(r.participants_list) && r.participants_list.length > 0
+      (item) => !item.reminder_sent && Array.isArray(item.participants_list) && item.participants_list.length > 0,
     );
 
     if (toRemind.length === 0) {
@@ -24,45 +19,40 @@ Deno.serve(async (req) => {
     }
 
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
-    const origin = new URL(req.url).origin;
     let totalSent = 0;
 
-    for (const r of toRemind) {
-      const productName = r.product_name || '—';
-      const recipients = r.participants_list
-        .filter((p) => p && p.email && p.email.includes('@'))
-        .map((p) => p.email);
-
+    for (const training of toRemind) {
+      const recipients = training.participants_list
+        .filter((participant) => participant?.email?.includes('@'))
+        .map((participant) => participant.email);
       if (recipients.length === 0) continue;
 
-      const locationLine = [r.location_specific, r.location_city, r.location_country]
-        .filter(Boolean)
-        .join(', ');
+      const productName = training.product_name || 'Treinamento Alliage';
+      const location = [training.location_specific, training.location_city, training.location_country].filter(Boolean).join(', ');
+      const roomLink = (training.format_details || '').match(/https?:\/\/[^\s<]+/i)?.[0] || '';
+      const start = new Date(`${targetDate}T00:00:00Z`);
+      const end = new Date(start);
+      end.setUTCDate(end.getUTCDate() + 1);
+      const startCompact = targetDate.replaceAll('-', '');
+      const endCompact = end.toISOString().slice(0, 10).replaceAll('-', '');
+      const eventDetails = roomLink ? `Acesse a sala: ${roomLink}` : location ? `Local: ${location}` : '';
+      const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(productName)}&dates=${startCompact}/${endCompact}&details=${encodeURIComponent(eventDetails)}&location=${encodeURIComponent(location || roomLink)}`;
+      const outlookUrl = `https://outlook.office.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(productName)}&startdt=${targetDate}T00%3A00%3A00&enddt=${end.toISOString().slice(0, 10)}T00%3A00%3A00&body=${encodeURIComponent(eventDetails)}&location=${encodeURIComponent(location || roomLink)}`;
+      const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Alliage//Training//PT\r\nBEGIN:VEVENT\r\nUID:${training.id}@alliage.global\r\nDTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15)}Z\r\nDTSTART;VALUE=DATE:${startCompact}\r\nDTEND;VALUE=DATE:${endCompact}\r\nSUMMARY:${productName}\r\nLOCATION:${location || roomLink}\r\nDESCRIPTION:${eventDetails}\r\nEND:VEVENT\r\nEND:VCALENDAR`;
 
       const result = await resend.emails.send({
         from: 'no-reply@trainning.alliage.global',
         to: recipients,
         subject: `Lembrete: seu treinamento é amanhã — ${productName}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #003B5C;">Seu treinamento é amanhã!</h2>
-            <p>Olá! Este é um lembrete de que você tem um treinamento agendado para amanhã.</p>
-            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p><strong>Produto/Tema:</strong> ${productName}</p>
-              <p><strong>Data:</strong> ${targetDate}</p>
-              <p><strong>Formato:</strong> ${r.format || '—'}</p>
-              ${locationLine ? `<p><strong>Local:</strong> ${locationLine}</p>` : ''}
-            </div>
-            <p>Contamos com a sua presença!</p>
-          </div>
-        `,
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto"><h2 style="color:#003B5C">Seu treinamento é amanhã!</h2><p>Olá! Este é um lembrete do seu treinamento agendado para amanhã.</p><div style="background:#f5f5f5;padding:20px;border-radius:8px;margin:20px 0"><p><strong>Produto/Tema:</strong> ${productName}</p><p><strong>Data:</strong> ${targetDate}</p><p><strong>Formato:</strong> ${training.format || '—'}</p>${location ? `<p><strong>Endereço:</strong> <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}">${location}</a></p>` : ''}${roomLink ? `<p><strong>Sala de treinamento:</strong> <a href="${roomLink}">Acessar sala</a></p>` : ''}</div><p style="margin:24px 0"><a href="${googleCalendarUrl}" style="display:inline-block;padding:10px 16px;background:#00A6D6;color:#fff;text-decoration:none;border-radius:20px;margin-right:8px">Google Calendar</a><a href="${outlookUrl}" style="display:inline-block;padding:10px 16px;background:#003B5C;color:#fff;text-decoration:none;border-radius:20px">Outlook Calendar</a></p><p>Para Apple Calendar, abra o arquivo de calendário anexado a este e-mail.</p><p>Contamos com a sua presença!</p></div>`,
+        attachments: [{ filename: 'treinamento-alliage.ics', content: btoa(unescape(encodeURIComponent(ics))) }],
       });
 
       if (!result.error) {
         totalSent += recipients.length;
-        await base44.asServiceRole.entities.TrainingRequest.update(r.id, { reminder_sent: true });
+        await base44.asServiceRole.entities.TrainingRequest.update(training.id, { reminder_sent: true });
       } else {
-        console.error('Resend error for request', r.id, result.error);
+        console.error('Resend error for request', training.id, result.error);
       }
     }
 

@@ -143,20 +143,23 @@ Return a JSON object with a "questions" array.`;
     const subject = fillTemplate(tpl?.subject || DEFAULT_SURVEY_SUBJECT, tplVars);
     const html = fillTemplate(tpl?.html_content || DEFAULT_SURVEY_HTML, tplVars);
 
+    const recipients = [request.requester_email, ...(request.participants_list || []).map((participant) => participant?.email)]
+      .filter((email) => email?.includes('@'));
+    const uniqueRecipients = [...new Set(recipients.map((email) => email.toLowerCase()))];
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
-    const result = await resend.emails.send({
+    const results = await Promise.all(uniqueRecipients.map((email) => resend.emails.send({
       from: 'no-reply@trainning.alliage.global',
-      to: request.requester_email,
+      to: email,
       subject,
       html
-    });
-
-    if (result.error) {
-      console.error('Resend error:', result.error);
-      return Response.json({ error: result.error.message }, { status: 500 });
+    })));
+    const failed = results.find((result) => result.error);
+    if (failed?.error) {
+      console.error('Resend error:', failed.error);
+      return Response.json({ error: failed.error.message }, { status: 500 });
     }
 
-    return Response.json({ success: true, email_id: result.data.id, survey_url: surveyUrl });
+    return Response.json({ success: true, emails_sent: uniqueRecipients.length, survey_url: surveyUrl });
   } catch (error) {
     console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
