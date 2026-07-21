@@ -24,39 +24,51 @@ Deno.serve(async (req) => {
     let totalSent = 0;
 
     for (const training of toRemind) {
-      const recipients = training.participants_list
-        .filter((participant) => participant?.email?.includes('@'))
-        .map((participant) => participant.email);
-      if (recipients.length === 0) continue;
+      const participants = training.participants_list.filter((participant) => participant?.email?.includes('@'));
+      if (participants.length === 0) continue;
 
       const productName = training.product_name || 'Treinamento Alliage';
       const location = [training.location_specific, training.location_city, training.location_country].filter(Boolean).join(', ');
       const roomLink = training.online_access_link || (training.format_details || '').match(/https?:\/\/[^\s<]+/i)?.[0] || '';
       const scheduledDate = training.training_scheduled_date || training.event_start_date || targetDate;
       const finalDate = training.event_end_date || scheduledDate;
-      const start = new Date(`${scheduledDate}T00:00:00Z`);
       const end = new Date(`${finalDate}T00:00:00Z`);
       end.setUTCDate(end.getUTCDate() + 1);
       const startCompact = scheduledDate.replaceAll('-', '');
       const endCompact = end.toISOString().slice(0, 10).replaceAll('-', '');
-      const eventDetails = roomLink ? `Acesse a sala: ${roomLink}` : location ? `Local: ${location}` : '';
-      const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(productName)}&dates=${startCompact}/${endCompact}&details=${encodeURIComponent(eventDetails)}&location=${encodeURIComponent(location || roomLink)}`;
-      const outlookUrl = `https://outlook.office.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(productName)}&startdt=${scheduledDate}T00%3A00%3A00&enddt=${end.toISOString().slice(0, 10)}T00%3A00%3A00&body=${encodeURIComponent(eventDetails)}&location=${encodeURIComponent(location || roomLink)}`;
-      const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Alliage//Training//PT\r\nBEGIN:VEVENT\r\nUID:${training.id}@alliage.global\r\nDTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15)}Z\r\nDTSTART;VALUE=DATE:${startCompact}\r\nDTEND;VALUE=DATE:${endCompact}\r\nSUMMARY:${productName}\r\nLOCATION:${location || roomLink}\r\nDESCRIPTION:${eventDetails}\r\nEND:VEVENT\r\nEND:VCALENDAR`;
+      let sentForRequest = 0;
 
-      const result = await resend.emails.send({
-        from: 'no-reply@trainning.alliage.global',
-        to: recipients,
-        subject: `Lembrete: seu treinamento é amanhã — ${productName}`,
-        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto"><h2 style="color:#003B5C">Seu treinamento é amanhã!</h2><p>Olá! Este é um lembrete do seu treinamento agendado para amanhã.</p><div style="background:#f5f5f5;padding:20px;border-radius:8px;margin:20px 0"><p><strong>Produto/Tema:</strong> ${productName}</p><p><strong>Data:</strong> ${scheduledDate}${training.event_end_date && training.event_end_date !== scheduledDate ? ` a ${training.event_end_date}` : ''}</p><p><strong>Formato:</strong> ${training.format || '—'}</p>${location ? `<p><strong>Endereço:</strong> <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}">${location}</a></p>` : ''}${roomLink ? `<p><strong>${training.online_platform || 'Sala de treinamento'}:</strong> <a href="${roomLink}">Acessar sala</a></p>` : training.needs_educator_link ? '<p><strong>Link online:</strong> será enviado pelo educador responsável.</p>' : ''}</div><p style="margin:24px 0"><a href="${googleCalendarUrl}" style="display:inline-block;padding:10px 16px;background:#00A6D6;color:#fff;text-decoration:none;border-radius:20px;margin-right:8px">Google Calendar</a><a href="${outlookUrl}" style="display:inline-block;padding:10px 16px;background:#003B5C;color:#fff;text-decoration:none;border-radius:20px">Outlook Calendar</a></p><p>Para Apple Calendar, abra o arquivo de calendário anexado a este e-mail.</p><p>Contamos com a sua presença!</p></div>`,
-        attachments: [{ filename: 'treinamento-alliage.ics', content: btoa(unescape(encodeURIComponent(ics))) }],
-      });
+      for (const participant of participants) {
+        const attendanceMode = participant.attendance_mode || training.guest_participation_mode || 'Presencial';
+        const includesLocation = attendanceMode !== 'Online';
+        const includesOnline = attendanceMode !== 'Presencial';
+        const accessDetails = [
+          includesLocation && location ? `Local: ${location}` : '',
+          includesOnline && roomLink ? `Acesse a sala: ${roomLink}` : '',
+        ].filter(Boolean).join(' | ');
+        const calendarLocation = includesLocation && location ? location : includesOnline ? roomLink : '';
+        const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(productName)}&dates=${startCompact}/${endCompact}&details=${encodeURIComponent(accessDetails)}&location=${encodeURIComponent(calendarLocation)}`;
+        const outlookUrl = `https://outlook.office.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(productName)}&startdt=${scheduledDate}T00%3A00%3A00&enddt=${end.toISOString().slice(0, 10)}T00%3A00%3A00&body=${encodeURIComponent(accessDetails)}&location=${encodeURIComponent(calendarLocation)}`;
+        const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Alliage//Training//PT\r\nBEGIN:VEVENT\r\nUID:${training.id}-${participant.email}@alliage.global\r\nDTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15)}Z\r\nDTSTART;VALUE=DATE:${startCompact}\r\nDTEND;VALUE=DATE:${endCompact}\r\nSUMMARY:${productName}\r\nLOCATION:${calendarLocation}\r\nDESCRIPTION:${accessDetails}\r\nEND:VEVENT\r\nEND:VCALENDAR`;
+        const locationHtml = includesLocation && location ? `<p><strong>Endereço:</strong> <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}">${location}</a></p>` : '';
+        const linkHtml = includesOnline && roomLink ? `<p><strong>${training.online_platform || 'Sala de treinamento'}:</strong> <a href="${roomLink}">Acessar sala</a></p>` : includesOnline && training.needs_educator_link ? '<p><strong>Link online:</strong> será enviado pelo educador responsável.</p>' : '';
+        const result = await resend.emails.send({
+          from: 'no-reply@trainning.alliage.global',
+          to: participant.email,
+          subject: `Lembrete: sua atividade é amanhã — ${productName}`,
+          html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto"><h2 style="color:#003B5C">Sua atividade é amanhã!</h2><p>Olá, ${participant.name || 'participante'}! Este é um lembrete da sua atividade agendada para amanhã.</p><div style="background:#f5f5f5;padding:20px;border-radius:8px;margin:20px 0"><p><strong>Produto/Tema:</strong> ${productName}</p><p><strong>Data:</strong> ${scheduledDate}${training.event_end_date && training.event_end_date !== scheduledDate ? ` a ${training.event_end_date}` : ''}</p><p><strong>Sua participação:</strong> ${attendanceMode}</p>${locationHtml}${linkHtml}</div><p style="margin:24px 0"><a href="${googleCalendarUrl}" style="display:inline-block;padding:10px 16px;background:#00A6D6;color:#fff;text-decoration:none;border-radius:20px;margin-right:8px">Google Calendar</a><a href="${outlookUrl}" style="display:inline-block;padding:10px 16px;background:#003B5C;color:#fff;text-decoration:none;border-radius:20px">Outlook Calendar</a></p><p>Para Apple Calendar, abra o arquivo de calendário anexado a este e-mail.</p><p>Contamos com a sua presença!</p></div>`,
+          attachments: [{ filename: 'atividade-alliage.ics', content: btoa(unescape(encodeURIComponent(ics))) }],
+        });
+        if (!result.error) {
+          totalSent += 1;
+          sentForRequest += 1;
+        } else {
+          console.error('Resend error for participant', participant.email, result.error);
+        }
+      }
 
-      if (!result.error) {
-        totalSent += recipients.length;
+      if (sentForRequest === participants.length) {
         await base44.asServiceRole.entities.TrainingRequest.update(training.id, { reminder_sent: true });
-      } else {
-        console.error('Resend error for request', training.id, result.error);
       }
     }
 

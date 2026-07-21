@@ -61,7 +61,7 @@ export default function RequestParticipants({ request, onUpdated }) {
             <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="input-base" placeholder={t('form.participantName')} />
             <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="input-base" placeholder={t('form.participantPhone')} />
             <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="input-base" placeholder={t('form.participantEmail')} />
-            <select value={form.attendance_mode} onChange={e => setForm({ ...form, attendance_mode: e.target.value })} className="input-base"><option value="Online">{t('format.online')}</option><option value="Presencial">{t('format.presencial')}</option></select>
+            <select value={form.attendance_mode} onChange={e => setForm({ ...form, attendance_mode: e.target.value })} className="input-base"><option value="Online">{t('format.online')}</option><option value="Presencial">{t('format.presencial')}</option><option value="Híbrido">{t('format.hibrido')}</option></select>
           </div>
           <div className="flex gap-2">
             <button onClick={handleAdd} disabled={saving || !form.name.trim()} className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-emerald-500 rounded-full hover:bg-emerald-600 disabled:opacity-40 transition-colors shadow-sm">

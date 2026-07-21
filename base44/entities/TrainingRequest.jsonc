@@ -266,7 +266,8 @@
             "type": "string",
             "enum": [
               "Online",
-              "Presencial"
+              "Presencial",
+              "H\u00edbrido"
             ]
           }
         }
