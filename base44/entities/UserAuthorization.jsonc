@@ -11,6 +11,20 @@
     "full_name": {
       "type": "string"
     },
+    "phone": {
+      "type": "string"
+    },
+    "company_type": {
+      "type": "string",
+      "enum": [
+        "Filial Alliage",
+        "Distribuidor/Dealer",
+        "Outro"
+      ]
+    },
+    "company_name": {
+      "type": "string"
+    },
     "role": {
       "type": "string",
       "enum": [

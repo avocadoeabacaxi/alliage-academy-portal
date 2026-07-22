@@ -1,15 +1,17 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
-    const { email, full_name } = body;
+    const { email, full_name, phone, company_type, company_name } = body;
+    const normalizedEmail = email?.trim().toLowerCase();
 
-    if (!email) return Response.json({ error: 'Email é obrigatório' }, { status: 400 });
+    if (!normalizedEmail || !full_name || !phone || !company_type || !company_name) {
+      return Response.json({ error: 'Preencha todos os campos obrigatórios' }, { status: 400 });
+    }
 
-    // Check if already exists
-    const existing = await base44.asServiceRole.entities.UserAuthorization.filter({ email });
+    const existing = await base44.asServiceRole.entities.UserAuthorization.filter({ email: normalizedEmail });
     if (existing.length > 0) {
       return Response.json({ 
         success: false, 
@@ -22,18 +24,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create pending authorization
     await base44.asServiceRole.entities.UserAuthorization.create({
-      email,
-      full_name: full_name || '',
+      email: normalizedEmail,
+      full_name,
+      phone,
+      company_type,
+      company_name,
       role: 'solicitante',
       status: 'pending',
       first_login_attempt: new Date().toISOString()
     });
 
-    return Response.json({ 
-      success: true, 
-      message: 'Solicitação de acesso enviada com sucesso! Você receberá um email quando for aprovado.',
+    return Response.json({
+      success: true,
+      message: 'Cadastro realizado. Seu acesso ficará disponível após a aprovação do administrador.',
       status: 'pending'
     });
   } catch (error) {

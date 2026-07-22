@@ -131,6 +131,7 @@ export default function UserAuthorizationTab() {
                 <tr className="border-b border-slate-100 bg-slate-50">
                   <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Nome</th>
                   <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Email</th>
+                  <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Contato / Empresa</th>
                   <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Status</th>
                   <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Role</th>
                   <th className="text-center px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Ações</th>
@@ -141,6 +142,7 @@ export default function UserAuthorizationTab() {
                   <tr key={auth.id} className="border-b border-slate-50 hover:bg-slate-50">
                     <td className="px-4 py-3 font-medium text-slate-900">{auth.full_name || '—'}</td>
                     <td className="px-4 py-3 text-slate-600 text-xs">{auth.email}</td>
+                    <td className="px-4 py-3 text-xs"><div className="text-slate-700">{auth.phone || '—'}</div><div className="text-slate-400 mt-0.5">{auth.company_type ? `${auth.company_type} · ${auth.company_name || '—'}` : '—'}</div></td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${
                         auth.status === 'pending' ? 'bg-amber-50 text-amber-700' :

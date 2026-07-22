@@ -285,7 +285,8 @@ export default function Login() {
           </form>
 
           <p className="text-center text-sm text-slate-500 mt-6">
-            Seu acesso é liberado pelo administrador. Use o e-mail que recebeu o convite.
+            Ainda não tem cadastro?{' '}
+            <Link to="/register" className="font-semibold text-[#00A6D6] hover:underline">Solicitar acesso</Link>
           </p>
         </div>
       </div>

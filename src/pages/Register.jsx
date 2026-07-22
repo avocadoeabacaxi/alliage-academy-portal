@@ -3,154 +3,142 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Loader2, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
+import { AlertCircle, Loader2, Lock, Mail, LogIn } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
+import RegistrationProfileFields from "@/components/RegistrationProfileFields";
+
+const emptyProfile = { full_name: "", email: "", phone: "", company_type: "", company_name: "" };
 
 export default function Register() {
-  const [email, setEmail] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [profile, setProfile] = useState(emptyProfile);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState("form");
+  const [loading, setLoading] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [message, setMessage] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const response = await base44.functions.invoke('requestAccess', { email, full_name: fullName });
-      if (response.data?.success) {
-        setSuccess(true);
-        setMessage(response.data.message);
-      } else {
-        setError(response.data?.message || "Erro ao solicitar acesso");
-      }
-    } catch (err) {
-      setError(err.message || "Erro ao solicitar acesso");
-    } finally {
-      setLoading(false);
+  const validateProfile = () => {
+    if (!profile.full_name || !profile.email || !profile.phone || !profile.company_type || !profile.company_name) {
+      setError("Preencha todos os dados pessoais e da empresa.");
+      return false;
+    }
+    return true;
+  };
+
+  const requestApproval = async () => {
+    const response = await base44.functions.invoke("requestAccess", profile);
+    if (!response.data?.success && response.data?.status !== "pending") {
+      throw new Error(response.data?.message || "Não foi possível solicitar o acesso");
     }
   };
 
-  const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/");
+  const handlePasswordRegister = async (event) => {
+    event.preventDefault();
+    setError("");
+    if (!validateProfile()) return;
+    if (password.length < 6) return setError("A senha deve ter pelo menos 6 caracteres.");
+    if (password !== confirmPassword) return setError("As senhas não coincidem.");
+    setLoading("password");
+    try {
+      await requestApproval();
+      await base44.auth.register({ email: profile.email.trim().toLowerCase(), password });
+      setStep("otp");
+    } catch (err) {
+      setError(err.message || "Erro ao realizar cadastro");
+    } finally {
+      setLoading("");
+    }
   };
 
-  if (success) {
+  const handleSocial = async (provider) => {
+    setError("");
+    if (!validateProfile()) return;
+    setLoading(provider);
+    try {
+      await requestApproval();
+      base44.auth.loginWithProvider(provider, "/");
+    } catch (err) {
+      setError(err.message || "Erro ao solicitar acesso");
+      setLoading("");
+    }
+  };
+
+  const handleVerifyOtp = async (event) => {
+    event.preventDefault();
+    setError("");
+    setLoading("otp");
+    try {
+      const response = await base44.auth.verifyOtp({ email: profile.email.trim().toLowerCase(), otpCode: otp });
+      if (!response?.access_token) throw new Error("Código inválido");
+      base44.auth.setToken(response.access_token);
+      window.location.href = "/";
+    } catch (err) {
+      setError(err.message || "Código inválido");
+      setLoading("");
+    }
+  };
+
+  if (step === "otp") {
     return (
-      <AuthLayout
-        icon={CheckCircle2}
-        title="Solicitação Enviada!"
-        subtitle={message}
-      >
-        <div className="space-y-4">
-          <div className="p-4 rounded-xl bg-green-50 text-green-800 text-sm border border-green-200">
-            <div className="flex gap-3">
-              <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold">Aguarde Aprovação</p>
-                <p className="text-xs opacity-75 mt-1">Sua solicitação foi enviada para o administrador. Você receberá um email com o convite assim que for aprovado.</p>
-              </div>
-            </div>
+      <AuthLayout icon={Mail} title="Verifique seu email" subtitle={`Enviamos um código para ${profile.email}`}>
+        <form onSubmit={handleVerifyOtp} className="space-y-5">
+          {error && <ErrorMessage message={error} />}
+          <div className="flex justify-center">
+            <InputOTP value={otp} onChange={setOtp} maxLength={6}>
+              <InputOTPGroup>{[0, 1, 2, 3, 4, 5].map(i => <InputOTPSlot key={i} index={i} />)}</InputOTPGroup>
+            </InputOTP>
           </div>
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => window.location.reload()}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar ao Login
+          <Button type="submit" className="w-full h-12" disabled={loading === "otp" || otp.length < 6}>
+            {loading === "otp" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Verificar e continuar
           </Button>
-        </div>
+          <button type="button" onClick={() => base44.auth.resendOtp(profile.email)} className="w-full text-sm text-primary hover:underline">Reenviar código</button>
+        </form>
       </AuthLayout>
     );
   }
 
   return (
-    <AuthLayout
-      title="Solicitar Acesso"
-      subtitle="Preencha seus dados para solicitar acesso ao portal"
-      footer={
-        <>
-          Já tem uma conta?{" "}
-          <Link to="/login" className="text-[#00A6D6] font-semibold hover:underline">
-            Fazer login
-          </Link>
-        </>
-      }
-    >
-      <Button
-        variant="outline"
-        className="w-full h-12 text-sm font-medium mb-6"
-        onClick={handleGoogle}
-      >
-        <GoogleIcon className="w-5 h-5 mr-2" />
-        Continuar com Google
-      </Button>
-
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
+    <AuthLayout title="Criar cadastro" subtitle="Preencha seus dados. O acesso depende da aprovação do administrador." footer={<>Já tem uma conta? <Link to="/login" className="text-[#00A6D6] font-semibold hover:underline">Fazer login</Link></>}>
+      {error && <ErrorMessage message={error} />}
+      <form onSubmit={handlePasswordRegister} className="space-y-4">
+        <RegistrationProfileFields profile={profile} onChange={setProfile} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <PasswordField id="password" label="Senha" value={password} onChange={setPassword} />
+          <PasswordField id="confirm" label="Confirmar senha" value={confirmPassword} onChange={setConfirmPassword} />
         </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">ou solicite acesso</span>
-        </div>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Nome Completo</Label>
-          <div className="relative">
-            <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="name"
-              type="text"
-              autoFocus
-              placeholder="Seu nome completo"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Enviando...
-            </>
-          ) : (
-            "Solicitar Acesso"
-          )}
+        <Button type="submit" className="w-full h-12" disabled={!!loading}>
+          {loading === "password" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Criar conta com senha
         </Button>
       </form>
+      <div className="relative my-5">
+        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
+        <div className="relative flex justify-center text-xs"><span className="bg-card px-3 text-muted-foreground">ou acesse com</span></div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Button type="button" variant="outline" className="h-12" disabled={!!loading} onClick={() => handleSocial("google")}><GoogleIcon className="w-5 h-5 mr-2" />Google</Button>
+        <Button type="button" variant="outline" className="h-12" disabled={!!loading} onClick={() => handleSocial("microsoft")}><LogIn className="w-5 h-5 mr-2 text-[#0078D4]" />Microsoft</Button>
+      </div>
+      <p className="mt-3 text-xs text-center text-muted-foreground">Use no Google ou Microsoft o mesmo email informado acima.</p>
     </AuthLayout>
   );
+}
+
+function PasswordField({ id, label, value, onChange }) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="relative">
+        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input id={id} type="password" value={value} onChange={(e) => onChange(e.target.value)} className="pl-10 h-12" placeholder="Mínimo 6 caracteres" required />
+      </div>
+    </div>
+  );
+}
+
+function ErrorMessage({ message }) {
+  return <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex gap-2"><AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />{message}</div>;
 }
