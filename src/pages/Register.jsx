@@ -104,6 +104,15 @@ export default function Register() {
   return (
     <AuthLayout title="Criar cadastro" subtitle="Preencha seus dados. O acesso depende da aprovação do administrador." footer={<>Já tem uma conta? <Link to="/login" className="text-[#00A6D6] font-semibold hover:underline">Fazer login</Link></>}>
       {error && <ErrorMessage message={error} />}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Button type="button" variant="outline" className="h-12" disabled={!!loading} onClick={() => handleSocial("google")}><GoogleIcon className="w-5 h-5 mr-2" />Google</Button>
+        <Button type="button" variant="outline" className="h-12" disabled={!!loading} onClick={() => handleSocial("microsoft")}><LogIn className="w-5 h-5 mr-2 text-[#0078D4]" />Microsoft</Button>
+      </div>
+      <p className="mt-3 text-xs text-center text-muted-foreground">Preencha os dados abaixo e use no Google ou Microsoft o mesmo email informado.</p>
+      <div className="relative my-5">
+        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
+        <div className="relative flex justify-center text-xs"><span className="bg-card px-3 text-muted-foreground">ou cadastre-se com senha</span></div>
+      </div>
       <form onSubmit={handlePasswordRegister} className="space-y-4">
         <RegistrationProfileFields profile={profile} onChange={setProfile} />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -114,15 +123,6 @@ export default function Register() {
           {loading === "password" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Criar conta com senha
         </Button>
       </form>
-      <div className="relative my-5">
-        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-        <div className="relative flex justify-center text-xs"><span className="bg-card px-3 text-muted-foreground">ou acesse com</span></div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Button type="button" variant="outline" className="h-12" disabled={!!loading} onClick={() => handleSocial("google")}><GoogleIcon className="w-5 h-5 mr-2" />Google</Button>
-        <Button type="button" variant="outline" className="h-12" disabled={!!loading} onClick={() => handleSocial("microsoft")}><LogIn className="w-5 h-5 mr-2 text-[#0078D4]" />Microsoft</Button>
-      </div>
-      <p className="mt-3 text-xs text-center text-muted-foreground">Use no Google ou Microsoft o mesmo email informado acima.</p>
     </AuthLayout>
   );
 }
