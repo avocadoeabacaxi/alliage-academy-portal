@@ -65,7 +65,22 @@ export default function RequestDetail() {
   const canEditExecution = userRole === 'educador' || userRole === 'admin';
   const canCloseCycle = userRole === 'gerente_regional' || userRole === 'admin';
   const canGenerateSurvey = userRole === 'educador' || userRole === 'admin';
-  const canEditAccess = userRole === 'admin' || userRole === 'educador' || user?.email === req?.requester_email;
+  const canEditAccess = req?.status !== 'Cancelado' && (userRole === 'admin' || userRole === 'educador' || user?.email === req?.requester_email);
+  const isOwnRequest = req && (req.created_by_id === user?.id || req.requester_email === user?.email);
+  const canCancel = isOwnRequest && req.status !== 'Cancelado';
+
+  const handleCancel = async () => {
+    if (!window.confirm(t('detail.cancelRequestConfirm'))) return;
+    setSaving(true);
+    try {
+      await base44.entities.TrainingRequest.update(id, { status: 'Cancelado' });
+      await loadData();
+    } catch (e) {
+      alert('Error: ' + e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleDecision = async (stage, decision) => {
     setSaving(true);
@@ -234,6 +249,12 @@ export default function RequestDetail() {
           </div>
           <p className="text-sm text-slate-500 mt-0.5">{t('detail.created')}: {req.created_date?.split('T')[0]}</p>
         </div>
+        {canCancel && (
+          <button onClick={handleCancel} disabled={saving} className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-red-600 border border-red-200 rounded-full hover:bg-red-50 disabled:opacity-40 transition-colors">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+            {t('detail.cancelRequest')}
+          </button>
+        )}
       </div>
 
       <Section title={t('detail.identification')} icon={User}>
@@ -377,7 +398,7 @@ export default function RequestDetail() {
             </div>
           )}
 
-          {canReviewStage1 && req.decision_stage1 === 'Pendente' && (
+          {canReviewStage1 && req.status !== 'Cancelado' && req.decision_stage1 === 'Pendente' && (
             <div className="border-t border-slate-100 pt-3 space-y-3">
               <div>
                 <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t('detail.educatorAnalysis')}</label>
@@ -427,7 +448,7 @@ export default function RequestDetail() {
               </div>
             )}
 
-            {canReviewStage2 && req.decision_stage2 === 'Pendente' && (
+            {canReviewStage2 && req.status !== 'Cancelado' && req.decision_stage2 === 'Pendente' && (
               <div className="border-t border-slate-100 pt-3 space-y-3">
                 <div>
                   <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t('detail.managerAnalysis')}</label>
@@ -488,7 +509,7 @@ export default function RequestDetail() {
               </div>
             )}
 
-            {canEditExecution && !req.training_completed_date && (
+            {canEditExecution && req.status !== 'Cancelado' && !req.training_completed_date && (
               <div className="border-t border-slate-100 pt-3 space-y-3">
                 <div>
                   <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t('detail.trainingCompletedDate')}</label>
@@ -505,7 +526,7 @@ export default function RequestDetail() {
               </div>
             )}
 
-            {canCloseCycle && req.training_completed_date && !tf(req.final_notes) && req.status !== 'Concluído' && (
+            {canCloseCycle && req.training_completed_date && !tf(req.final_notes) && !['Concluído', 'Cancelado'].includes(req.status) && (
               <div className="border-t border-slate-100 pt-3 space-y-3">
                 <div>
                   <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t('detail.finalNotes')}</label>
@@ -521,7 +542,7 @@ export default function RequestDetail() {
         </Section>
       )}
 
-      {req.decision_stage2 === 'Aprovado' && canGenerateSurvey && (
+      {req.decision_stage2 === 'Aprovado' && req.status !== 'Cancelado' && canGenerateSurvey && (
         <Section title={t('detail.survey')} icon={Star}>
           <div className="space-y-3">
             {!survey ? (

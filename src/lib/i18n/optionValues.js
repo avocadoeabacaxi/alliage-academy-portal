@@ -22,6 +22,7 @@ export const optionValues = {
   'Aprovado Etapa 2': { en: 'Approved Stage 2', es: 'Aprobado Etapa 2' },
   'Rejeitado': { en: 'Rejected', es: 'Rechazado' },
   'Concluído': { en: 'Completed', es: 'Completado' },
+  'Cancelado': { en: 'Cancelled', es: 'Cancelado' },
   // Decisões
   'Pendente': { en: 'Pending', es: 'Pendiente' },
   'Aprovado': { en: 'Approved', es: 'Aprobado' },
@@ -41,6 +42,7 @@ export const optionValues = {
   // Formato
   'Remoto': { en: 'Remote', es: 'Remoto' },
   'Presencial': { en: 'In-person', es: 'Presencial' },
+  'Híbrido': { en: 'Hybrid', es: 'Híbrido' },
   // Público (treinamento)
   'Equipe interna': { en: 'Internal team', es: 'Equipo interno' },
   'Distribuidor': { en: 'Distributor', es: 'Distribuidor' },

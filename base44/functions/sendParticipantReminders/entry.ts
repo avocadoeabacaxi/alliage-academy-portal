@@ -4,6 +4,7 @@ import { Resend } from 'npm:resend@3.2.0';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const payload = await req.json().catch(() => ({}));
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const targetDate = tomorrow.toISOString().split('T')[0];
@@ -13,11 +14,15 @@ Deno.serve(async (req) => {
     ]);
     const requests = [...new Map([...(trainings || []), ...(events || [])].map((item) => [item.id, item])).values()];
     const toRemind = requests.filter(
-      (item) => !item.reminder_sent && Array.isArray(item.participants_list) && item.participants_list.length > 0,
+      (item) => item.status !== 'Cancelado' && !item.reminder_sent && Array.isArray(item.participants_list) && item.participants_list.length > 0,
     );
 
     if (toRemind.length === 0) {
       return Response.json({ success: true, message: 'Nenhum treinamento para notificar', date: targetDate });
+    }
+
+    if (payload.dry_run === true) {
+      return Response.json({ success: true, dry_run: true, trainings_to_notify: toRemind.length, date: targetDate });
     }
 
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));

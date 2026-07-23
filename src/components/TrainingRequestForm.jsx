@@ -88,7 +88,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
         return !form.has_multiplier || (form.specialist_name.trim() && form.specialist_role.trim() && form.specialist_email.trim());
       case 'logistics': {
         const onlineReady = !['Online', 'Híbrido'].includes(form.guest_participation_mode) || !!form.online_access_link || form.needs_educator_link;
-        const addressReady = form.guest_participation_mode === 'Online' || (form.location_country && form.location_city && form.location_street && form.location_number && form.location_postal_code);
+        const addressReady = form.guest_participation_mode === 'Online' || form.presencial_mode === 'ribeirao' || (form.location_country && form.location_city && form.location_street && form.location_number && form.location_postal_code);
         return onlineReady && addressReady;
       }
       default: return true;
@@ -434,7 +434,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
                     </button>
                   </div>
                 </Field>
-                <AddressFields data={form} update={update} />
+                {form.presencial_mode === 'local' && <AddressFields data={form} update={update} />}
               </div>
             )}
             <Field label={t('form.formatDetails')}>

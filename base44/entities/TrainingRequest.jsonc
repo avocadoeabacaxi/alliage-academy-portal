@@ -20,7 +20,8 @@
         "Aprovado Etapa 1",
         "Aprovado Etapa 2",
         "Rejeitado",
-        "Conclu\u00eddo"
+        "Conclu\u00eddo",
+        "Cancelado"
       ],
       "default": "Pendente An\u00e1lise"
     },

@@ -5,7 +5,8 @@ const STATUS_CONFIG = {
   'Aprovado Etapa 1': { key: 'aprovado1', classes: 'bg-[#00A6D6]/10 text-[#003B5C] border-[#00A6D6]/20', dot: 'bg-[#00A6D6]' },
   'Aprovado Etapa 2': { key: 'aprovado2', classes: 'bg-emerald-50 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500' },
   'Concluído': { key: 'concluido', classes: 'bg-green-50 text-green-800 border-green-300', dot: 'bg-green-600' },
-  'Rejeitado': { key: 'rejeitado', classes: 'bg-red-50 text-red-700 border-red-200', dot: 'bg-red-500' }
+  'Rejeitado': { key: 'rejeitado', classes: 'bg-red-50 text-red-700 border-red-200', dot: 'bg-red-500' },
+  'Cancelado': { key: 'cancelado', classes: 'bg-slate-100 text-slate-700 border-slate-300', dot: 'bg-slate-500' }
 };
 
 const PRIORITY_CONFIG = {

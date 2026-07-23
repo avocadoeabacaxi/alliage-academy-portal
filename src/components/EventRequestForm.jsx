@@ -313,7 +313,7 @@ export default function EventRequestForm({ mode = 'new' }) {
               <div className="flex gap-2">
                 {['Presencial', 'Remoto', 'Híbrido'].map(opt => (
                   <button key={opt} onClick={() => update('format', opt)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${form.format === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
-                    {t(`format.${opt.toLowerCase()}`)}
+                    {t(`format.${opt.toLowerCase().replace('í', 'i')}`)}
                   </button>
                 ))}
               </div>
