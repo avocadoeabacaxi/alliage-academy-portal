@@ -51,6 +51,7 @@ export default function SettingsUsers({ canManage = false }) {
   const [inviteMsg, setInviteMsg] = useState('');
   const [showPerms, setShowPerms] = useState(false);
   const [sendingReset, setSendingReset] = useState(null);
+  const [savingNotification, setSavingNotification] = useState(null);
   const [resetMsg, setResetMsg] = useState({});
   const [modalUser, setModalUser] = useState(null);
 
@@ -76,6 +77,19 @@ export default function SettingsUsers({ canManage = false }) {
       setTimeout(() => {
         setResetMsg(prev => { const c = { ...prev }; delete c[user.id]; return c; });
       }, 5000);
+    }
+  };
+
+  const handleNotificationToggle = async (user) => {
+    setSavingNotification(user.id);
+    const nextValue = !user.receive_access_request_emails;
+    try {
+      await base44.entities.User.update(user.id, { receive_access_request_emails: nextValue });
+      setUsers(prev => prev.map(item => item.id === user.id ? { ...item, receive_access_request_emails: nextValue } : item));
+    } catch (e) {
+      alert('Erro ao atualizar preferência: ' + e.message);
+    } finally {
+      setSavingNotification(null);
     }
   };
 
@@ -301,6 +315,7 @@ export default function SettingsUsers({ canManage = false }) {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Nome</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Papel</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Região</th>
+                {canManage && <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700">Receber pedidos de acesso</th>}
                 {canManage && <th className="px-4 py-3 text-right text-xs font-semibold text-slate-700">Ações</th>}
               </tr>
             </thead>
@@ -340,6 +355,21 @@ export default function SettingsUsers({ canManage = false }) {
                       {user.region || '—'}
                     </span>
                   </td>
+                  {canManage && (
+                    <td className="px-4 py-3 text-center">
+                      {user.role === 'admin' && !user.pending_registration ? (
+                        <label className="inline-flex items-center justify-center cursor-pointer" title="Receber email quando alguém solicitar acesso">
+                          <input
+                            type="checkbox"
+                            checked={user.receive_access_request_emails === true}
+                            onChange={() => handleNotificationToggle(user)}
+                            disabled={savingNotification === user.id}
+                            className="w-4 h-4 accent-[#00A6D6] disabled:opacity-50"
+                          />
+                        </label>
+                      ) : <span className="text-slate-300">—</span>}
+                    </td>
+                  )}
                   {canManage && (
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1.5">

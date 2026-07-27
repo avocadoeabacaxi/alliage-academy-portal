@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { Resend } from 'npm:resend@3.2.0';
 
 Deno.serve(async (req) => {
   try {
@@ -9,6 +10,12 @@ Deno.serve(async (req) => {
 
     if (!normalizedEmail || !full_name || !phone || !company_type || !company_name) {
       return Response.json({ error: 'Preencha todos os campos obrigatórios' }, { status: 400 });
+    }
+
+    const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+    const recipients = admins.filter((admin) => admin.receive_access_request_emails === true && admin.email).map((admin) => admin.email);
+    if (body.dry_run === true) {
+      return Response.json({ success: true, dry_run: true, recipient_count: recipients.length });
     }
 
     const existing = await base44.asServiceRole.entities.UserAuthorization.filter({ email: normalizedEmail });
@@ -34,6 +41,17 @@ Deno.serve(async (req) => {
       status: 'pending',
       first_login_attempt: new Date().toISOString()
     });
+
+    if (recipients.length > 0) {
+      const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[char]);
+      const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+      await Promise.allSettled(recipients.map((recipient) => resend.emails.send({
+        from: 'no-reply@trainning.alliage.global',
+        to: recipient,
+        subject: 'Novo pedido de acesso — Alliage Academy',
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto"><h2 style="color:#003B5C">Novo pedido de acesso</h2><p>Uma pessoa solicitou acesso à plataforma e aguarda autorização.</p><div style="background:#f5f5f5;padding:20px;border-radius:8px;margin:20px 0"><p><strong>Nome:</strong> ${escapeHtml(full_name)}</p><p><strong>Email:</strong> ${escapeHtml(normalizedEmail)}</p><p><strong>Telefone:</strong> ${escapeHtml(phone)}</p><p><strong>Empresa:</strong> ${escapeHtml(company_type)} — ${escapeHtml(company_name)}</p></div><p>Acesse a área de Configurações da plataforma para aprovar ou rejeitar o pedido.</p></div>`
+      })));
+    }
 
     return Response.json({
       success: true,
