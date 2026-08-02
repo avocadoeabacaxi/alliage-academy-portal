@@ -4,18 +4,15 @@ import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ChevronLeft, ChevronRight, Check, Loader2, Globe, CalendarDays, Upload, X, Paperclip } from 'lucide-react';
 import RequestSuccessScreen from '@/components/RequestSuccessScreen';
-import ParticipationAccessFields from '@/components/ParticipationAccessFields';
-import ParticipantsList from '@/components/ParticipantsList';
 import AddressFields from '@/components/AddressFields';
 
 const EVENT_TYPES = ['Feira / Congresso', 'Palestra', 'Lançamento de produto', 'Evento Comercial', 'Outro'];
-const ALLIAGE_ROLE_OPTIONS = ['Palestrante/Apresentador', 'Instrutor hands-on', 'Moderador', 'Consultor técnico', 'Demonstração de produtos', 'Outro'];
+const ALLIAGE_ROLE_OPTIONS = ['Palestrante/Apresentador', 'Moderador', 'Lançamento de produtos', 'Outro'];
 const WHO_INVITED_OPTIONS = ['Gestor', 'Cliente estratégico', 'Distribuidor/Dealer', 'Parceiro', 'Organizador', 'Associação/Entidade', 'Outro'];
 const VISITOR_OPTIONS = ['1-50', '51-100', '101-300', '301-500', '500+'];
 const STRATEGIC_OBJECTIVES = ['Relacionamento com cliente estratégico', 'Prospecção', 'Lançamento/divulgação de produto', 'Posicionamento de marca', 'Networking', 'Outro'];
 const IMPACT_OPTIONS = ['Leads qualificados', 'Vendas', 'Fidelização', 'Parcerias', 'Visibilidade', 'Outro'];
 const PROFESSIONALS_OPTIONS = ['1', '2', '3+'];
-const PRIORITY_KEYS = { 'Baixa': 'baixa', 'Média': 'media', 'Alta': 'alta', 'Crítica': 'critica' };
 
 export default function EventRequestForm({ mode = 'new' }) {
   const isPast = mode === 'past';
@@ -38,20 +35,17 @@ export default function EventRequestForm({ mode = 'new' }) {
   ];
 
   const [form, setForm] = useState({
-    requester_name: '', requester_email: '', region: 'Brasil', region_detail: '',
-    company_type: 'Filial Alliage', company_type_detail: '', position: '',
+    requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', position: '',
     event_type: 'Feira / Congresso', event_type_detail: '',
     event_name: '', event_description: '', event_organizer: '', event_website: '',
     event_start_date: '', event_end_date: '', format: 'Presencial',
-    guest_participation_mode: 'Presencial', online_platform: 'Google Meet', online_access_link: '', needs_educator_link: false,
     location_country: '', location_city: '', location_specific: '', location_postal_code: '', location_street: '', location_number: '', location_complement: '', location_formatted_address: '', location_place_id: '',
     alliage_role: [], alliage_role_detail: '', who_invited: '', who_invited_detail: '',
-    audience: [], expected_visitors: '51-100', participants_list: [],
+    audience: [], expected_visitors: '51-100',
     justification: '', strategic_objectives: [], strategic_objectives_detail: '',
     expected_impacts: [],
-    costs_covered_by_requester: true, costs_covered_detail: '',
     professionals_needed: '1', professionals_names: '', professionals_equipment: '',
-    priority: 'Média', deadline_requested: '',
+    deadline_requested: '',
     event_history: '', additional_notes: '', attachments: [],
     training_completed_date: '',
   });
@@ -82,13 +76,11 @@ export default function EventRequestForm({ mode = 'new' }) {
   const steps = [
     { id: 'sec1', title: t('event.sec1.title'), desc: t('event.sec1.desc') },
     { id: 'sec2', title: t('event.sec2.title'), desc: t('event.sec2.desc') },
-    { id: 'sec3', title: t('event.sec3.title'), desc: t('event.sec3.desc') },
+    ...(form.format === 'Remoto' ? [] : [{ id: 'sec3', title: t('event.sec3.title'), desc: t('event.sec3.desc') }]),
     { id: 'sec4', title: t('event.sec4.title'), desc: t('event.sec4.desc') },
     { id: 'sec5', title: t('event.sec5.title'), desc: t('event.sec5.desc') },
     { id: 'sec6', title: t('event.sec6.title'), desc: t('event.sec6.desc') },
-    { id: 'sec7', title: t('event.sec7.title'), desc: t('event.sec7.desc') },
     { id: 'sec8', title: t('event.sec8.title'), desc: t('event.sec8.desc') },
-    { id: 'sec9', title: t('event.sec9.title'), desc: t('event.sec9.desc') },
     { id: 'sec10', title: t('event.sec10.title'), desc: t('event.sec10.desc') },
   ];
 
@@ -99,32 +91,25 @@ export default function EventRequestForm({ mode = 'new' }) {
     switch (sid) {
       case 'sec1':
         return form.requester_name && form.requester_email && form.region &&
-          (form.region === 'USA' || form.region_detail.trim()) &&
-          (form.company_type !== 'Outro' || form.company_type_detail.trim());
+          (form.region === 'USA' || form.region_detail.trim());
       case 'sec2': {
         const base = form.event_name.trim() && form.event_type && (form.event_type !== 'Outro' || form.event_type_detail.trim());
         if (isPast) return base && form.event_start_date && form.event_end_date && form.training_completed_date;
         return base && form.event_start_date && form.event_end_date;
       }
       case 'sec3':
-        return form.format && (form.format === 'Remoto' || (form.location_country.trim() && form.location_city.trim() && form.location_street.trim() && form.location_number.trim() && form.location_postal_code.trim()));
+        return form.location_country.trim() && form.location_city.trim();
       case 'sec4':
         return form.alliage_role.length > 0 && (!form.alliage_role.includes('Outro') || form.alliage_role_detail.trim()) &&
           form.who_invited && (form.who_invited !== 'Outro' || form.who_invited_detail.trim());
-      case 'sec5': {
-        const onlineReady = !['Online', 'Híbrido'].includes(form.guest_participation_mode) || form.online_access_link || form.needs_educator_link;
-        return form.audience.length > 0 && onlineReady;
-      }
+      case 'sec5':
+        return form.audience.length > 0;
       case 'sec6':
         return form.justification.trim() && form.strategic_objectives.length >= 2 && form.expected_impacts.length > 0;
-      case 'sec7':
-        return form.costs_covered_by_requester === true || form.costs_covered_detail.trim();
       case 'sec8':
         return form.professionals_needed && form.professionals_names.trim() && form.professionals_equipment.trim();
-      case 'sec9':
-        return form.priority && (isPast || form.deadline_requested);
       case 'sec10':
-        return form.event_history.trim();
+        return form.event_history.trim() && (isPast || form.deadline_requested);
       default:
         return true;
     }
@@ -256,16 +241,7 @@ export default function EventRequestForm({ mode = 'new' }) {
                   <input value={form.region_detail} onChange={e => update('region_detail', e.target.value)} className="input-base" placeholder={form.region === 'Brasil' ? t('form.regionDetailBrasilPlaceholder') : form.region === 'ROW' ? t('form.regionDetailRowPlaceholder') : t('form.regionDetailLatamPlaceholder')} />
                 </Field>
               )}
-              <Field label={t('form.companyType')}>
-                <select value={form.company_type} onChange={e => update('company_type', e.target.value)} className="input-base">
-                  {['Filial Alliage', 'Distribuidor/Dealer', 'Outro'].map(r => <option key={r} value={r}>{t(`company.${r === 'Filial Alliage' ? 'filial' : r === 'Distribuidor/Dealer' ? 'distribuidor' : 'outro'}`)}</option>)}
-                </select>
-              </Field>
-              {form.company_type === 'Outro' && (
-                <Field label={t('form.companyTypeDetail')} required>
-                  <input value={form.company_type_detail} onChange={e => update('company_type_detail', e.target.value)} className="input-base" placeholder={t('form.companyTypeDetailPlaceholder')} />
-                </Field>
-              )}
+
             </div>
           </div>
         )}
@@ -311,7 +287,7 @@ export default function EventRequestForm({ mode = 'new' }) {
             </div>
             <Field label={t('event.format')}>
               <div className="flex gap-2">
-                {['Presencial', 'Remoto', 'Híbrido'].map(opt => (
+                {['Presencial', 'Remoto'].map(opt => (
                   <button key={opt} onClick={() => update('format', opt)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${form.format === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
                     {t(`format.${opt.toLowerCase().replace('í', 'i')}`)}
                   </button>
@@ -379,7 +355,7 @@ export default function EventRequestForm({ mode = 'new' }) {
                 ))}
               </div>
             </Field>
-            {!isPast && <><ParticipationAccessFields data={form} update={update} /><ParticipantsList participants={form.participants_list} onChange={(list) => update('participants_list', list)} /></>}
+
           </div>
         )}
 
@@ -416,27 +392,6 @@ export default function EventRequestForm({ mode = 'new' }) {
           </div>
         )}
 
-        {/* Seção 7 — Análise de Custos */}
-        {steps[step]?.id === 'sec7' && (
-          <div className="space-y-4">
-            <Field label={t('event.costsCovered')} required>
-              <div className="flex gap-2">
-                <button onClick={() => update('costs_covered_by_requester', true)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${form.costs_covered_by_requester ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
-                  {t('common.yes')}
-                </button>
-                <button onClick={() => update('costs_covered_by_requester', false)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${!form.costs_covered_by_requester ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
-                  {t('common.no')}
-                </button>
-              </div>
-            </Field>
-            {!form.costs_covered_by_requester && (
-              <Field label={t('event.costsCoveredDetail')} required>
-                <textarea value={form.costs_covered_detail} onChange={e => update('costs_covered_detail', e.target.value)} rows={3} className="input-base resize-none" placeholder={t('event.costsCoveredDetailPlaceholder')} />
-              </Field>
-            )}
-          </div>
-        )}
-
         {/* Seção 8 — Recursos Necessários */}
         {steps[step]?.id === 'sec8' && (
           <div className="space-y-4">
@@ -458,29 +413,14 @@ export default function EventRequestForm({ mode = 'new' }) {
           </div>
         )}
 
-        {/* Seção 9 — Priorização */}
-        {steps[step]?.id === 'sec9' && (
+        {/* Seção 10 — Informações Complementares */}
+        {steps[step]?.id === 'sec10' && (
           <div className="space-y-4">
-            <Field label={t('form.priority')} required>
-              <div className="grid grid-cols-4 gap-2">
-                {['Baixa', 'Média', 'Alta', 'Crítica'].map(opt => (
-                  <button key={opt} onClick={() => update('priority', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.priority === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                    {t(`priority.${PRIORITY_KEYS[opt]}`)}
-                  </button>
-                ))}
-              </div>
-            </Field>
             {!isPast && (
               <Field label={t('event.confirmDeadline')} required>
                 <input type="date" value={form.deadline_requested} onChange={e => update('deadline_requested', e.target.value)} className="input-base" />
               </Field>
             )}
-          </div>
-        )}
-
-        {/* Seção 10 — Informações Complementares */}
-        {steps[step]?.id === 'sec10' && (
-          <div className="space-y-4">
             <Field label={t('event.history')} required>
               <textarea value={form.event_history} onChange={e => update('event_history', e.target.value)} rows={3} className="input-base resize-none" placeholder={t('event.historyPlaceholder')} />
               <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">

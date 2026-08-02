@@ -10,11 +10,9 @@ import AddressFields from '@/components/AddressFields';
 import ProductSelector, { resolveProductName, BRAND_OPTIONS } from '@/components/ProductSelector';
 
 const AREA_OPTIONS = ['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'];
-const AUDIENCE_OPTIONS = ['Equipe interna', 'Distribuidor', 'Cliente final', 'Misto'];
 const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Dificuldade de posicionamento comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
 const IMPACT_OPTIONS = ['Aumento de vendas', 'Redução de chamados', 'Melhora de conhecimento técnico', 'Certificação da equipe', 'Suporte a lançamento', 'Outro'];
 const NO_AUDIENCE_TYPES = ['Apoio técnico', 'Consulta de mercado', 'Licitação', 'Modificação de produto'];
-const PRIORITY_KEYS = { 'Baixa': 'baixa', 'Média': 'media', 'Alta': 'alta', 'Crítica': 'critica' };
 
 export default function TrainingRequestForm({ mode = 'new' }) {
   const isPast = mode === 'past';
@@ -26,14 +24,13 @@ export default function TrainingRequestForm({ mode = 'new' }) {
   const [successId, setSuccessId] = useState(null);
 
   const [form, setForm] = useState({
-    requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', company_type: 'Filial Alliage', company_type_detail: '', position: '', area: 'Comercial', area_detail: '',
+    requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', position: '', area: 'Comercial', area_detail: '',
     request_type: 'Novo treinamento', request_type_detail: '',
     products: [{ category: 'Extraoral', brand: '', brand_detail: '' }], product_obs: '',
     training_focus: '',
-    audience: [], audience_detail: '', participants_count: '6-10', participants_list: [],
+    participants_count: '6-10', participants_list: [],
     justification: '', specific_problems: [], expected_impacts: [],
     needs_deadline: false, deadline_requested: '', deadline_reason: '',
-    priority: 'Média',
     has_multiplier: false, specialist_name: '', specialist_role: '', specialist_email: '',
     format: 'Presencial', guest_participation_mode: 'Presencial', online_platform: 'Google Meet', online_access_link: '', needs_educator_link: false,
     format_details: '', presencial_mode: 'local', location_country: '', location_city: '', location_specific: '',
@@ -67,7 +64,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
   const canProceed = () => {
     const sid = steps[step]?.id;
     switch (sid) {
-      case 'identification': return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.company_type !== 'Outro' || form.company_type_detail.trim()) && (form.area !== 'Outro' || form.area_detail.trim());
+      case 'identification': return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.area !== 'Outro' || form.area_detail.trim());
       case 'request_type': return form.request_type && (form.request_type !== 'Outro' || form.request_type_detail.trim());
       case 'product': {
         const list = form.products || [];
@@ -80,15 +77,15 @@ export default function TrainingRequestForm({ mode = 'new' }) {
         });
       }
       case 'training_focus': return form.training_focus.length > 10;
-      case 'audience': return form.audience.length > 0;
+      case 'audience': return true;
       case 'justification_urgency':
         if (isPast) return form.training_completed_date && form.justification.trim().length > 0;
-        return form.justification.trim().length > 0 && form.priority && (!form.needs_deadline || form.deadline_requested);
+        return form.justification.trim().length > 0 && (!form.needs_deadline || form.deadline_requested);
       case 'specialist':
         return !form.has_multiplier || (form.specialist_name.trim() && form.specialist_role.trim() && form.specialist_email.trim());
       case 'logistics': {
-        const onlineReady = !['Online', 'Híbrido'].includes(form.guest_participation_mode) || !!form.online_access_link || form.needs_educator_link;
-        const addressReady = form.guest_participation_mode === 'Online' || form.presencial_mode === 'ribeirao' || (form.location_country && form.location_city && form.location_street && form.location_number && form.location_postal_code);
+        const onlineReady = form.guest_participation_mode !== 'Online' || !!form.online_access_link || form.needs_educator_link;
+        const addressReady = form.guest_participation_mode === 'Online' || form.presencial_mode === 'ribeirao' || (form.location_country && form.location_city);
         return onlineReady && addressReady;
       }
       default: return true;
@@ -114,8 +111,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       const today = new Date().toISOString().split('T')[0];
       const completedDate = form.training_completed_date || today;
 
-      const { audience_detail, presencial_mode, ...formData } = form;
-      const audienceFinal = form.audience.map(a => a === 'Misto' && audience_detail ? `Misto: ${audience_detail}` : a);
+      const { presencial_mode, ...formData } = form;
       const presencialLabel = presencial_mode === 'ribeirao' ? t('form.presencialModeRibeirao') : t('form.presencialModeLocal');
       const formatDetailsFinal = form.format === 'Presencial'
         ? [presencialLabel, form.format_details].filter(Boolean).join(' — ')
@@ -126,7 +122,6 @@ export default function TrainingRequestForm({ mode = 'new' }) {
         ...formData,
         format: form.guest_participation_mode === 'Online' ? 'Remoto' : form.guest_participation_mode,
         format_details: formatDetailsFinal,
-        audience: audienceFinal,
         products: productsList,
         product_name: productNameFinal,
         product_category: productsList[0]?.category || '',
@@ -170,18 +165,6 @@ export default function TrainingRequestForm({ mode = 'new' }) {
       </div>
     );
   }
-
-  const priorityField = (
-    <Field label={t('form.priority')}>
-      <div className="grid grid-cols-4 gap-2">
-        {['Baixa', 'Média', 'Alta', 'Crítica'].map(opt => (
-          <button key={opt} onClick={() => update('priority', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.priority === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-            {t(`priority.${PRIORITY_KEYS[opt]}`)}
-          </button>
-        ))}
-      </div>
-    </Field>
-  );
 
   return (
     <div className="p-4 lg:p-6 max-w-3xl mx-auto">
@@ -235,16 +218,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
                   <input value={form.region_detail} onChange={e => update('region_detail', e.target.value)} className="input-base" placeholder={form.region === 'Brasil' ? t('form.regionDetailBrasilPlaceholder') : form.region === 'ROW' ? t('form.regionDetailRowPlaceholder') : t('form.regionDetailLatamPlaceholder')} />
                 </Field>
               )}
-              <Field label={t('form.companyType')}>
-                <select value={form.company_type} onChange={e => update('company_type', e.target.value)} className="input-base">
-                  {['Filial Alliage', 'Distribuidor/Dealer', 'Outro'].map(r => <option key={r} value={r}>{t(`company.${r === 'Filial Alliage' ? 'filial' : r === 'Distribuidor/Dealer' ? 'distribuidor' : 'outro'}`)}</option>)}
-                </select>
-              </Field>
-              {form.company_type === 'Outro' && (
-                <Field label={t('form.companyTypeDetail')} required>
-                  <input value={form.company_type_detail} onChange={e => update('company_type_detail', e.target.value)} className="input-base" placeholder={t('form.companyTypeDetailPlaceholder')} />
-                </Field>
-              )}
+
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label={t('form.position')}>
@@ -307,18 +281,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
         {steps[step]?.id === 'audience' && (
           <div className="space-y-4">
-            <Field label={t('form.audience')}>
-              <div className="grid grid-cols-2 gap-2">
-                {AUDIENCE_OPTIONS.map(opt => (
-                  <button key={opt} onClick={() => toggleArrayItem('audience', opt)} className={`px-3 py-2 text-sm rounded-lg border transition-all ${form.audience.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                    {opt}
-                  </button>
-                ))}
-              </div>
-              {form.audience.includes('Misto') && (
-                <input value={form.audience_detail} onChange={e => update('audience_detail', e.target.value)} className="input-base mt-2" placeholder={t('form.audienceDetailPlaceholder')} />
-              )}
-            </Field>
+
             <Field label={t('form.participantsCount')}>
               <div className="grid grid-cols-4 gap-2">
                 {['1-5', '6-10', '11-20', '20+'].map(opt => (
@@ -337,12 +300,9 @@ export default function TrainingRequestForm({ mode = 'new' }) {
         {steps[step]?.id === 'justification_urgency' && (
           <div className="space-y-4">
             {isPast && (
-              <>
-                <Field label={t('form.trainingCompletedDate')} required>
-                  <input type="date" value={form.training_completed_date} onChange={e => update('training_completed_date', e.target.value)} className="input-base" />
-                </Field>
-                {priorityField}
-              </>
+              <Field label={t('form.trainingCompletedDate')} required>
+                <input type="date" value={form.training_completed_date} onChange={e => update('training_completed_date', e.target.value)} className="input-base" />
+              </Field>
             )}
             <Field label={t('form.justification')} required>
               <textarea value={form.justification} onChange={e => update('justification', e.target.value)} rows={4} className="input-base resize-none" placeholder={t('form.justificationPlaceholder')} />
@@ -369,7 +329,6 @@ export default function TrainingRequestForm({ mode = 'new' }) {
             </Field>
             {!isPast && (
               <>
-                {priorityField}
                 <Field label={t('form.needDeadline')}>
                   <div className="flex gap-2">
                     <button onClick={() => update('needs_deadline', true)} className={`px-4 py-2 text-sm rounded-lg border transition-all ${form.needs_deadline ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>

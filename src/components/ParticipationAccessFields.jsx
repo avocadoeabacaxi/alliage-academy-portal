@@ -4,13 +4,13 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 export default function ParticipationAccessFields({ data, update, disabled = false }) {
   const { t } = useLanguage();
   const mode = data.guest_participation_mode || 'Presencial';
-  const needsOnline = mode === 'Online' || mode === 'Híbrido';
+  const needsOnline = mode === 'Online';
   return (
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-1.5">{t('form.guestParticipationMode')}</label>
-        <div className="grid grid-cols-3 gap-2">
-          {['Online', 'Presencial', 'Híbrido'].map(option => (
+        <div className="grid grid-cols-2 gap-2">
+          {['Online', 'Presencial'].map(option => (
             <button type="button" key={option} disabled={disabled} onClick={() => update('guest_participation_mode', option)} className={`px-3 py-2 text-sm rounded-lg border transition-all disabled:cursor-default ${mode === option ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 text-slate-700'}`}>
               {t(`format.${option.toLowerCase().replace('í', 'i')}`)}
             </button>
