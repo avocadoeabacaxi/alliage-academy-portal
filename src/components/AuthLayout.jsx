@@ -1,6 +1,6 @@
 import React from "react";
 
-const LOGO_URL = "https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png";
+const LOGO_URL = "https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/520d06895_trianeningpng.png";
 
 export default function AuthLayout({ icon: Icon, title, subtitle, footer, children }) {
   return (

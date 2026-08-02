@@ -60,7 +60,7 @@ const UserNotRegisteredError = () => {
         <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-lg border border-slate-100">
           <div className="flex justify-center mb-6">
             <img
-              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png"
+              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/520d06895_trianeningpng.png"
               alt="Alliage Training & Education"
               className="h-14 w-auto"
             />
@@ -91,7 +91,7 @@ const UserNotRegisteredError = () => {
         <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-lg border border-slate-100">
           <div className="flex justify-center mb-6">
             <img
-              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png"
+              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/520d06895_trianeningpng.png"
               alt="Alliage Training & Education"
               className="h-14 w-auto"
             />
@@ -123,7 +123,7 @@ const UserNotRegisteredError = () => {
         <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-lg border border-slate-100">
           <div className="flex justify-center mb-6">
             <img
-              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png"
+              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/520d06895_trianeningpng.png"
               alt="Alliage Training & Education"
               className="h-14 w-auto"
             />
@@ -158,7 +158,7 @@ const UserNotRegisteredError = () => {
       <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-lg border border-slate-100">
         <div className="flex justify-center mb-6">
           <img
-            src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png"
+            src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/520d06895_trianeningpng.png"
             alt="Alliage Training & Education"
             className="h-14 w-auto"
           />
