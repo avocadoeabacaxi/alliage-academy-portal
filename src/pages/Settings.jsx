@@ -34,6 +34,7 @@ export default function Settings() {
   }
 
   const canManage = user?.role === 'admin';
+  const canExportDatabase = user?.email?.toLowerCase() === 'firnando@gmail.com';
   const canViewUsers = canManage || user?.role === 'gerente_regional' || user?.role === 'educador';
 
   if (!canViewUsers) {
@@ -63,7 +64,7 @@ export default function Settings() {
         )}
         <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')} icon={UsersIcon} label="Usuários" />
         {canManage && <TabButton active={activeTab === 'routing'} onClick={() => setActiveTab('routing')} icon={Route} label="Roteamento" />}
-        {canManage && <TabButton active={activeTab === 'database'} onClick={() => setActiveTab('database')} icon={Database} label="Banco de Dados" />}
+        {canExportDatabase && <TabButton active={activeTab === 'database'} onClick={() => setActiveTab('database')} icon={Database} label="Banco de Dados" />}
       </div>
 
       {/* Content */}
@@ -72,7 +73,7 @@ export default function Settings() {
         {canManage && activeTab === 'emails' && <EmailTemplates />}
         {activeTab === 'users' && <SettingsUsers canManage={canManage} />}
         {canManage && activeTab === 'routing' && <RoutingTab />}
-        {canManage && activeTab === 'database' && <DatabaseExport />}
+        {canExportDatabase && activeTab === 'database' && <DatabaseExport />}
       </div>
     </div>
   );
