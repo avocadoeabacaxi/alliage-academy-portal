@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { ArrowLeft, Mail, Users as UsersIcon, AlertCircle, Loader2, Lock, Route } from 'lucide-react';
+import { ArrowLeft, Mail, Users as UsersIcon, AlertCircle, Loader2, Lock, Route, Database } from 'lucide-react';
 import EmailTemplates from '@/components/settings/EmailTemplates';
+import DatabaseExport from '@/components/settings/DatabaseExport';
 import SettingsUsers from '@/components/settings/SettingsUsers';
 import UserAuthorizationTab from '@/components/settings/UserAuthorizationTab';
 import RoutingTab from '@/components/settings/RoutingTab';
@@ -62,6 +63,7 @@ export default function Settings() {
         )}
         <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')} icon={UsersIcon} label="Usuários" />
         {canManage && <TabButton active={activeTab === 'routing'} onClick={() => setActiveTab('routing')} icon={Route} label="Roteamento" />}
+        {canManage && <TabButton active={activeTab === 'database'} onClick={() => setActiveTab('database')} icon={Database} label="Banco de Dados" />}
       </div>
 
       {/* Content */}
@@ -70,6 +72,7 @@ export default function Settings() {
         {canManage && activeTab === 'emails' && <EmailTemplates />}
         {activeTab === 'users' && <SettingsUsers canManage={canManage} />}
         {canManage && activeTab === 'routing' && <RoutingTab />}
+        {canManage && activeTab === 'database' && <DatabaseExport />}
       </div>
     </div>
   );
