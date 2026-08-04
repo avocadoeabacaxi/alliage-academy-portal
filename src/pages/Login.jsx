@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogIn, Mail, Lock, Loader2, AlertCircle, Clock, GraduationCap, ArrowRight, CheckCircle2, Users, BookOpen, BarChart3 } from "lucide-react";
 import GoogleIcon from "@/components/GoogleIcon";
+import LanguageSelector from "@/components/LanguageSelector";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function Login() {
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -42,7 +45,7 @@ export default function Login() {
       await base44.auth.loginViaEmailPassword(email, password);
       await checkAuthStatus();
     } catch (err) {
-      setError(err.message || "Email ou senha inválidos");
+      setError(err.message || t('login.invalid'));
       setLoading(false);
     }
   };
@@ -68,6 +71,7 @@ export default function Login() {
     const isPending = authStatus === 'pending';
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #003B5C 0%, #00547A 50%, #00A6D6 100%)' }}>
+        <div className="absolute right-4 top-4 z-20"><LanguageSelector compact /></div>
         <div className="absolute top-10 left-10 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
         <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-[#00A6D6]/10 blur-3xl" />
 
@@ -88,12 +92,10 @@ export default function Login() {
                   {isPending ? <Clock className="w-10 h-10 text-amber-500" /> : <AlertCircle className="w-10 h-10 text-red-500" />}
                 </div>
                 <h1 className="text-2xl font-bold text-[#003B5C] mb-2">
-                  {isPending ? 'Aguardando Aprovação' : 'Acesso Negado'}
+                  {isPending ? t('login.pendingTitle') : t('login.rejectedTitle')}
                 </h1>
                 <p className="text-slate-500 text-sm leading-relaxed mb-6 px-2">
-                  {isPending
-                    ? 'Seu acesso ao portal está pendente de aprovação do administrador. Você receberá um email assim que for autorizado.'
-                    : 'Sua solicitação de acesso foi rejeitada. Entre em contato com o administrador para mais informações.'}
+                  {isPending ? t('login.pendingDesc') : t('login.rejectedDesc')}
                 </p>
               </div>
 
@@ -109,7 +111,7 @@ export default function Login() {
                 className="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#003B5C] hover:bg-[#002D44] transition-colors shadow-lg"
               >
                 <LogIn className="w-4 h-4" />
-                Voltar ao Login
+                {t('login.back')}
               </button>
             </div>
           </div>
@@ -121,6 +123,7 @@ export default function Login() {
   // Login — split layout
   return (
     <div className="min-h-screen flex">
+      <div className="fixed right-4 top-4 z-20 rounded-xl bg-[#003B5C] shadow-lg"><LanguageSelector compact /></div>
       {/* Lado esquerdo — branding / info do portal */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between p-12" style={{ background: 'linear-gradient(135deg, #003B5C 0%, #00547A 60%, #00A6D6 100%)' }}>
         {/* Decorative elements */}
@@ -141,18 +144,14 @@ export default function Login() {
 
         {/* Headline + features */}
         <div className="relative z-10">
-          <h1 className="text-white font-bold text-4xl leading-tight mb-4">
-            Portal de<br />Treinamentos<br />Alliage
-          </h1>
-          <p className="text-white/70 text-sm leading-relaxed mb-10 max-w-md">
-            Gerencie solicitações de treinamento, acompanhe aprovações e avalie resultados em uma plataforma centralizada.
-          </p>
+          <h1 className="text-white font-bold text-4xl leading-tight mb-4">{t('login.portalTitle')}</h1>
+          <p className="text-white/70 text-sm leading-relaxed mb-10 max-w-md">{t('login.portalDesc')}</p>
 
           <div className="space-y-4">
             {[
-              { icon: BookOpen, title: 'Gestão de Solicitações', desc: 'Fluxo completo de solicitação e aprovação em duas etapas' },
-              { icon: Users, title: 'Colaboração Multi-regional', desc: 'Atendimento a Brasil, LATAM, USA e demais regiões' },
-              { icon: BarChart3, title: 'Avaliação e Métricas', desc: 'Pesquisas de satisfação e indicadores de performance' },
+              { icon: BookOpen, title: t('login.featureRequests'), desc: t('login.featureRequestsDesc') },
+              { icon: Users, title: t('login.featureRegions'), desc: t('login.featureRegionsDesc') },
+              { icon: BarChart3, title: t('login.featureMetrics'), desc: t('login.featureMetricsDesc') },
             ].map((feature, i) => (
               <div key={i} className="flex items-start gap-3">
                 <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10 flex-shrink-0">
@@ -170,7 +169,7 @@ export default function Login() {
         {/* Footer */}
         <div className="relative z-10 flex items-center gap-2 text-white/40 text-xs">
           <CheckCircle2 className="w-3 h-3" />
-          Plataforma certificada · © {new Date().getFullYear()} Alliage
+          {t('login.certified')} · © {new Date().getFullYear()} Alliage
         </div>
       </div>
 
@@ -187,8 +186,8 @@ export default function Login() {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-[#003B5C] mb-1">Bem-vindo de volta</h1>
-            <p className="text-slate-500 text-sm">Acesse sua conta para continuar</p>
+            <h1 className="text-2xl font-bold text-[#003B5C] mb-1">{t('login.welcome')}</h1>
+            <p className="text-slate-500 text-sm">{t('login.subtitle')}</p>
           </div>
 
           <Button
@@ -197,7 +196,7 @@ export default function Login() {
             onClick={handleGoogle}
           >
             <GoogleIcon className="w-5 h-5 mr-2" />
-            Continuar com Google
+            {t('login.google')}
           </Button>
 
           <Button
@@ -206,7 +205,7 @@ export default function Login() {
             onClick={handleMicrosoft}
           >
             <LogIn className="w-5 h-5 mr-2 text-[#0078D4]" />
-            Continuar com Microsoft
+            {t('login.microsoft')}
           </Button>
 
           <div className="relative mb-4">
@@ -214,7 +213,7 @@ export default function Login() {
               <div className="w-full border-t border-slate-100" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-3 text-slate-400">ou</span>
+              <span className="bg-white px-3 text-slate-400">{t('login.or')}</span>
             </div>
           </div>
 
@@ -227,7 +226,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-xs font-medium text-slate-600">Email</Label>
+              <Label htmlFor="email" className="text-xs font-medium text-slate-600">{t('login.email')}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
                 <Input
@@ -245,9 +244,9 @@ export default function Login() {
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-xs font-medium text-slate-600">Senha</Label>
+                <Label htmlFor="password" className="text-xs font-medium text-slate-600">{t('login.password')}</Label>
                 <Link to="/forgot-password" className="text-xs text-[#00A6D6] hover:underline font-medium">
-                  Esqueceu a senha?
+                  {t('login.forgot')}
                 </Link>
               </div>
               <div className="relative">
@@ -273,11 +272,11 @@ export default function Login() {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Acessando...
+                  {t('login.loading')}
                 </>
               ) : (
                 <>
-                  Acessar
+                  {t('login.submit')}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </>
               )}
@@ -285,8 +284,8 @@ export default function Login() {
           </form>
 
           <p className="text-center text-sm text-slate-500 mt-6">
-            Ainda não tem cadastro?{' '}
-            <Link to="/register" className="font-semibold text-[#00A6D6] hover:underline">Solicitar acesso</Link>
+            {t('login.noAccount')}{' '}
+            <Link to="/register" className="font-semibold text-[#00A6D6] hover:underline">{t('login.requestAccess')}</Link>
           </p>
         </div>
       </div>
