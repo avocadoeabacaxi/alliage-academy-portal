@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     // Always use the SatisfactionSurvey token — the /survey/:token page resolves only these
     const surveys = await base44.asServiceRole.entities.SatisfactionSurvey.filter({ training_request_id });
     const validToken = surveys[0]?.public_token || public_token;
-    const surveyUrl = `https://trainning.alliage.global/survey/${validToken}`;
+    const surveyUrl = `https://training.alliage.global/survey/${validToken}`;
 
     // Fetch configured email template from database
     const templates = await base44.asServiceRole.entities.EmailTemplate.filter({ template_type: 'survey' });
@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     // Send via Resend
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
     const result = await resend.emails.send({
-      from: 'no-reply@trainning.alliage.global',
+      from: 'no-reply@training.alliage.global',
       to: request.requester_email,
       subject,
       html

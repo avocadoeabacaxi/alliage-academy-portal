@@ -104,7 +104,7 @@ Return a JSON object with a "questions" array.`;
       });
     }
 
-    const surveyUrl = `https://trainning.alliage.global/survey/${survey.public_token}`;
+    const surveyUrl = `https://training.alliage.global/survey/${survey.public_token}`;
 
     // Keep the TrainingEvaluation report record in sync (same token as the survey)
     const evals = await base44.asServiceRole.entities.TrainingEvaluation.filter({ training_request_id });
@@ -148,7 +148,7 @@ Return a JSON object with a "questions" array.`;
     const uniqueRecipients = [...new Set(recipients.map((email) => email.toLowerCase()))];
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
     const results = await Promise.all(uniqueRecipients.map((email) => resend.emails.send({
-      from: 'no-reply@trainning.alliage.global',
+      from: 'no-reply@training.alliage.global',
       to: email,
       subject,
       html

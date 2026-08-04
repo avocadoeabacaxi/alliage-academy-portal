@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
       const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[char]);
       const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
       await Promise.allSettled(recipients.map((recipient) => resend.emails.send({
-        from: 'no-reply@trainning.alliage.global',
+        from: 'no-reply@training.alliage.global',
         to: recipient,
         subject: 'Novo pedido de acesso — Alliage Academy',
         html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto"><h2 style="color:#003B5C">Novo pedido de acesso</h2><p>Uma pessoa solicitou acesso à plataforma e aguarda autorização.</p><div style="background:#f5f5f5;padding:20px;border-radius:8px;margin:20px 0"><p><strong>Nome:</strong> ${escapeHtml(full_name)}</p><p><strong>Email:</strong> ${escapeHtml(normalizedEmail)}</p><p><strong>Telefone:</strong> ${escapeHtml(phone)}</p><p><strong>Empresa:</strong> ${escapeHtml(company_type)} — ${escapeHtml(company_name)}</p></div><p>Acesse a área de Configurações da plataforma para aprovar ou rejeitar o pedido.</p></div>`

@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     });
 
     const result = await resend.emails.send({
-      from: 'no-reply@trainning.alliage.global',
+      from: 'no-reply@training.alliage.global',
       to: requester_email,
       subject: `📅 Lembrete: Seu Treinamento é Amanhã!`,
       html: `

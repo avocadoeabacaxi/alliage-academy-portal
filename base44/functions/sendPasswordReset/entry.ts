@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // Always use the production domain for the set-password link
-    const baseUrl = 'https://trainning.alliage.global';
+    const baseUrl = 'https://training.alliage.global';
 
     // ALWAYS send the custom Portuguese email with a link to the set-password page.
     // The SetPassword page handles both new users (self-register + OTP) and existing users (password reset).
@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
     // Send via Resend SDK directly (Core.SendEmail only works for existing app users)
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
     const result = await resend.emails.send({
-      from: 'no-reply@trainning.alliage.global',
+      from: 'no-reply@training.alliage.global',
       to: normalizedEmail,
       subject: '✅ Acesso Aprovado — Defina sua Senha | Portal de Treinamentos Alliage',
       html: `

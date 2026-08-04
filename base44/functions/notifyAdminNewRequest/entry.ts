@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
       const found = await base44.asServiceRole.entities.TrainingRequest.filter({ request_id });
       if (found && found.length > 0) recordId = found[0].id;
     }
-    const APP_URL = 'https://trainning.alliage.global';
+    const APP_URL = 'https://training.alliage.global';
     const reviewUrl = recordId ? `${APP_URL}/requests/${recordId}` : `${APP_URL}/requests`;
 
     // Resolve recipients via routing rules
@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
     const result = await resend.emails.send({
-      from: 'no-reply@trainning.alliage.global',
+      from: 'no-reply@training.alliage.global',
       to: recipientEmails,
       subject: `[${priority || 'Nova'}] Nova Solicitação - ${request_id}`,
       html: `
