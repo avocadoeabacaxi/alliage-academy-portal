@@ -1,6 +1,6 @@
 import React from "react";
 
-const LOGO_URL = "https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/520d06895_trianeningpng.png";
+const LOGO_URL = "https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/3f49984b2_logotraininnniinin.png";
 
 export default function AlliageLogo({ className = "", imgClassName = "" }) {
   return (
