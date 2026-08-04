@@ -93,6 +93,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
   };
 
   const handleSubmit = async () => {
+    if (!canProceed()) return;
     setSubmitting(true);
     setSubmitMsg(t('form.generatingId'));
     try {
@@ -424,7 +425,8 @@ export default function TrainingRequestForm({ mode = 'new' }) {
         ) : (
           <button
             onClick={handleSubmit}
-            className="flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+            disabled={!canProceed()}
+            className="flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <Check className="w-4 h-4" />
             {t('common.submit')}
