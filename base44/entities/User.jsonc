@@ -30,6 +30,16 @@
       "type": "boolean",
       "description": "Receber notifica\u00e7\u00f5es por email sobre novos pedidos de acesso",
       "default": false
+    },
+    "preferred_language": {
+      "type": "string",
+      "enum": [
+        "pt",
+        "en",
+        "es"
+      ],
+      "default": "pt",
+      "description": "Idioma preferido para a interface e notifica\u00e7\u00f5es por email"
     }
   },
   "required": [

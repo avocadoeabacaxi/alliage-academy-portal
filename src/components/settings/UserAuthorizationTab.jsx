@@ -35,7 +35,8 @@ export default function UserAuthorizationTab() {
         email: auth.email,
         full_name: auth.full_name,
         role,
-        region: auth.region || 'Brasil'
+        region: auth.region || 'Brasil',
+        preferred_language: auth.preferred_language || 'pt'
       });
       await loadData();
     } catch (e) {

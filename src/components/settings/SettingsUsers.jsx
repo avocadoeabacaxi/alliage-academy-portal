@@ -62,7 +62,7 @@ export default function SettingsUsers({ canManage = false }) {
   const handleSendAccess = async (user) => {
     setSendingReset(user.id);
     try {
-      const response = await base44.functions.invoke('sendPasswordReset', { email: user.email });
+      const response = await base44.functions.invoke('sendPasswordReset', { email: user.email, preferred_language: user.preferred_language || lang });
       const data = response.data || {};
       const msg = data.message || 'Email enviado com sucesso!';
       setResetMsg(prev => ({ ...prev, [user.id]: msg }));
@@ -113,7 +113,7 @@ export default function SettingsUsers({ canManage = false }) {
     if (!inviteForm.email.trim()) return;
     setSaving(true);
     try {
-      await inviteAuthorizedUser(inviteForm);
+      await inviteAuthorizedUser({ ...inviteForm, preferred_language: lang });
       setInviteMsg('Convite enviado. O usuário receberá um link para criar a senha e acessar o portal.');
       setInviteForm({ email: '', role: 'solicitante', region: 'Brasil' });
       setTimeout(() => setInviteMsg(''), 5000);

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { translations } from './translations';
 import { translateOption } from './optionValues';
 
@@ -8,6 +9,11 @@ const LANGS = ['pt', 'en', 'es'];
 
 function detectLanguage() {
   try {
+    const urlLanguage = new URLSearchParams(window.location.search).get('lang');
+    if (urlLanguage && LANGS.includes(urlLanguage)) {
+      localStorage.setItem('alliage_lang', urlLanguage);
+      return urlLanguage;
+    }
     const saved = localStorage.getItem('alliage_lang');
     if (saved && LANGS.includes(saved)) return saved;
   } catch (e) {}
@@ -24,6 +30,12 @@ export function LanguageProvider({ children }) {
     setLangState(newLang);
     try { localStorage.setItem('alliage_lang', newLang); } catch (e) {}
   }, []);
+
+  useEffect(() => {
+    base44.auth.isAuthenticated().then((authenticated) => {
+      if (authenticated) return base44.auth.updateMe({ preferred_language: lang });
+    }).catch(() => {});
+  }, [lang]);
 
   const t = useCallback((key) => {
     return (translations[lang] && translations[lang][key]) || translations.pt[key] || key;

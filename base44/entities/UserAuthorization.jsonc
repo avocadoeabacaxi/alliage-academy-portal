@@ -43,6 +43,15 @@
         "ROW"
       ]
     },
+    "preferred_language": {
+      "type": "string",
+      "enum": [
+        "pt",
+        "en",
+        "es"
+      ],
+      "default": "pt"
+    },
     "status": {
       "type": "string",
       "enum": [

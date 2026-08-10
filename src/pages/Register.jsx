@@ -9,10 +9,12 @@ import { AlertCircle, Loader2, Lock, Mail, LogIn } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import RegistrationProfileFields from "@/components/RegistrationProfileFields";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const emptyProfile = { full_name: "", email: "", phone: "", company_type: "", company_name: "" };
 
 export default function Register() {
+  const { lang } = useLanguage();
   const [profile, setProfile] = useState(emptyProfile);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -30,7 +32,7 @@ export default function Register() {
   };
 
   const requestApproval = async () => {
-    const response = await base44.functions.invoke("requestAccess", profile);
+    const response = await base44.functions.invoke("requestAccess", { ...profile, preferred_language: lang });
     if (!response.data?.success && response.data?.status !== "pending") {
       throw new Error(response.data?.message || "Não foi possível solicitar o acesso");
     }
