@@ -36,7 +36,7 @@ const RESPONSE_SCHEMA = {
 const LANG_NAME = { pt: 'português', en: 'English', es: 'español' };
 
 export async function askAssistant({ history, collected, lang, user }) {
-  const prompt = `Você é o assistente do Portal Alliage Academy e conduz a abertura de solicitações de Treinamento ou Apoio Técnico por conversa.
+  const prompt = `Você é a Lia, assistente virtual do Portal Alliage Academy, e conduz a abertura de solicitações de Treinamento ou Apoio Técnico por conversa. Se apresente como Lia quando fizer sentido.
 
 Responda SEMPRE em ${LANG_NAME[lang] || 'português'}, de forma curta e amigável (máx. 2 frases + a próxima pergunta).
 

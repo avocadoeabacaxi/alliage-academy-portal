@@ -8,14 +8,14 @@ import ChatComposer from '@/components/quick/ChatComposer';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 
-const LOGO_URL = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6cf5c1a2b_LogoAlliage.png';
+const LIA_AVATAR = 'https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/2fb3bbb24_CapturadeTela2026-08-11as092416.png';
 
 const COPY = {
   pt: {
-    title: 'Alliage Academy',
-    status: 'Assistente online',
+    title: 'Lia · Alliage Academy',
+    status: 'online',
     placeholder: 'Mensagem',
-    intro: 'Olá! Vou abrir sua solicitação em poucos passos. É um Treinamento ou um Apoio Técnico? Se preferir, cole aqui todas as informações que já tiver.',
+    intro: 'Oi! Eu sou a Lia, sua assistente da Alliage Academy. 👋\nVou abrir sua solicitação em poucos passos. É um Treinamento ou um Apoio Técnico? Se preferir, cole aqui todas as informações que já tiver.',
     creating: 'Abrindo o chamado...',
     typing: 'digitando...',
     created: 'Chamado aberto com sucesso!',
@@ -23,10 +23,10 @@ const COPY = {
     error: 'Não consegui abrir o chamado'
   },
   en: {
-    title: 'Alliage Academy',
-    status: 'Assistant online',
+    title: 'Lia · Alliage Academy',
+    status: 'online',
     placeholder: 'Message',
-    intro: 'Hi! I will open your request in a few steps. Is it a Training or Technical Support? You can also paste all the info you already have.',
+    intro: 'Hi! I\'m Lia, your Alliage Academy assistant. 👋\nI will open your request in a few steps. Is it a Training or Technical Support? You can also paste all the info you already have.',
     creating: 'Opening the ticket...',
     typing: 'typing...',
     created: 'Ticket opened successfully!',
@@ -34,10 +34,10 @@ const COPY = {
     error: 'Could not open the ticket'
   },
   es: {
-    title: 'Alliage Academy',
-    status: 'Asistente en línea',
+    title: 'Lia · Alliage Academy',
+    status: 'en línea',
     placeholder: 'Mensaje',
-    intro: '¡Hola! Abriré su solicitud en pocos pasos. ¿Es un Entrenamiento o un Soporte Técnico? También puede pegar aquí toda la información que ya tenga.',
+    intro: '¡Hola! Soy Lia, su asistente de Alliage Academy. 👋\nAbriré su solicitud en pocos pasos. ¿Es un Entrenamiento o un Soporte Técnico? También puede pegar aquí toda la información que ya tenga.',
     creating: 'Abriendo el ticket...',
     typing: 'escribiendo...',
     created: '¡Ticket abierto con éxito!',
@@ -110,9 +110,7 @@ export default function QuickRequest() {
         className="flex items-center gap-3 px-4 py-3 bg-[#003B5C] text-white shadow-md z-10"
         style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))' }}
       >
-        <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center overflow-hidden flex-shrink-0">
-          <img src={LOGO_URL} alt="Alliage" className="w-7 h-7 object-contain" />
-        </div>
+        <img src={LIA_AVATAR} alt="Lia" className="w-10 h-10 rounded-full object-cover object-top bg-white flex-shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold truncate">{copy.title}</p>
           <p className="text-[11px] text-white/70 truncate">{thinking ? copy.typing : copy.status}</p>
