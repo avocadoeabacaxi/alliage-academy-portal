@@ -8,7 +8,8 @@ import ParticipantsList from '@/components/ParticipantsList';
 import ParticipationAccessFields from '@/components/ParticipationAccessFields';
 import AddressFields from '@/components/AddressFields';
 import ProductSelector, { resolveProductName, BRAND_OPTIONS } from '@/components/ProductSelector';
-import { requestTypeLabels, supportTypes } from '@/lib/requestTypeLabels';
+import { requestTypeLabels, supportTypes, trainingTypes } from '@/lib/requestTypeLabels';
+import { translateOption } from '@/lib/i18n/optionValues';
 
 const AREA_OPTIONS = ['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'];
 const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Dificuldade de posicionamento comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
@@ -19,7 +20,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
   const isPast = mode === 'past';
   const { t, lang } = useLanguage();
   const kindLabels = requestTypeLabels(lang);
-  const requestOptions = requestKind === 'support' ? [...supportTypes, 'Outro'] : ['Novo treinamento', 'Reciclagem', 'Atualização de produto', 'Treinamento de lançamento', 'Técnico avançado', 'Treinamento clínico', 'Treinamento de integração', 'Outro'];
+  const requestOptions = [...(requestKind === 'support' ? supportTypes : trainingTypes), 'Outro'];
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -230,7 +231,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
               </Field>
               <Field label={t('form.area')}>
                 <select value={form.area} onChange={e => update('area', e.target.value)} className="input-base">
-                  {AREA_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                  {AREA_OPTIONS.map(r => <option key={r} value={r}>{translateOption(r, lang)}</option>)}
                 </select>
               </Field>
               {form.area === 'Outro' && (
@@ -248,7 +249,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {requestOptions.map(opt => (
                   <button key={opt} onClick={() => update('request_type', opt)} className={`px-3 py-2.5 text-sm rounded-lg border text-left transition-all ${form.request_type === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                    {opt}
+                    {translateOption(opt, lang)}
                   </button>
                 ))}
               </div>
@@ -316,7 +317,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {PROBLEM_OPTIONS.map(opt => (
                   <button key={opt} onClick={() => toggleArrayItem('specific_problems', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.specific_problems.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                    {opt}
+                    {translateOption(opt, lang)}
                   </button>
                 ))}
               </div>
@@ -326,7 +327,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {IMPACT_OPTIONS.map(opt => (
                   <button key={opt} onClick={() => toggleArrayItem('expected_impacts', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.expected_impacts.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                    {opt}
+                    {translateOption(opt, lang)}
                   </button>
                 ))}
               </div>

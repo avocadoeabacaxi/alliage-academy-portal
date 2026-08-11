@@ -10,7 +10,22 @@ export const optionValues = {
   'Treinamento de lançamento': { en: 'Launch training', es: 'Entrenamiento de lanzamiento' },
   'Técnico avançado': { en: 'Advanced technical', es: 'Técnico avanzado' },
   'Treinamento clínico': { en: 'Clinical training', es: 'Entrenamiento clínico' },
-  'Apoio técnico': { en: 'Technical support', es: 'Soporte técnico' },
+  'Apoio técnico': { pt: 'Apoio técnico – solicitação/dúvida sobre o produto', en: 'Technical support – product request/question', es: 'Soporte técnico – solicitud/duda sobre el producto' },
+  'Marketing': { en: 'Marketing', es: 'Marketing' },
+  // Problemas específicos
+  'Baixa performance comercial': { en: 'Low commercial performance', es: 'Bajo desempeño comercial' },
+  'Dificuldade de posicionamento comercial': { en: 'Commercial positioning difficulty', es: 'Dificultad de posicionamiento comercial' },
+  'Capacitação': { en: 'Training needs', es: 'Capacitación' },
+  'Dificuldade de operação': { en: 'Operating difficulty', es: 'Dificultad de operación' },
+  'Alto volume de suporte técnico': { en: 'High technical support volume', es: 'Alto volumen de soporte técnico' },
+  'Novo distribuidor': { en: 'New distributor', es: 'Nuevo distribuidor' },
+  'Novo colaborador': { en: 'New employee', es: 'Nuevo colaborador' },
+  // Impactos esperados (treinamento)
+  'Aumento de vendas': { en: 'Sales increase', es: 'Aumento de ventas' },
+  'Redução de chamados': { en: 'Fewer support tickets', es: 'Reducción de tickets' },
+  'Melhora de conhecimento técnico': { en: 'Better technical knowledge', es: 'Mejora del conocimiento técnico' },
+  'Certificação da equipe': { en: 'Team certification', es: 'Certificación del equipo' },
+  'Suporte a lançamento': { en: 'Launch support', es: 'Soporte al lanzamiento' },
   'Consulta de mercado': { en: 'Market inquiry', es: 'Consulta de mercado' },
   'Licitação': { en: 'Bidding', es: 'Licitación' },
   'Modificação de produto': { en: 'Product modification', es: 'Modificación de producto' },
@@ -91,6 +106,6 @@ export const optionValues = {
 };
 
 export function translateOption(value, lang) {
-  if (!value || lang === 'pt') return value;
+  if (!value) return value;
   return (optionValues[value] && optionValues[value][lang]) || value;
 }

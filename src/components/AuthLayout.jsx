@@ -1,4 +1,5 @@
 import React from "react";
+import LanguageSelector from "@/components/LanguageSelector";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/3f49984b2_logotraininnniinin.png";
 
@@ -6,6 +7,9 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
+        <div className="flex justify-end mb-4">
+          <LanguageSelector />
+        </div>
         <div className="text-center mb-10">
           <div className="flex justify-center mb-6">
             <img
