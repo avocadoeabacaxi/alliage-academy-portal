@@ -11,7 +11,7 @@ import GoogleIcon from "@/components/GoogleIcon";
 import RegistrationProfileFields from "@/components/RegistrationProfileFields";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-const emptyProfile = { full_name: "", email: "", phone: "", company_type: "", company_name: "" };
+const emptyProfile = { full_name: "", email: "", phone: "" };
 
 export default function Register() {
   const { lang } = useLanguage();
@@ -24,8 +24,8 @@ export default function Register() {
   const [error, setError] = useState("");
 
   const validateProfile = () => {
-    if (!profile.full_name || !profile.email || !profile.phone || !profile.company_type || !profile.company_name) {
-      setError("Preencha todos os dados pessoais e da empresa.");
+    if (!profile.full_name || !profile.email || !profile.phone) {
+      setError("Preencha todos os dados pessoais.");
       return false;
     }
     return true;

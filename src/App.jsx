@@ -29,6 +29,10 @@ import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import SetPassword from '@/pages/SetPassword';
+import Team from '@/pages/Team';
+import Clients from '@/pages/Clients';
+import TechnicalSupportRequest from '@/pages/TechnicalSupportRequest';
+import SolicitacaoSupport from '@/pages/SolicitacaoSupport';
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/set-password'];
 
@@ -79,10 +83,14 @@ const AuthenticatedApp = () => {
         <Route path="/requests" element={<RequestList />} />
         <Route path="/requests/new" element={<RequestTypeSelection />} />
         <Route path="/requests/new/training" element={<NewRequest />} />
+        <Route path="/requests/new/support" element={<TechnicalSupportRequest />} />
         <Route path="/requests/new/event" element={<EventRequestPlaceholder />} />
         <Route path="/solicitacao" element={<RequestTypeSelection />} />
         <Route path="/solicitacao/training" element={<Solicitacao />} />
+        <Route path="/solicitacao/support" element={<SolicitacaoSupport />} />
         <Route path="/solicitacao/event" element={<EventRequestPlaceholder />} />
+        <Route path="/team" element={<Team />} />
+        <Route path="/clients" element={<Clients />} />
         <Route path="/requests/past" element={<PastEventSelection />} />
         <Route path="/requests/past/training" element={<PastEvent />} />
         <Route path="/requests/past/event" element={<PastEventForm />} />

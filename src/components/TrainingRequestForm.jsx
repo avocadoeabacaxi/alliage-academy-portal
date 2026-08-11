@@ -8,15 +8,18 @@ import ParticipantsList from '@/components/ParticipantsList';
 import ParticipationAccessFields from '@/components/ParticipationAccessFields';
 import AddressFields from '@/components/AddressFields';
 import ProductSelector, { resolveProductName, BRAND_OPTIONS } from '@/components/ProductSelector';
+import { requestTypeLabels, supportTypes } from '@/lib/requestTypeLabels';
 
 const AREA_OPTIONS = ['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'];
 const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Dificuldade de posicionamento comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
 const IMPACT_OPTIONS = ['Aumento de vendas', 'Redução de chamados', 'Melhora de conhecimento técnico', 'Certificação da equipe', 'Suporte a lançamento', 'Outro'];
 const NO_AUDIENCE_TYPES = ['Apoio técnico', 'Consulta de mercado', 'Licitação', 'Modificação de produto'];
 
-export default function TrainingRequestForm({ mode = 'new' }) {
+export default function TrainingRequestForm({ mode = 'new', requestKind = 'training' }) {
   const isPast = mode === 'past';
   const { t, lang } = useLanguage();
+  const kindLabels = requestTypeLabels(lang);
+  const requestOptions = requestKind === 'support' ? [...supportTypes, 'Outro'] : ['Novo treinamento', 'Reciclagem', 'Atualização de produto', 'Treinamento de lançamento', 'Técnico avançado', 'Treinamento clínico', 'Treinamento de integração', 'Outro'];
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -25,7 +28,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
 
   const [form, setForm] = useState({
     requester_name: '', requester_email: '', region: 'Brasil', region_detail: '', position: '', area: 'Comercial', area_detail: '',
-    request_type: 'Novo treinamento', request_type_detail: '',
+    request_type: requestKind === 'support' ? 'Apoio técnico' : 'Novo treinamento', request_type_detail: '',
     products: [{ category: 'Extraoral', brand: '', brand_detail: '' }], product_obs: '',
     training_focus: '',
     participants_count: '6-10', participants_list: [],
@@ -171,7 +174,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
     <div className="p-4 lg:p-6 max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[#003B5C]">{isPast ? t('form.pastTitle') : t('form.title')}</h1>
+        <h1 className="text-2xl font-bold text-[#003B5C]">{isPast ? t('form.pastTitle') : requestKind === 'support' ? kindLabels.supportForm : kindLabels.trainingForm}</h1>
         <div className="flex items-center gap-1.5 mt-1 text-sm text-slate-500">
           <Globe className="w-3.5 h-3.5" />
           <span>{t('form.step')} {step + 1} {t('form.of')} {totalStepsAdjusted}</span>
@@ -243,7 +246,7 @@ export default function TrainingRequestForm({ mode = 'new' }) {
           <div className="space-y-3">
             <Field label={t('form.requestType')} required>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {['Novo treinamento', 'Reciclagem', 'Atualização de produto', 'Treinamento de lançamento', 'Técnico avançado', 'Treinamento clínico', 'Apoio técnico', 'Consulta de mercado', 'Licitação', 'Modificação de produto', 'Treinamento de integração', 'Outro'].map(opt => (
+                {requestOptions.map(opt => (
                   <button key={opt} onClick={() => update('request_type', opt)} className={`px-3 py-2.5 text-sm rounded-lg border text-left transition-all ${form.request_type === opt ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
                     {opt}
                   </button>

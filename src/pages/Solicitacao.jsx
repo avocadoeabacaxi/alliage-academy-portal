@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { Loader2, Check, Copy } from 'lucide-react';
 
-export default function Solicitacao() {
+export default function Solicitacao({ requestKind = 'training' }) {
   const { t, lang } = useLanguage();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
@@ -94,7 +94,7 @@ export default function Solicitacao() {
         region_detail: form.region_detail,
         company_type: 'Filial Alliage',
         area: 'Comercial',
-        request_type: 'Novo treinamento',
+        request_type: requestKind === 'support' ? 'Apoio técnico' : 'Novo treinamento',
         product_category: 'Outro',
         product_name: form.product_name,
         training_focus: { [lang]: form.justification },

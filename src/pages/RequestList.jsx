@@ -4,15 +4,17 @@ import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
 import { Search, PlusCircle, FileText, ChevronRight } from 'lucide-react';
+import { requestKind, requestTypeLabels } from '@/lib/requestTypeLabels';
 
 export default function RequestList() {
-  const { t, tf, tv } = useLanguage();
+  const { t, tf, tv, lang } = useLanguage();
+  const typeLabels = requestTypeLabels(lang);
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState({ status: '', region: '', priority: '' });
+  const [filters, setFilters] = useState({ status: '', region: '', priority: '', kind: '' });
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -44,6 +46,7 @@ export default function RequestList() {
     if (filters.status) result = result.filter(r => r.status === filters.status);
     if (filters.region) result = result.filter(r => r.region === filters.region);
     if (filters.priority) result = result.filter(r => r.priority === filters.priority);
+    if (filters.kind) result = result.filter(r => requestKind(r) === filters.kind);
 
     return result;
   }, [requests, user, search, filters, tf]);
@@ -81,6 +84,10 @@ export default function RequestList() {
             className="input-base pl-9"
           />
         </div>
+        <select value={filters.kind} onChange={e => setFilters({...filters, kind: e.target.value})} className="input-base w-auto">
+          <option value="">{typeLabels.all}</option>
+          <option value="training">{typeLabels.training}</option><option value="support">{typeLabels.support}</option><option value="event">{typeLabels.event}</option>
+        </select>
         <select value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})} className="input-base w-auto">
           <option value="">{t('dash.allStatuses')}</option>
           {['Pendente Análise', 'Aprovado Etapa 1', 'Aprovado Etapa 2', 'Concluído', 'Rejeitado'].map(s => <option key={s} value={s}>{tv(s)}</option>)}

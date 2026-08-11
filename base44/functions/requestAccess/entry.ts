@@ -7,10 +7,10 @@ export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
-    const { email, full_name, phone, company_type, company_name } = body;
+    const { email, full_name, phone } = body;
     const language = normalizeLanguage(body.preferred_language);
     const normalizedEmail = email?.trim().toLowerCase();
-    if (!normalizedEmail || !full_name || !phone || !company_type || !company_name) return Response.json({ error: 'Preencha todos os campos obrigatórios' }, { status: 400 });
+    if (!normalizedEmail || !full_name || !phone) return Response.json({ error: 'Preencha todos os campos obrigatórios' }, { status: 400 });
     const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
     const recipients = admins.filter((admin) => admin.receive_access_request_emails === true && admin.email);
     if (body.dry_run === true) return Response.json({ success: true, dry_run: true, recipients: recipients.map((admin) => admin.email), preferred_language: language, from: EMAIL_FROM });
@@ -23,10 +23,10 @@ export default async function(req) {
       };
       return Response.json({ success: false, message: messages[language][existing[0].status], status: existing[0].status });
     }
-    await base44.asServiceRole.entities.UserAuthorization.create({ email: normalizedEmail, full_name, phone, company_type, company_name, role: 'solicitante', preferred_language: language, status: 'pending', first_login_attempt: new Date().toISOString() });
+    await base44.asServiceRole.entities.UserAuthorization.create({ email: normalizedEmail, full_name, phone, role: 'solicitante', preferred_language: language, status: 'pending', first_login_attempt: new Date().toISOString() });
     const resend = new Resend(secrets.get('RESEND_API_KEY'));
     await Promise.all(recipients.map((admin) => {
-      const message = buildEmail('accessAdmin', admin.preferred_language || 'pt', { name: full_name, email: normalizedEmail, phone, company: `${company_type} — ${company_name}` });
+      const message = buildEmail('accessAdmin', admin.preferred_language || 'pt', { name: full_name, email: normalizedEmail, phone, company: '—' });
       return resend.emails.send({ from: EMAIL_FROM, to: admin.email, ...message });
     }));
     const success = { pt: 'Cadastro realizado. Seu acesso ficará disponível após a aprovação do administrador.', en: 'Registration completed. Your access will be available after administrator approval.', es: 'Registro realizado. Su acceso estará disponible después de la aprobación del administrador.' }[language];

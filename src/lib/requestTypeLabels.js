@@ -1,0 +1,8 @@
+const copy = {
+  pt: { training: 'Treinamento', trainingDesc: 'Solicite treinamentos, reciclagens e atualizações de produto.', support: 'Apoio Técnico', supportDesc: 'Solicite apoio técnico, consultas, licitações ou modificações de produto.', trainingForm: 'Solicitação de Treinamento', supportForm: 'Solicitação de Apoio Técnico', all: 'Todos os tipos', event: 'Evento' },
+  en: { training: 'Training', trainingDesc: 'Request training, refreshers and product updates.', support: 'Technical Support', supportDesc: 'Request technical support, consultations, bids or product modifications.', trainingForm: 'Training Request', supportForm: 'Technical Support Request', all: 'All types', event: 'Event' },
+  es: { training: 'Entrenamiento', trainingDesc: 'Solicite entrenamientos, reciclajes y actualizaciones de producto.', support: 'Soporte Técnico', supportDesc: 'Solicite soporte técnico, consultas, licitaciones o modificaciones de producto.', trainingForm: 'Solicitud de Entrenamiento', supportForm: 'Solicitud de Soporte Técnico', all: 'Todos los tipos', event: 'Evento' }
+};
+export const requestTypeLabels = (lang) => copy[lang] || copy.pt;
+export const supportTypes = ['Apoio técnico', 'Consulta de mercado', 'Licitação', 'Modificação de produto'];
+export const requestKind = (request) => request.request_category === 'Evento' ? 'event' : supportTypes.includes(request.request_type) ? 'support' : 'training';

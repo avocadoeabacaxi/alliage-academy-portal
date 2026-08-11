@@ -4,11 +4,14 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import ProfileEditModal from '@/components/ProfileEditModal';
 import AuthorizationGate from '@/components/AuthorizationGate';
-import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList, Edit, User as UserIcon, ChevronDown, Settings, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList, Edit, User as UserIcon, ChevronDown, Settings, BarChart3, ContactRound, UserRoundPlus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { teamCopy, clientCopy } from '@/lib/directoryLabels';
 
 export default function Layout() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const teamLabels = teamCopy[lang] || teamCopy.pt;
+  const clientLabels = clientCopy[lang] || clientCopy.pt;
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -25,7 +28,7 @@ export default function Layout() {
         const u = await base44.auth.me();
         if (!u) return;
         const res = await base44.functions.invoke('checkUserAuthorization', { email: u.email });
-        const appUser = res.data?.status === 'approved' && res.data?.role ? { ...u, role: res.data.role } : u;
+        const appUser = res.data?.status === 'approved' && res.data?.role ? { ...u, role: res.data.role, region: res.data.region || u.region } : u;
         setUser(appUser);
         if (appUser.role !== 'solicitante') {
           const requests = await base44.entities.TrainingRequest.filter({ status: 'Pendente Análise' });
@@ -45,6 +48,8 @@ export default function Layout() {
         { path: '/', label: t('nav.dashboard'), icon: LayoutDashboard, roles: ['admin', 'educador', 'gerente_regional'] },
         { path: '/requests', label: t('nav.requests'), icon: FileText, roles: ['admin', 'educador', 'gerente_regional'], badge: pendingCount },
         { path: '/my-requests', label: t('nav.requests'), icon: ClipboardList, roles: ['solicitante'] },
+        { path: '/team', label: teamLabels.title, icon: UserRoundPlus, roles: ['admin', 'gerente_regional', 'solicitante'] },
+        { path: '/clients', label: clientLabels.title, icon: ContactRound, roles: ['admin', 'gerente_regional', 'solicitante'] },
       ]
     },
     {

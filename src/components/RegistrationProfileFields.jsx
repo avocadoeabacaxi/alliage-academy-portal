@@ -1,7 +1,7 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, Mail, Phone, UserPlus } from "lucide-react";
+import { Mail, Phone, UserPlus } from "lucide-react";
 
 const fields = [
   { key: "full_name", label: "Nome completo", type: "text", placeholder: "Seu nome completo", Icon: UserPlus },
@@ -22,16 +22,7 @@ export default function RegistrationProfileFields({ profile, onChange }) {
           </div>
         </div>
       ))}
-      <div className="space-y-2">
-        <Label htmlFor="company_type">Tipo de empresa</Label>
-        <select id="company_type" value={profile.company_type} onChange={(e) => update("company_type", e.target.value)} className="input-base h-12" required>
-          <option value="">Selecione</option>
-          <option value="Filial Alliage">Filial Alliage</option>
-          <option value="Distribuidor/Dealer">Distribuidor / Dealer</option>
-          <option value="Outro">Outro</option>
-        </select>
-      </div>
-      {profile.company_type && <div className="space-y-2"><Label htmlFor="company_name">Nome da empresa</Label><div className="relative"><Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input id="company_name" value={profile.company_name} onChange={(e) => update("company_name", e.target.value)} placeholder="Informe a empresa" className="pl-10 h-12" required /></div></div>}
+
     </div>
   );
 }

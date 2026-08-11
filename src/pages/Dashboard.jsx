@@ -6,6 +6,7 @@ import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
 import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 import { TrendingUp, Clock, CheckCircle2, XCircle, FileText, PlusCircle, Download, Activity } from 'lucide-react';
 import TrainersTab from '@/components/dashboard/TrainersTab';
+import { requestKind, requestTypeLabels } from '@/lib/requestTypeLabels';
 
 const STATUS_COLORS = {
   'Pendente Análise': '#F59E0B',
@@ -31,7 +32,8 @@ const STATUS_KEYS = {
 };
 
 export default function Dashboard() {
-  const { t, tf } = useLanguage();
+  const { t, tf, lang } = useLanguage();
+  const typeLabels = requestTypeLabels(lang);
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +47,7 @@ export default function Dashboard() {
         const currentUser = await base44.auth.me();
         const authorization = await base44.functions.invoke('checkUserAuthorization', { email: currentUser.email });
         const appUser = authorization.data?.status === 'approved' && authorization.data?.role
-          ? { ...currentUser, role: authorization.data.role }
+          ? { ...currentUser, role: authorization.data.role, region: authorization.data.region || currentUser.region }
           : currentUser;
         setUser(appUser);
         if (appUser.role === 'solicitante') {
@@ -53,7 +55,11 @@ export default function Dashboard() {
           return;
         }
         const requests = await base44.entities.TrainingRequest.list('-created_date', 1000);
-        setRequests(requests);
+        const visibleRequests = appUser.role === 'gerente_regional' && appUser.region
+          ? requests.filter((request) => request.region === appUser.region)
+          : requests;
+        setRequests(visibleRequests);
+        if (appUser.role === 'gerente_regional' && appUser.region) setFilters((current) => ({ ...current, region: appUser.region }));
       } catch (e) {
         console.error('Error loading dashboard:', e);
       } finally {
@@ -117,9 +123,13 @@ export default function Dashboard() {
 
   const byTypeData = useMemo(() => {
     const counts = {};
-    filteredRequests.forEach(r => { counts[r.request_type] = (counts[r.request_type] || 0) + 1; });
+    filteredRequests.forEach((request) => {
+      const kind = requestKind(request);
+      const name = typeLabels[kind];
+      counts[name] = (counts[name] || 0) + 1;
+    });
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
-  }, [filteredRequests]);
+  }, [filteredRequests, typeLabels]);
 
   const handleExport = () => {
     const headers = ['ID', 'Status', 'Priority', 'Region', 'Product', 'Type', 'Requester', 'Created'];
@@ -175,10 +185,12 @@ export default function Dashboard() {
       <>
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2 mb-6">
-        <select value={filters.region} onChange={e => setFilters({...filters, region: e.target.value})} className="input-base w-auto">
-          <option value="">{t('dash.allRegions')}</option>
-          {['Brasil', 'LATAM', 'USA', 'ROW'].map(r => <option key={r} value={r}>{t(`region.${r.toLowerCase()}`)}</option>)}
-        </select>
+        {user?.role !== 'gerente_regional' && (
+          <select value={filters.region} onChange={e => setFilters({...filters, region: e.target.value})} className="input-base w-auto">
+            <option value="">{t('dash.allRegions')}</option>
+            {['Brasil', 'LATAM', 'USA', 'ROW'].map(r => <option key={r} value={r}>{t(`region.${r.toLowerCase()}`)}</option>)}
+          </select>
+        )}
         <select value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})} className="input-base w-auto">
           <option value="">{t('dash.allStatuses')}</option>
           {['Pendente Análise', 'Aprovado Etapa 1', 'Aprovado Etapa 2', 'Concluído', 'Rejeitado'].map(s => <option key={s} value={s}>{t(`status.${STATUS_KEYS[s]}`)}</option>)}
