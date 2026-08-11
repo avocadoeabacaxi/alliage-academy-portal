@@ -33,6 +33,7 @@ import Team from '@/pages/Team';
 import Clients from '@/pages/Clients';
 import TechnicalSupportRequest from '@/pages/TechnicalSupportRequest';
 import SolicitacaoSupport from '@/pages/SolicitacaoSupport';
+import QuickRequest from '@/pages/QuickRequest';
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/set-password'];
 
@@ -89,6 +90,7 @@ const AuthenticatedApp = () => {
         <Route path="/solicitacao/training" element={<Solicitacao />} />
         <Route path="/solicitacao/support" element={<SolicitacaoSupport />} />
         <Route path="/solicitacao/event" element={<EventRequestPlaceholder />} />
+        <Route path="/quick-request" element={<QuickRequest />} />
         <Route path="/team" element={<Team />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/requests/past" element={<PastEventSelection />} />

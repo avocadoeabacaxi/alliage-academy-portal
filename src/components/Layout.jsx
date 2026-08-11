@@ -4,7 +4,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import ProfileEditModal from '@/components/ProfileEditModal';
 import AuthorizationGate from '@/components/AuthorizationGate';
-import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList, Edit, User as UserIcon, ChevronDown, Settings, BarChart3, ContactRound, UserRoundPlus } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList, Edit, User as UserIcon, ChevronDown, Settings, BarChart3, ContactRound, UserRoundPlus, MessageSquare } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { teamCopy, clientCopy } from '@/lib/directoryLabels';
 
@@ -57,6 +57,7 @@ export default function Layout() {
       items: [
         { path: '/requests/new', label: t('nav.newRequest'), icon: PlusCircle, roles: ['admin', 'educador', 'gerente_regional'] },
         { path: '/solicitacao', label: t('nav.newRequest'), icon: PlusCircle, roles: ['solicitante'] },
+        { path: '/quick-request', label: lang === 'en' ? 'Chat request' : lang === 'es' ? 'Solicitud por chat' : 'Solicitação por chat', icon: MessageSquare, roles: ['admin', 'educador', 'gerente_regional', 'solicitante'] },
         { path: '/requests/past', label: t('nav.pastEvent'), icon: History, roles: ['admin', 'educador', 'gerente_regional'] },
       ]
     },
@@ -76,6 +77,7 @@ export default function Layout() {
     if (path === '/requests/new') return location.pathname.startsWith('/requests/new');
     if (path === '/solicitacao') return location.pathname.startsWith('/solicitacao');
     if (path === '/surveys') return location.pathname === '/surveys';
+    if (path === '/quick-request') return location.pathname === '/quick-request';
     return location.pathname === path;
   };
 
