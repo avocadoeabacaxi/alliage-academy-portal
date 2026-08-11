@@ -1,17 +1,18 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
 
-export default function ChatMessage({ role, content }) {
+export default function ChatMessage({ role, content, time }) {
   const isUser = role === 'user';
   return (
-    <div className={`flex gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
-      {!isUser && (
-        <div className="w-7 h-7 rounded-full bg-[#00A6D6] flex items-center justify-center flex-shrink-0">
-          <Sparkles className="w-4 h-4 text-white" />
-        </div>
-      )}
-      <div className={`max-w-[80%] px-3.5 py-2.5 text-sm whitespace-pre-line rounded-2xl ${isUser ? 'bg-[#003B5C] text-white rounded-br-sm' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'}`}>
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div
+        className={`relative max-w-[85%] sm:max-w-[75%] px-3 pt-2 pb-5 text-[15px] leading-snug whitespace-pre-line shadow-sm ${
+          isUser
+            ? 'bg-[#D6F2FB] text-slate-800 rounded-2xl rounded-tr-sm'
+            : 'bg-white text-slate-800 rounded-2xl rounded-tl-sm'
+        }`}
+      >
         {content}
+        <span className="absolute bottom-1 right-2.5 text-[10px] text-slate-400">{time}</span>
       </div>
     </div>
   );
