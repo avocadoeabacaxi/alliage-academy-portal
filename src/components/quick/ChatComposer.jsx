@@ -25,7 +25,6 @@ export default function ChatComposer({ onSend, disabled, placeholder }) {
     <form
       onSubmit={submit}
       className="flex items-end gap-2 px-3 py-2.5 bg-[#F0F4F8] border-t border-slate-200"
-      style={{ paddingBottom: 'calc(0.625rem + env(safe-area-inset-bottom))' }}
     >
       <textarea
         ref={ref}

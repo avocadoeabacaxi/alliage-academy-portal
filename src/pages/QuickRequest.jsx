@@ -105,10 +105,9 @@ export default function QuickRequest() {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#F0F4F8]">
+    <div className="fixed inset-0 flex flex-col overflow-hidden bg-[#F0F4F8]">
       <header
-        className="flex items-center gap-3 px-4 py-3 bg-[#003B5C] text-white shadow-md z-10"
-        style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))' }}
+        className="flex items-center gap-3 px-4 py-3 bg-[#003B5C] text-white shadow-md z-10 flex-shrink-0"
       >
         <img src={LIA_AVATAR} alt="Lia" className="w-10 h-10 rounded-full object-cover object-top bg-white flex-shrink-0" />
         <div className="min-w-0 flex-1">
@@ -131,7 +130,7 @@ export default function QuickRequest() {
         </div>
       </div>
 
-      <div className="w-full">
+      <div className="w-full flex-shrink-0">
         <ChatComposer onSend={handleSend} disabled={thinking || creating} placeholder={copy.placeholder} />
       </div>
     </div>
