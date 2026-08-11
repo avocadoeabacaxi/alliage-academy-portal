@@ -1,0 +1,32 @@
+{
+  "name": "TrainingSchedule",
+  "type": "object",
+  "properties": {
+    "training_request_id": {
+      "type": "string"
+    },
+    "request_id_display": {
+      "type": "string"
+    },
+    "educator_id": {
+      "type": "string"
+    },
+    "educator_name": {
+      "type": "string"
+    },
+    "start_datetime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_datetime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "training_request_id",
+    "educator_id",
+    "start_datetime",
+    "end_datetime"
+  ]
+}

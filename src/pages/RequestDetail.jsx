@@ -5,6 +5,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
 import RequestParticipants from '@/components/RequestParticipants';
 import AccessDetailsEditor from '@/components/AccessDetailsEditor';
+import TrainingScheduler from '@/components/TrainingScheduler';
 import { ArrowLeft, Check, X, Clock, MapPin, User, Mail, Building, Calendar, Star, Copy, FileText, Loader2, Globe, Activity } from 'lucide-react';
 
 export default function RequestDetail() {
@@ -73,7 +74,10 @@ export default function RequestDetail() {
     if (!window.confirm(t('detail.cancelRequestConfirm'))) return;
     setSaving(true);
     try {
-      await base44.entities.TrainingRequest.update(id, { status: 'Cancelado' });
+      await Promise.all([
+        base44.entities.TrainingRequest.update(id, { status: 'Cancelado' }),
+        base44.entities.TrainingSchedule.deleteMany({ training_request_id: id })
+      ]);
       await loadData();
     } catch (e) {
       alert('Error: ' + e.message);
@@ -363,6 +367,10 @@ export default function RequestDetail() {
       </Section>
 
       <AccessDetailsEditor request={req} canEdit={canEditAccess} onUpdated={loadData} />
+
+      {req.decision_stage2 === 'Aprovado' && req.status !== 'Cancelado' && (
+        <TrainingScheduler request={req} canEdit={canEditExecution} />
+      )}
 
       {req.has_multiplier && (req.specialist_name || req.specialist_role) && (
         <Section title={t('detail.specialist')} icon={User}>
