@@ -80,7 +80,7 @@ export default function QuickRequest() {
 
   if (result) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 text-center gap-3">
+      <div className="flex flex-col items-center justify-center h-screen p-6 text-center gap-3">
         <CheckCircle2 className="w-14 h-14 text-green-600" />
         <h2 className="text-lg font-bold text-[#003B5C]">{copy.created}</h2>
         <p className="text-sm font-mono text-slate-500">{result.request_id}</p>
@@ -92,7 +92,7 @@ export default function QuickRequest() {
   }
 
   return (
-    <div className="flex flex-col h-full max-w-2xl mx-auto">
+    <div className="flex flex-col h-screen max-w-2xl mx-auto">
       <div className="px-4 py-3 border-b border-slate-200 bg-white">
         <h1 className="text-base font-bold text-[#003B5C] flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[#00A6D6]" />

@@ -79,6 +79,7 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/chat" element={<QuickRequest />} />
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/requests" element={<RequestList />} />
@@ -90,7 +91,6 @@ const AuthenticatedApp = () => {
         <Route path="/solicitacao/training" element={<Solicitacao />} />
         <Route path="/solicitacao/support" element={<SolicitacaoSupport />} />
         <Route path="/solicitacao/event" element={<EventRequestPlaceholder />} />
-        <Route path="/quick-request" element={<QuickRequest />} />
         <Route path="/team" element={<Team />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/requests/past" element={<PastEventSelection />} />
