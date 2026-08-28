@@ -5,6 +5,8 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ChevronLeft, ChevronRight, Check, Loader2, Globe, CalendarDays, Upload, X, Paperclip } from 'lucide-react';
 import RequestSuccessScreen from '@/components/RequestSuccessScreen';
 import AddressFields from '@/components/AddressFields';
+import ValidatedInput from '@/components/ValidatedInput';
+import { isValidEmail } from '@/lib/validation';
 
 const EVENT_TYPES = ['Feira / Congresso', 'Palestra', 'Lançamento de produto', 'Evento Comercial', 'Outro'];
 const ALLIAGE_ROLE_OPTIONS = ['Palestrante/Apresentador', 'Moderador', 'Lançamento de produtos', 'Outro'];
@@ -90,7 +92,7 @@ export default function EventRequestForm({ mode = 'new' }) {
     const sid = steps[step]?.id;
     switch (sid) {
       case 'sec1':
-        return form.requester_name && form.requester_email && form.region &&
+        return form.requester_name && isValidEmail(form.requester_email) && form.region &&
           (form.region === 'USA' || form.region_detail.trim());
       case 'sec2': {
         const base = form.event_name.trim() && form.event_type && (form.event_type !== 'Outro' || form.event_type_detail.trim());
@@ -225,7 +227,7 @@ export default function EventRequestForm({ mode = 'new' }) {
               <input value={form.requester_name} onChange={e => update('requester_name', e.target.value)} className="input-base" placeholder="—" />
             </Field>
             <Field label={t('form.requesterEmail')} required>
-              <input type="email" value={form.requester_email} onChange={e => update('requester_email', e.target.value)} className="input-base" placeholder="—" />
+              <ValidatedInput kind="email" value={form.requester_email} onChange={v => update('requester_email', v)} placeholder="nome@empresa.com" />
             </Field>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label={t('form.position')}>

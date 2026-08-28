@@ -10,6 +10,8 @@ import AddressFields from '@/components/AddressFields';
 import ProductSelector, { resolveProductName, BRAND_OPTIONS } from '@/components/ProductSelector';
 import { requestTypeLabels, supportTypes, trainingTypes } from '@/lib/requestTypeLabels';
 import { translateOption } from '@/lib/i18n/optionValues';
+import ValidatedInput from '@/components/ValidatedInput';
+import { isValidEmail, isValidPhone } from '@/lib/validation';
 
 const AREA_OPTIONS = ['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'];
 const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Dificuldade de posicionamento comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
@@ -68,7 +70,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
   const canProceed = () => {
     const sid = steps[step]?.id;
     switch (sid) {
-      case 'identification': return form.requester_name && form.requester_email && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.area !== 'Outro' || form.area_detail.trim());
+      case 'identification': return form.requester_name && isValidEmail(form.requester_email) && form.region && (form.region === 'USA' || form.region_detail.trim()) && (form.area !== 'Outro' || form.area_detail.trim());
       case 'request_type': return form.request_type && (form.request_type !== 'Outro' || form.request_type_detail.trim());
       case 'product': {
         const list = form.products || [];
@@ -81,12 +83,12 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
         });
       }
       case 'training_focus': return form.training_focus.length > 10;
-      case 'audience': return true;
+      case 'audience': return (form.participants_list || []).every(p => p.name?.trim() && isValidEmail(p.email) && isValidPhone(p.phone));
       case 'justification_urgency':
         if (isPast) return form.training_completed_date && form.justification.trim().length > 0;
         return form.justification.trim().length > 0 && (!form.needs_deadline || form.deadline_requested);
       case 'specialist':
-        return !form.has_multiplier || (form.specialist_name.trim() && form.specialist_role.trim() && form.specialist_email.trim());
+        return !form.has_multiplier || (form.specialist_name.trim() && form.specialist_role.trim() && isValidEmail(form.specialist_email));
       case 'logistics': {
         const onlineReady = form.guest_participation_mode !== 'Online' || !!form.online_access_link || form.needs_educator_link;
         const addressReady = form.guest_participation_mode === 'Online' || form.presencial_mode === 'ribeirao' || (form.location_country && form.location_city);
@@ -210,7 +212,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
               <input value={form.requester_name} onChange={e => update('requester_name', e.target.value)} className="input-base" placeholder="—" />
             </Field>
             <Field label={t('form.requesterEmail')} required>
-              <input type="email" value={form.requester_email} onChange={e => update('requester_email', e.target.value)} className="input-base" placeholder="—" />
+              <ValidatedInput kind="email" value={form.requester_email} onChange={v => update('requester_email', v)} placeholder="nome@empresa.com" />
             </Field>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label={t('form.region')} required>
@@ -377,7 +379,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
               <div className="space-y-4 pl-3 border-l-2 border-[#00A6D6]/20">
                 <Field label={t('form.specialistName')} required><input value={form.specialist_name} onChange={e => update('specialist_name', e.target.value)} className="input-base" /></Field>
                 <Field label={t('form.specialistRole')} required><input value={form.specialist_role} onChange={e => update('specialist_role', e.target.value)} className="input-base" /></Field>
-                <Field label={t('form.specialistEmail')} required><input type="email" value={form.specialist_email} onChange={e => update('specialist_email', e.target.value)} className="input-base" /></Field>
+                <Field label={t('form.specialistEmail')} required><ValidatedInput kind="email" value={form.specialist_email} onChange={v => update('specialist_email', v)} placeholder="nome@empresa.com" /></Field>
               </div>
             )}
           </div>

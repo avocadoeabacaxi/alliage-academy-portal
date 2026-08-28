@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { Plus, Trash2, Users } from 'lucide-react';
+import ValidatedInput from '@/components/ValidatedInput';
 
 export default function ParticipantsList({ participants = [], onChange }) {
   const { t } = useLanguage();
@@ -42,21 +43,10 @@ export default function ParticipantsList({ participants = [], onChange }) {
                 value={p.name || ''}
                 onChange={(e) => update(i, 'name', e.target.value)}
                 className="input-base"
-                placeholder={t('form.participantName')}
+                placeholder={`${t('form.participantName')} *`}
               />
-              <input
-                value={p.phone || ''}
-                onChange={(e) => update(i, 'phone', e.target.value)}
-                className="input-base"
-                placeholder={t('form.participantPhone')}
-              />
-              <input
-                type="email"
-                value={p.email || ''}
-                onChange={(e) => update(i, 'email', e.target.value)}
-                className="input-base"
-                placeholder={t('form.participantEmail')}
-              />
+              <ValidatedInput kind="phone" value={p.phone || ''} onChange={(v) => update(i, 'phone', v)} placeholder={`${t('form.participantPhone')} *`} />
+              <ValidatedInput kind="email" value={p.email || ''} onChange={(v) => update(i, 'email', v)} placeholder={`${t('form.participantEmail')} *`} />
               <select value={p.attendance_mode || 'Presencial'} onChange={(e) => update(i, 'attendance_mode', e.target.value)} className="input-base">
                 <option value="Online">{t('format.online')}</option>
                 <option value="Presencial">{t('format.presencial')}</option>
