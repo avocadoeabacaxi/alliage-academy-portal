@@ -8,7 +8,7 @@ import {
   updateRecord,
 } from './db.mjs';
 import { evaluationQuestions, generateSurveyQuestions, invokeStructuredAssistant, translateTexts } from './ai.mjs';
-import { escapeHtml, fillTemplate, sendEmail } from './mailer.mjs';
+import { emailDeliveryEnabled, escapeHtml, fillTemplate, sendEmail } from './mailer.mjs';
 
 const FINAL_APPROVER_EMAIL = 'caio.monteiro@alliage-global.com';
 const EXCLUDED_EMAILS = new Set(['fernando@avocado.buzz']);
@@ -70,6 +70,7 @@ function localized(value) {
 
 function mailVariables(request, extras = {}) {
   return {
+    origin: escapeHtml(config.appOrigin),
     request_id: escapeHtml(request.request_id || ''),
     requester_name: escapeHtml(request.requester_name || ''),
     requester_email: escapeHtml(request.requester_email || ''),
@@ -108,12 +109,14 @@ export async function notifyAdminNewRequest(request) {
   if (recipients.length === 0) return { skipped: true, reason: 'No recipients' };
 
   const template = templateFor('admin_notification');
-  const variables = mailVariables(request, { review_url: `${config.appOrigin}/requests/${request.id}` });
+  const variables = mailVariables(request, { review_url: `${config.appOrigin}/requests/${encodeURIComponent(request.id)}` });
+  // Historical templates used the display number where the route needs the record ID.
+  const htmlTemplate = (template.html_content || template.html || '').replaceAll('${origin}/requests/${request_id}', '${review_url}');
   return sendEmail({
     emailType: 'admin_notification',
     to: recipients,
     subject: fillTemplate(template.subject, variables),
-    html: fillTemplate(template.html_content || template.html, variables),
+    html: fillTemplate(htmlTemplate, variables),
   });
 }
 
@@ -153,15 +156,12 @@ export async function ensureSurvey(request) {
       product_name: request.product_name || '—',
       training_date: request.training_completed_date || request.training_scheduled_date || '',
       questions: survey.questions,
-      status: 'sent',
+      status: 'pending',
       public_token: survey.public_token,
-      sent_at: new Date().toISOString(),
     });
   } else {
     updateRecord('TrainingEvaluation', evaluations[0].id, {
-      status: evaluations[0].status === 'completed' ? 'completed' : 'sent',
       public_token: survey.public_token,
-      sent_at: new Date().toISOString(),
     });
   }
   return survey;
@@ -174,8 +174,24 @@ export async function sendSatisfactionSurvey(request) {
   const template = templateFor('survey');
   const variables = mailVariables(request, { survey_url: surveyUrl });
   const recipients = uniqueEmails([request.requester_email, ...(request.participants_list || []).map(participant => participant?.email)]);
-  await Promise.all(recipients.map(to => sendEmail({ emailType: 'survey', to, subject: fillTemplate(template.subject, variables), html: fillTemplate(template.html_content || template.html, variables) })));
-  return { success: true, emails_sent: recipients.length, survey_url: surveyUrl };
+  let emailsSent = 0;
+  for (const to of recipients) {
+    const result = await sendEmail({ emailType: 'survey', to, subject: fillTemplate(template.subject, variables), html: fillTemplate(template.html_content || template.html, variables) });
+    if (result.accepted) emailsSent += 1;
+  }
+  if (emailsSent === recipients.length && emailsSent > 0) markSurveySent(request.id);
+  return { success: true, dry_run: config.emailDryRun, emails_sent: emailsSent, survey_url: surveyUrl };
+}
+
+function markSurveySent(requestId, { resend = false } = {}) {
+  const evaluation = listRecords('TrainingEvaluation', { filters: { training_request_id: requestId }, limit: 1 })[0];
+  if (!evaluation) return;
+  const now = new Date().toISOString();
+  updateRecord('TrainingEvaluation', evaluation.id, {
+    status: ['completed', 'in_progress'].includes(evaluation.status) ? evaluation.status : 'sent',
+    sent_at: evaluation.sent_at || now,
+    ...(resend ? { resend_count: (evaluation.resend_count || 0) + 1, last_resent_at: now } : {}),
+  });
 }
 
 export async function runRecordAutomation(entity, previous, current) {
@@ -211,13 +227,16 @@ export async function sendParticipantReminders({ dryRun = false } = {}) {
     && Array.isArray(request.participants_list)
     && request.participants_list.length > 0
   );
-  if (dryRun) return { success: true, dry_run: true, trainings_to_notify: requests.length, date: tomorrow };
+  if (dryRun || !emailDeliveryEnabled()) return { success: true, dry_run: true, trainings_to_notify: requests.length, trainings_notified: 0, emails_sent: 0, date: tomorrow };
 
   let emailsSent = 0;
+  let trainingsNotified = 0;
   for (const request of requests) {
     const participants = request.participants_list.filter(participant => participant?.email?.includes('@'));
-    let sentForRequest = 0;
+    const sentRecipients = new Set(request.reminder_delivery_date === tomorrow ? request.reminder_sent_recipients || [] : []);
     for (const participant of participants) {
+      const recipient = participant.email.trim().toLowerCase();
+      if (sentRecipients.has(recipient)) continue;
       const attendanceMode = participant.attendance_mode || request.guest_participation_mode || 'Presencial';
       const location = request.location_formatted_address || [request.location_street, request.location_number, request.location_city, request.location_country].filter(Boolean).join(', ');
       const roomLink = request.online_access_link || '';
@@ -238,19 +257,25 @@ export async function sendParticipantReminders({ dryRun = false } = {}) {
         calendar_links: calendarLinks,
       });
       const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Alliage//Training//PT\r\nBEGIN:VEVENT\r\nUID:${request.id}-${participant.email}@alliage.global\r\nDTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15)}Z\r\nDTSTART;VALUE=DATE:${startDate.replaceAll('-', '')}\r\nDTEND;VALUE=DATE:${endDate.replaceAll('-', '')}\r\nSUMMARY:${productName}\r\nLOCATION:${calendarLocation || ''}\r\nDESCRIPTION:${accessParts.join(' | ')}\r\nEND:VEVENT\r\nEND:VCALENDAR`;
-      await sendEmail({
+      const result = await sendEmail({
         emailType: 'training_reminder',
         to: participant.email,
         subject: fillTemplate(template.subject, variables),
         html: fillTemplate(template.html_content || template.html, variables),
         attachments: [{ filename: 'atividade-alliage.ics', content: Buffer.from(ics).toString('base64') }],
       });
-      emailsSent += 1;
-      sentForRequest += 1;
+      if (result.accepted) {
+        emailsSent += 1;
+        sentRecipients.add(recipient);
+        updateRecord('TrainingRequest', request.id, { reminder_delivery_date: tomorrow, reminder_sent_recipients: [...sentRecipients] });
+      }
     }
-    if (participants.length > 0 && sentForRequest === participants.length) updateRecord('TrainingRequest', request.id, { reminder_sent: true });
+    if (participants.length > 0 && participants.every(participant => sentRecipients.has(participant.email.trim().toLowerCase()))) {
+      updateRecord('TrainingRequest', request.id, { reminder_sent: true });
+      trainingsNotified += 1;
+    }
   }
-  return { success: true, trainings_notified: requests.length, emails_sent: emailsSent, date: tomorrow };
+  return { success: true, dry_run: false, trainings_notified: trainingsNotified, emails_sent: emailsSent, date: tomorrow };
 }
 
 export async function invokeFunction(name, payload = {}, user = null) {
@@ -402,8 +427,8 @@ export async function invokeFunction(name, payload = {}, user = null) {
       requireAdmin(user);
       const email = payload.email?.trim().toLowerCase();
       if (!email) throw Object.assign(new Error('Email é obrigatório'), { status: 400 });
-      await sendAccessEmail(email, payload.full_name || '');
-      return { success: true, message: 'Email de definição de senha enviado com sucesso!' };
+      const result = await sendAccessEmail(email, payload.full_name || '');
+      return { success: true, dry_run: result.dryRun, message: result.dryRun ? 'Modo de teste: nenhum e-mail foi enviado.' : 'Email de definição de senha enviado com sucesso!' };
     }
     case 'resendSurveyEmail': {
       requireManagement(user);
@@ -413,10 +438,9 @@ export async function invokeFunction(name, payload = {}, user = null) {
       const surveyUrl = `${config.appOrigin}/survey/${survey.public_token}`;
       const template = templateFor('survey');
       const variables = mailVariables(request, { survey_url: surveyUrl });
-      await sendEmail({ emailType: 'survey_resend', to: request.requester_email, subject: `[Reenvio] ${fillTemplate(template.subject, variables)}`, html: fillTemplate(template.html_content || template.html, variables) });
-      const evaluation = listRecords('TrainingEvaluation', { filters: { training_request_id: request.id }, limit: 1 })[0];
-      if (evaluation) updateRecord('TrainingEvaluation', evaluation.id, { resend_count: (evaluation.resend_count || 0) + 1, last_resent_at: new Date().toISOString(), status: 'sent' });
-      return { success: true };
+      const result = await sendEmail({ emailType: 'survey_resend', to: request.requester_email, subject: `[Reenvio] ${fillTemplate(template.subject, variables)}`, html: fillTemplate(template.html_content || template.html, variables) });
+      if (result.accepted) markSurveySent(request.id, { resend: true });
+      return { success: true, dry_run: result.dryRun, emails_sent: result.accepted ? 1 : 0 };
     }
     case 'sendParticipantReminders':
       requireAdmin(user);

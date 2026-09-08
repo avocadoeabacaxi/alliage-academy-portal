@@ -67,7 +67,7 @@ export default function SettingsUsers({ canManage = false }) {
       const msg = data.message || 'Email enviado com sucesso!';
       setResetMsg(prev => ({ ...prev, [user.id]: msg }));
       // If the account didn't exist before, it's now invited — refresh to reflect status
-      if (user.pending_registration && data.success) {
+      if (user.pending_registration && data.success && !data.dry_run) {
         setUsers(prev => prev.map(u => u.id === user.id ? { ...u, pending_registration: false } : u));
       }
     } catch (e) {

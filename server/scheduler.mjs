@@ -1,6 +1,7 @@
 import { config } from './config.mjs';
 import { getJobRun, saveJobRun } from './db.mjs';
 import { sendParticipantReminders } from './functions.mjs';
+import { emailDeliveryEnabled } from './mailer.mjs';
 
 const JOB_NAME = 'participant-reminders';
 let timer;
@@ -19,6 +20,7 @@ function localParts(date = new Date()) {
 
 export async function runScheduledJobs(now = new Date()) {
   if (!config.schedulerEnabled) return { skipped: true, reason: 'disabled' };
+  if (!emailDeliveryEnabled()) return { skipped: true, reason: 'email-disabled', dry_run: true };
   const parts = localParts(now);
   const localDate = `${parts.year}-${parts.month}-${parts.day}`;
   if (Number(parts.hour) < config.schedulerHour) return { skipped: true, reason: 'before-hour' };

@@ -34,12 +34,16 @@ export default function Surveys() {
   const handleResendSurvey = async (eval_) => {
     setResending(eval_.id);
     try {
-      await alliage.functions.invoke('resendSurveyEmail', {
+      const response = await alliage.functions.invoke('resendSurveyEmail', {
         training_request_id: eval_.training_request_id,
         request_id_display: eval_.request_id_display,
         public_token: eval_.public_token
       });
       await loadData();
+      if (response.data?.dry_run) {
+        alert('Modo de teste: nenhum e-mail foi enviado. A pesquisa continua com o status anterior.');
+        return;
+      }
       const updated = (await alliage.entities.TrainingEvaluation.filter({ id: eval_.id }))[0] || eval_;
       setSuccessModal({
         evaluation: updated,

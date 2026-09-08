@@ -54,6 +54,25 @@ ADMIN_PASSWORD='uma-senha-forte' pnpm admin:set-password admin@dominio.com
 
 Mantenha `EMAIL_DRY_RUN=true` durante homologação. Cada tentativa fica registrada em `email_log` no SQLite, mas nenhuma mensagem sai do servidor. Depois de validar domínio/remetente no Resend, configure `RESEND_API_KEY` e altere para `false`.
 
+Use uma chave exclusiva com **Sending access** restrito a `training.alliage.global`
+e `EMAIL_FROM=Alliage Trainning <no-reply@training.alliage.global>`. A chave fica
+somente no `.env` protegido do VPS, nunca no Git ou no navegador do portal.
+Instalar a chave não libera disparos: mantenha `EMAIL_DRY_RUN=true` até aprovar
+um teste controlado com destinatário definido.
+
+No modo de teste, pesquisas não recebem status de enviadas e os lembretes
+automáticos não são consumidos nem registrados como execuções bem-sucedidas.
+O reenvio manual informa quando foi apenas simulado. Sem chave e com modo de
+teste desligado, uma tentativa de envio falha explicitamente.
+
+O envio usa timeout de 15 segundos e até três tentativas para falhas transitórias,
+com a mesma chave de idempotência do Resend em todas as tentativas. Lembretes
+registram os destinatários aceitos para retomar uma execução parcialmente falha.
+O status `sent` significa **aceito pelo Resend**, não entrega na caixa de entrada.
+Confirmação de entrega e rejeição por webhooks ainda não está configurada.
+Referências: [idempotência](https://resend.com/docs/dashboard/emails/idempotency-keys)
+e [eventos de entrega](https://resend.com/docs/webhooks/event-types).
+
 Sem `AI_API_URL`, `AI_API_KEY` e `AI_MODEL`, o portal continua funcionando: traduções mantêm o texto original e pesquisas usam o questionário trilíngue padrão.
 
 ## Produção
