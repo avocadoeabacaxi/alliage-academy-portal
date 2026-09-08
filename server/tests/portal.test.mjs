@@ -11,6 +11,7 @@ process.env.UPLOADS_DIR = join(testDataDir, 'uploads');
 process.env.JWT_SECRET = 'test-secret-with-more-than-thirty-two-characters';
 process.env.EMAIL_DRY_RUN = 'true';
 process.env.SCHEDULER_ENABLED = 'false';
+process.env.SUPER_ADMIN_EMAIL = 'admin@example.com';
 
 let origin;
 let server;
@@ -143,6 +144,59 @@ test('solicitante só enxerga a própria solicitação e não altera a aprovaç�
   });
   assert.equal(cancelled.response.status, 200);
   assert.equal(cancelled.body.status, 'Cancelado');
+});
+
+test('recursos novos usam a API própria e exclusão definitiva fica restrita ao superadministrador', async () => {
+  const adminLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: 'admin@example.com', password: 'Senha-Forte-123' }),
+  });
+  const adminHeaders = { Authorization: `Bearer ${adminLogin.body.access_token}` };
+  const training = await request('/api/entities/TrainingRequest', {
+    method: 'POST',
+    headers: adminHeaders,
+    body: JSON.stringify({ request_id: 'TR-TEST-SCHEDULE', requester_email: 'admin@example.com', status: 'Aprovado Etapa 2' }),
+  });
+  const schedule = await request('/api/entities/TrainingSchedule', {
+    method: 'POST',
+    headers: adminHeaders,
+    body: JSON.stringify({ training_request_id: training.body.id, educator_id: 'admin-test', start_datetime: '2026-09-10T12:00:00.000Z', end_datetime: '2026-09-10T13:00:00.000Z' }),
+  });
+  assert.equal(schedule.response.status, 201);
+
+  const client = await request('/api/entities/Client', {
+    method: 'POST',
+    headers: adminHeaders,
+    body: JSON.stringify({ name: 'Cliente Teste' }),
+  });
+  assert.equal(client.response.status, 201);
+  assert.equal(client.body.owner_user_id, 'admin-test');
+
+  const exported = await request('/api/functions/exportDatabase', {
+    method: 'POST',
+    headers: adminHeaders,
+    body: JSON.stringify({}),
+  });
+  assert.equal(exported.response.status, 200);
+  assert.ok(exported.body.data.entities.Client.some(item => item.id === client.body.id));
+
+  const requesterLogin = await request('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: 'requester@example.com', password: 'Senha-Solicitante-123' }),
+  });
+  const denied = await request(`/api/entities/TrainingRequest/${training.body.id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${requesterLogin.body.access_token}` },
+  });
+  assert.equal(denied.response.status, 403);
+
+  const deleted = await request(`/api/entities/TrainingRequest/${training.body.id}`, {
+    method: 'DELETE',
+    headers: adminHeaders,
+  });
+  assert.equal(deleted.response.status, 200);
+  const removedSchedule = await request(`/api/entities/TrainingSchedule/${schedule.body.id}`, { headers: adminHeaders });
+  assert.equal(removedSchedule.response.status, 404);
 });
 
 test('pesquisa pública expõe somente detalhes necessários e aceita token correto', async () => {

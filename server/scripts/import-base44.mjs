@@ -21,7 +21,7 @@ if (!exported?.entities || typeof exported.entities !== 'object') {
   process.exit(1);
 }
 
-const allowedEntities = new Set(['TrainingRequest', 'UserAuthorization', 'RoutingRule', 'SatisfactionSurvey', 'TrainingEvaluation', 'EmailTemplate', 'SurveyResponse', 'User']);
+const allowedEntities = new Set(['TrainingRequest', 'TrainingSchedule', 'Client', 'TeamMember', 'UserAuthorization', 'RoutingRule', 'SatisfactionSurvey', 'TrainingEvaluation', 'EmailTemplate', 'SurveyResponse', 'User']);
 const imported = {};
 
 db.exec('BEGIN IMMEDIATE');

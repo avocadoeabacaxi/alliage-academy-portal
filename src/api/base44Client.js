@@ -56,6 +56,11 @@ function entityClient(entity) {
     delete(id) {
       return api(`/api/entities/${entity}/${encodeURIComponent(id)}`, { method: 'DELETE' });
     },
+    async deleteMany(filter = {}) {
+      const records = await this.filter(filter, '', 5000);
+      await Promise.all(records.map(record => this.delete(record.id)));
+      return { deleted: records.length };
+    },
   };
 }
 
@@ -96,6 +101,14 @@ export const base44 = {
     async me() {
       return api('/api/auth/me');
     },
+    async isAuthenticated() {
+      try {
+        await api('/api/auth/me');
+        return true;
+      } catch {
+        return false;
+      }
+    },
     async updateMe(payload) {
       return api('/api/auth/me', json('PATCH', payload));
     },
@@ -110,7 +123,7 @@ export const base44 = {
       window.location.href = '/login';
     },
   },
-  entities: Object.fromEntries(['TrainingRequest', 'UserAuthorization', 'RoutingRule', 'SatisfactionSurvey', 'TrainingEvaluation', 'EmailTemplate', 'SurveyResponse', 'User'].map(entity => [entity, entityClient(entity)])),
+  entities: Object.fromEntries(['TrainingRequest', 'TrainingSchedule', 'Client', 'TeamMember', 'UserAuthorization', 'RoutingRule', 'SatisfactionSurvey', 'TrainingEvaluation', 'EmailTemplate', 'SurveyResponse', 'User'].map(entity => [entity, entityClient(entity)])),
   functions: {
     invoke(name, payload = {}) {
       return api(`/api/functions/${encodeURIComponent(name)}`, json('POST', payload));
@@ -121,6 +134,10 @@ export const base44 = {
       async UploadFile({ file }) {
         const data = await fileToDataUrl(file);
         return api('/api/uploads', json('POST', { name: file.name, type: file.type, data }));
+      },
+      async InvokeLLM(payload) {
+        const response = await api('/api/functions/invokeLLM', json('POST', payload));
+        return response.data;
       },
     },
   },

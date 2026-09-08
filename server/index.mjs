@@ -30,10 +30,11 @@ import { startScheduler } from './scheduler.mjs';
 const distDir = resolve(config.rootDir, 'dist');
 const publicFunctionNames = new Set(['requestAccess', 'getSurveyByToken', 'createSurveyResponse']);
 const preApprovalFunctionNames = new Set(['checkUserAuthorization', 'ensureUserAuthorization']);
-const allowedEntities = new Set(['TrainingRequest', 'UserAuthorization', 'RoutingRule', 'SatisfactionSurvey', 'TrainingEvaluation', 'EmailTemplate', 'SurveyResponse', 'User']);
+const allowedEntities = new Set(['TrainingRequest', 'TrainingSchedule', 'Client', 'TeamMember', 'UserAuthorization', 'RoutingRule', 'SatisfactionSurvey', 'TrainingEvaluation', 'EmailTemplate', 'SurveyResponse', 'User']);
 const managementRoles = new Set(['admin', 'gerente_regional', 'educador']);
 const adminEntities = new Set(['EmailTemplate', 'RoutingRule', 'UserAuthorization']);
 const managementEntities = new Set(['User', 'TrainingEvaluation', 'SurveyResponse', 'SatisfactionSurvey']);
+const ownedEntities = new Set(['Client', 'TeamMember']);
 const rateLimits = new Map();
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -156,6 +157,19 @@ function entityAccess(user, entity, action, record = null) {
   requireApproved(user);
   if (adminEntities.has(entity)) return requireAdmin(user);
   if (managementEntities.has(entity)) return requireManagement(user);
+  if (ownedEntities.has(entity) && record && user.role !== 'admin') {
+    const owner = record.created_by_id === user.id || record.owner_user_id === user.id;
+    if (!owner) throw new HttpError(403, 'Você não pode acessar este cadastro');
+  }
+  if (entity === 'TrainingSchedule' && ['create', 'update'].includes(action)) return requireManagement(user);
+  if (entity === 'TrainingSchedule' && record && ['read', 'delete'].includes(action) && !managementRoles.has(user.role)) {
+    const trainingRequest = getRecord('TrainingRequest', record.training_request_id);
+    const owner = trainingRequest && (trainingRequest.created_by_id === user.id || trainingRequest.created_by === user.email || trainingRequest.requester_email === user.email);
+    if (!owner) throw new HttpError(403, 'Você não pode acessar este agendamento');
+  }
+  if (entity === 'TrainingRequest' && action === 'delete' && user.email?.toLowerCase() !== config.superAdminEmail) {
+    throw new HttpError(403, 'Apenas o superadministrador pode excluir solicitações');
+  }
   if (entity === 'TrainingRequest' && ['update', 'delete'].includes(action) && record) {
     const owner = record.created_by_id === user.id || record.created_by === user.email || record.requester_email === user.email;
     if (!owner && !managementRoles.has(user.role)) throw new HttpError(403, 'Você não pode alterar esta solicitação');
@@ -273,7 +287,7 @@ async function handleAuth(request, response, pathname, url) {
   if (request.method === 'PATCH' && pathname === '/api/auth/me') {
     const user = currentUser(request);
     const payload = await readJson(request);
-    const allowed = { full_name: payload.full_name, photo_url: payload.photo_url };
+    const allowed = { full_name: payload.full_name, photo_url: payload.photo_url, preferred_language: payload.preferred_language };
     const cleaned = Object.fromEntries(Object.entries(allowed).filter(([, value]) => value !== undefined));
     const updated = updateRecord('User', user.id, cleaned);
     if (!updated) throw new HttpError(404, 'Usuário não encontrado');
@@ -378,6 +392,15 @@ async function handleEntity(request, response, pathname, url) {
     if (entity === 'TrainingRequest' && !managementRoles.has(user.role)) {
       records = records.filter(record => record.created_by_id === user.id || record.created_by === user.email || record.requester_email === user.email);
     }
+    if (ownedEntities.has(entity) && user.role !== 'admin') {
+      records = records.filter(record => record.created_by_id === user.id || record.owner_user_id === user.id);
+    }
+    if (entity === 'TrainingSchedule' && !managementRoles.has(user.role)) {
+      records = records.filter(record => {
+        const trainingRequest = getRecord('TrainingRequest', record.training_request_id);
+        return trainingRequest && (trainingRequest.created_by_id === user.id || trainingRequest.created_by === user.email || trainingRequest.requester_email === user.email);
+      });
+    }
     if (entity === 'User') records = records.map(record => mergedUser(getAccountByEmail(record.email)) || record);
     return sendJson(response, 200, records);
   }
@@ -385,6 +408,9 @@ async function handleEntity(request, response, pathname, url) {
     let payload = await readJson(request);
     if (entity === 'TrainingRequest' && !managementRoles.has(user.role)) {
       payload = { ...payload, requester_email: user.email, requester_name: user.full_name || payload.requester_name || '' };
+    }
+    if (ownedEntities.has(entity)) {
+      payload = { ...payload, owner_user_id: user.id, owner_name: user.full_name || payload.owner_name || '' };
     }
     const created = createRecord(entity, payload, user);
     void runRecordAutomation(entity, null, created);
@@ -409,6 +435,10 @@ async function handleEntity(request, response, pathname, url) {
   }
   if (request.method === 'DELETE' && id) {
     if (!existing || !deleteRecord(entity, id)) throw new HttpError(404, 'Registro não encontrado');
+    if (entity === 'TrainingRequest') {
+      listRecords('TrainingSchedule', { filters: { training_request_id: id }, limit: 5000 })
+        .forEach(schedule => deleteRecord('TrainingSchedule', schedule.id));
+    }
     return sendJson(response, 200, { success: true });
   }
   throw new HttpError(405, 'Método não permitido');

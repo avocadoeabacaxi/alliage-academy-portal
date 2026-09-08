@@ -38,6 +38,20 @@ export async function generateJson(prompt) {
   return extractJson(result.choices?.[0]?.message?.content);
 }
 
+export async function invokeStructuredAssistant(prompt) {
+  try {
+    const result = await generateJson(prompt);
+    if (result && typeof result === 'object') return result;
+  } catch (error) {
+    console.error('AI assistant fallback:', error.message);
+  }
+  return {
+    reply: 'A assistente de IA ainda não está configurada neste ambiente. Use o formulário tradicional para abrir a solicitação.',
+    ready: false,
+    data: {},
+  };
+}
+
 export async function translateTexts(texts, sourceLanguage) {
   const fieldNames = Object.keys(texts || {});
   if (fieldNames.length === 0) return {};
@@ -75,4 +89,3 @@ export function evaluationQuestions(productName = 'treinamento') {
     { id: 'feedback', category: 'general', text: 'Qual foi o seu maior aprendizado neste treinamento?', type: 'text' },
   ];
 }
-

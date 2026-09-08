@@ -7,7 +7,7 @@ import {
   nextTrainingRequestId,
   updateRecord,
 } from './db.mjs';
-import { evaluationQuestions, generateSurveyQuestions, translateTexts } from './ai.mjs';
+import { evaluationQuestions, generateSurveyQuestions, invokeStructuredAssistant, translateTexts } from './ai.mjs';
 import { escapeHtml, fillTemplate, sendEmail } from './mailer.mjs';
 
 const FINAL_APPROVER_EMAIL = 'caio.monteiro@alliage-global.com';
@@ -43,6 +43,13 @@ function requireUser(user) {
 function requireAdmin(user) {
   requireUser(user);
   if (user.role !== 'admin') throw Object.assign(new Error('Apenas administradores'), { status: 403 });
+}
+
+function requireSuperAdmin(user) {
+  requireUser(user);
+  if (user.email?.toLowerCase() !== config.superAdminEmail) {
+    throw Object.assign(new Error('Apenas o superadministrador pode realizar esta ação'), { status: 403 });
+  }
 }
 
 function requireManagement(user) {
@@ -322,6 +329,17 @@ export async function invokeFunction(name, payload = {}, user = null) {
     case 'translateContent':
       requireUser(user);
       return { translations: await translateTexts(payload.texts, payload.source_lang) };
+    case 'invokeLLM':
+      requireUser(user);
+      return invokeStructuredAssistant(String(payload.prompt || ''));
+    case 'exportDatabase': {
+      requireSuperAdmin(user);
+      const entities = ['TrainingRequest', 'TrainingSchedule', 'Client', 'TeamMember', 'UserAuthorization', 'RoutingRule', 'SatisfactionSurvey', 'TrainingEvaluation', 'EmailTemplate', 'SurveyResponse', 'User'];
+      return {
+        exported_at: new Date().toISOString(),
+        entities: Object.fromEntries(entities.map(entity => [entity, listRecords(entity, { sort: '-created_date', limit: 5000 })])),
+      };
+    }
     case 'googleAddress': {
       requireUser(user);
       const headers = { 'User-Agent': 'AlliageTrainingPortal/2.0', 'Accept-Language': payload.language || 'pt-BR' };

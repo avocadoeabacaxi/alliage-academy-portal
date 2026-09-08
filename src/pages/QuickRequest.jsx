@@ -8,7 +8,7 @@ import ChatComposer from '@/components/quick/ChatComposer';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 
-const LIA_AVATAR = 'https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/2fb3bbb24_CapturadeTela2026-08-11as092416.png';
+const LIA_AVATAR = '/assets/alliage-symbol.png';
 
 const COPY = {
   pt: {

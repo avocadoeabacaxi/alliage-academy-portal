@@ -4,7 +4,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import ProfileEditModal from '@/components/ProfileEditModal';
 import AuthorizationGate from '@/components/AuthorizationGate';
-import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, Search, PanelLeftClose, PanelLeftOpen, Activity, History, ClipboardList, Edit, User as UserIcon, ChevronDown, Settings, BarChart3, ContactRound, UserRoundPlus } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, History, ClipboardList, User as UserIcon, ChevronDown, Settings, BarChart3, ContactRound, UserRoundPlus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { teamCopy, clientCopy } from '@/lib/directoryLabels';
 

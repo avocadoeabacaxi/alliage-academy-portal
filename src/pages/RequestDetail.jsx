@@ -6,7 +6,7 @@ import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
 import RequestParticipants from '@/components/RequestParticipants';
 import AccessDetailsEditor from '@/components/AccessDetailsEditor';
 import TrainingScheduler from '@/components/TrainingScheduler';
-import { ArrowLeft, Check, X, Clock, MapPin, User, Mail, Building, Calendar, Star, Copy, FileText, Loader2, Globe, Activity } from 'lucide-react';
+import { ArrowLeft, Check, X, Clock, MapPin, User, Mail, Building, Calendar, Star, Copy, FileText, Loader2, Globe } from 'lucide-react';
 
 export default function RequestDetail() {
   const { id } = useParams();

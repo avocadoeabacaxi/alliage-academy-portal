@@ -29,6 +29,7 @@ export const config = {
   microsoftClientId: process.env.MICROSOFT_CLIENT_ID || '',
   microsoftClientSecret: process.env.MICROSOFT_CLIENT_SECRET || '',
   microsoftTenant: process.env.MICROSOFT_TENANT || 'common',
+  superAdminEmail: (process.env.SUPER_ADMIN_EMAIL || 'firnando@gmail.com').trim().toLowerCase(),
   schedulerEnabled: booleanEnv('SCHEDULER_ENABLED', true),
   schedulerTimezone: process.env.SCHEDULER_TIMEZONE || 'America/Sao_Paulo',
   schedulerHour: Number(process.env.SCHEDULER_HOUR || 8),
@@ -41,4 +42,3 @@ if (config.nodeEnv === 'production' && config.jwtSecret === 'local-development-s
 
 mkdirSync(config.dataDir, { recursive: true });
 mkdirSync(config.uploadsDir, { recursive: true });
-
