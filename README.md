@@ -10,7 +10,7 @@ Portal de solicitações, aprovações e avaliação de treinamentos da Alliage.
 - Armazenamento local de imagens e PDFs.
 - Resend para e-mails, com modo seguro `EMAIL_DRY_RUN=true`.
 - Provedor de IA compatível com a API OpenAI para tradução e geração de pesquisas, com perguntas padrão quando a IA não está configurada.
-- OAuth Google e Microsoft opcional.
+- Login Google e autenticação por e-mail/senha.
 - Agendador diário de lembretes aos participantes.
 - Nginx/Certbot no VPS para proxy reverso e HTTPS.
 
@@ -59,6 +59,11 @@ Sem `AI_API_URL`, `AI_API_KEY` e `AI_MODEL`, o portal continua funcionando: trad
 ## Produção
 
 ### Login Google e Microsoft
+
+A interface oferece Google e e-mail/senha. O botão Microsoft foi removido do
+login e do cadastro; o suporte opcional no servidor permanece desativado sem
+suas credenciais. Para uma futura ativação, também será preciso restaurar a
+opção na interface.
 
 Com `APP_ORIGIN=https://training.alliage.global`, registre aplicativos Web com
 estes endereços de retorno exatos:

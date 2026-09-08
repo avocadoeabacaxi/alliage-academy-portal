@@ -54,10 +54,6 @@ export default function Login() {
     alliage.auth.loginWithProvider("google", "/");
   };
 
-  const handleMicrosoft = () => {
-    alliage.auth.loginWithProvider("microsoft", "/");
-  };
-
   const handleLogout = () => {
     alliage.auth.logout();
     setIsLoggedIn(false);
@@ -197,15 +193,6 @@ export default function Login() {
           >
             <GoogleIcon className="w-5 h-5 mr-2" />
             {t('login.google')}
-          </Button>
-
-          <Button
-            variant="outline"
-            className="w-full h-11 text-sm font-medium mb-4 border-slate-200 hover:bg-slate-50"
-            onClick={handleMicrosoft}
-          >
-            <LogIn className="w-5 h-5 mr-2 text-[#0078D4]" />
-            {t('login.microsoft')}
           </Button>
 
           <div className="relative mb-4">
