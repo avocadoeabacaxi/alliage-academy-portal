@@ -59,6 +59,13 @@ Sem `AI_API_URL`, `AI_API_KEY` e `AI_MODEL`, o portal continua funcionando: trad
 3. Inicie com `docker compose up -d --build`. O app fica disponível apenas em `127.0.0.1:8027`.
 4. Instale `deploy/nginx-http.conf` no Nginx e confira `/api/health`.
 
+Quando o servidor de produção não tiver acesso ao registro npm, compile primeiro com `pnpm build` e gere a imagem sem reinstalar dependências:
+
+```bash
+docker build -f deploy/Dockerfile.prebuilt -t alliage-trainning-app .
+docker compose up -d
+```
+
 O Certbot só conseguirá emitir o certificado quando os registros DNS A/AAAA do domínio apontarem para o servidor e as portas 80/443 estiverem acessíveis. Para `trainning.avocaserver.com`, mantenha `APP_ORIGIN=https://trainning.avocaserver.com`.
 
 Faça backup periódico do volume `alliage_data`; ele contém o SQLite e os uploads.
