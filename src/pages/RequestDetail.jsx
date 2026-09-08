@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
 import RequestParticipants from '@/components/RequestParticipants';
@@ -29,15 +29,15 @@ export default function RequestDetail() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    alliage.auth.me().then(setUser).catch(() => {});
     loadData();
   }, [id]);
 
   const loadData = async () => {
     try {
       const [r, surveys] = await Promise.all([
-        base44.entities.TrainingRequest.get(id),
-        base44.entities.SatisfactionSurvey.filter({ training_request_id: id }).catch(() => [])
+        alliage.entities.TrainingRequest.get(id),
+        alliage.entities.SatisfactionSurvey.filter({ training_request_id: id }).catch(() => [])
       ]);
       setReq(r);
       setEducatorAnalysis(tf(r.educator_analysis) || '');
@@ -50,7 +50,7 @@ export default function RequestDetail() {
 
       if (surveys.length > 0) {
         setSurvey(surveys[0]);
-        base44.entities.SurveyResponse.filter({ survey_id: surveys[0].id }).then(setResponses).catch(() => {});
+        alliage.entities.SurveyResponse.filter({ survey_id: surveys[0].id }).then(setResponses).catch(() => {});
       }
     } catch (e) {
       console.error(e);
@@ -75,8 +75,8 @@ export default function RequestDetail() {
     setSaving(true);
     try {
       await Promise.all([
-        base44.entities.TrainingRequest.update(id, { status: 'Cancelado' }),
-        base44.entities.TrainingSchedule.deleteMany({ training_request_id: id })
+        alliage.entities.TrainingRequest.update(id, { status: 'Cancelado' }),
+        alliage.entities.TrainingSchedule.deleteMany({ training_request_id: id })
       ]);
       await loadData();
     } catch (e) {
@@ -96,7 +96,7 @@ export default function RequestDetail() {
         const texts = { analysis: educatorAnalysis };
         let translations = {};
         try {
-          const resp = await base44.functions.invoke('translateContent', { texts, source_lang: lang });
+          const resp = await alliage.functions.invoke('translateContent', { texts, source_lang: lang });
           translations = resp.data.translations || {};
         } catch (e) {}
 
@@ -111,7 +111,7 @@ export default function RequestDetail() {
         if (decision === 'Rejeitado') {
           const rejTexts = { reason: rejectionReason };
           try {
-            const rejResp = await base44.functions.invoke('translateContent', { texts: rejTexts, source_lang: lang });
+            const rejResp = await alliage.functions.invoke('translateContent', { texts: rejTexts, source_lang: lang });
             updateData.rejection_reason = rejResp.data.translations?.reason || { [lang]: rejectionReason };
           } catch (e) {
             updateData.rejection_reason = { [lang]: rejectionReason };
@@ -121,7 +121,7 @@ export default function RequestDetail() {
         const texts = { analysis: managerAnalysis };
         let translations = {};
         try {
-          const resp = await base44.functions.invoke('translateContent', { texts, source_lang: lang });
+          const resp = await alliage.functions.invoke('translateContent', { texts, source_lang: lang });
           translations = resp.data.translations || {};
         } catch (e) {}
 
@@ -134,7 +134,7 @@ export default function RequestDetail() {
         if (decision === 'Rejeitado') {
           const rejTexts = { reason: rejectionReason };
           try {
-            const rejResp = await base44.functions.invoke('translateContent', { texts: rejTexts, source_lang: lang });
+            const rejResp = await alliage.functions.invoke('translateContent', { texts: rejTexts, source_lang: lang });
             updateData.rejection_reason = rejResp.data.translations?.reason || { [lang]: rejectionReason };
           } catch (e) {
             updateData.rejection_reason = { [lang]: rejectionReason };
@@ -142,7 +142,7 @@ export default function RequestDetail() {
         }
       }
 
-      await base44.entities.TrainingRequest.update(id, updateData);
+      await alliage.entities.TrainingRequest.update(id, updateData);
       await loadData();
     } catch (e) {
       alert('Error: ' + e.message);
@@ -157,11 +157,11 @@ export default function RequestDetail() {
       const texts = { notes: executionNotes };
       let translations = {};
       try {
-        const resp = await base44.functions.invoke('translateContent', { texts, source_lang: lang });
+        const resp = await alliage.functions.invoke('translateContent', { texts, source_lang: lang });
         translations = resp.data.translations || {};
       } catch (e) {}
 
-      await base44.entities.TrainingRequest.update(id, {
+      await alliage.entities.TrainingRequest.update(id, {
         training_completed_date: trainingCompletedDate || new Date().toISOString().split('T')[0],
         execution_notes: translations.notes || { [lang]: executionNotes },
         status: 'Concluído'
@@ -180,11 +180,11 @@ export default function RequestDetail() {
       const texts = { notes: finalNotes };
       let translations = {};
       try {
-        const resp = await base44.functions.invoke('translateContent', { texts, source_lang: lang });
+        const resp = await alliage.functions.invoke('translateContent', { texts, source_lang: lang });
         translations = resp.data.translations || {};
       } catch (e) {}
 
-      await base44.entities.TrainingRequest.update(id, {
+      await alliage.entities.TrainingRequest.update(id, {
         final_notes: translations.notes || { [lang]: finalNotes },
         status: 'Concluído'
       });
@@ -199,7 +199,7 @@ export default function RequestDetail() {
   const handleGenerateSurvey = async () => {
     setGeneratingSurvey(true);
     try {
-      const resp = await base44.functions.invoke('generateSurvey', {
+      const resp = await alliage.functions.invoke('generateSurvey', {
         request_type: req.request_type,
         product_name: req.product_name,
         training_focus: req.training_focus,

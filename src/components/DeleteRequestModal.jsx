@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { AlertTriangle, Loader2, X } from 'lucide-react';
 
 export default function DeleteRequestModal({ request, onClose, onDeleted }) {
@@ -10,7 +10,7 @@ export default function DeleteRequestModal({ request, onClose, onDeleted }) {
 
   const confirm = async () => {
     setDeleting(true);
-    await base44.entities.TrainingRequest.delete(request.id);
+    await alliage.entities.TrainingRequest.delete(request.id);
     setDeleting(false);
     onDeleted(request.id);
   };

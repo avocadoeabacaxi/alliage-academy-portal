@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { Users, Plus, Loader2, Check, Mail, Phone, X } from 'lucide-react';
 
@@ -15,7 +15,7 @@ export default function RequestParticipants({ request, onUpdated }) {
     setSaving(true);
     try {
       const next = [...participants, { name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim(), attendance_mode: form.attendance_mode }];
-      await base44.entities.TrainingRequest.update(request.id, { participants_list: next });
+      await alliage.entities.TrainingRequest.update(request.id, { participants_list: next });
       setForm({ name: '', phone: '', email: '', attendance_mode: 'Presencial' });
       setAdding(false);
       onUpdated && onUpdated();

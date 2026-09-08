@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { ArrowLeft, Mail, Users as UsersIcon, Lock, Route, Database } from 'lucide-react';
 import EmailTemplates from '@/components/settings/EmailTemplates';
 import DatabaseExport from '@/components/settings/DatabaseExport';
@@ -16,8 +16,8 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.auth.me().then(async u => {
-      const response = await base44.functions.invoke('checkUserAuthorization', { email: u.email });
+    alliage.auth.me().then(async u => {
+      const response = await alliage.functions.invoke('checkUserAuthorization', { email: u.email });
       const appRole = response.data?.status === 'approved' ? response.data.role : u.role;
       setUser({ ...u, role: appRole });
       if (appRole !== 'admin') setActiveTab('users');

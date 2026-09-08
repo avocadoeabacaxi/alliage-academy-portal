@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge } from '@/components/StatusBadge';
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend, PieChart, Pie, Cell } from 'recharts';
@@ -20,7 +20,7 @@ export default function TrainersTab({ requests }) {
   const [selectedTrainer, setSelectedTrainer] = useState(null);
 
   useEffect(() => {
-    base44.entities.SurveyResponse.list('-created_date', 1000)
+    alliage.entities.SurveyResponse.list('-created_date', 1000)
       .then(setResponses)
       .catch(() => {})
       .finally(() => setLoading(false));

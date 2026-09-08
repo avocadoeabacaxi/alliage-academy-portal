@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import ParticipationAccessFields from '@/components/ParticipationAccessFields';
 import AddressFields from '@/components/AddressFields';
@@ -14,7 +14,7 @@ export default function AccessDetailsEditor({ request, canEdit, onUpdated }) {
   const save = async () => {
     setSaving(true);
     try {
-      await base44.entities.TrainingRequest.update(request.id, {
+      await alliage.entities.TrainingRequest.update(request.id, {
         guest_participation_mode: data.guest_participation_mode,
         online_platform: data.online_platform,
         online_access_link: data.online_access_link,

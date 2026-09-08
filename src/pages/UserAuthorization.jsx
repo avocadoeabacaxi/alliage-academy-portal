@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { X, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +14,7 @@ export default function UserAuthorization() {
   const [updating, setUpdating] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(u => {
+    alliage.auth.me().then(u => {
       if (u?.role !== 'admin') {
         navigate('/');
         return;
@@ -26,7 +26,7 @@ export default function UserAuthorization() {
 
   const loadData = async () => {
     try {
-      const data = await base44.entities.UserAuthorization.list('-created_date', 100);
+      const data = await alliage.entities.UserAuthorization.list('-created_date', 100);
       setAuths(data);
     } catch (e) {
       console.error(e);
@@ -38,7 +38,7 @@ export default function UserAuthorization() {
   const handleApprove = async (auth, role) => {
     setUpdating(auth.id);
     try {
-      await base44.entities.UserAuthorization.update(auth.id, {
+      await alliage.entities.UserAuthorization.update(auth.id, {
         status: 'approved',
         role,
         approved_by: user.id,
@@ -57,7 +57,7 @@ export default function UserAuthorization() {
     if (!r) return;
     setUpdating(auth.id);
     try {
-      await base44.entities.UserAuthorization.update(auth.id, {
+      await alliage.entities.UserAuthorization.update(auth.id, {
         status: 'rejected',
         rejection_reason: r
       });

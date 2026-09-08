@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { translations } from './translations';
 import { translateOption } from './optionValues';
 
@@ -32,8 +32,8 @@ export function LanguageProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    base44.auth.isAuthenticated().then((authenticated) => {
-      if (authenticated) return base44.auth.updateMe({ preferred_language: lang });
+    alliage.auth.isAuthenticated().then((authenticated) => {
+      if (authenticated) return alliage.auth.updateMe({ preferred_language: lang });
     }).catch(() => {});
   }, [lang]);
 

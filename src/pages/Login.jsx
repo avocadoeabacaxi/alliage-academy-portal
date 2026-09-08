@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { alliage } from "@/api/alliageClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +20,7 @@ export default function Login() {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await base44.functions.invoke('checkUserAuthorization', { email });
+      const response = await alliage.functions.invoke('checkUserAuthorization', { email });
       if (response.data?.authorized) {
         window.location.href = "/";
       } else {
@@ -42,7 +42,7 @@ export default function Login() {
     setAuthStatus(null);
     setLoading(true);
     try {
-      await base44.auth.loginViaEmailPassword(email, password);
+      await alliage.auth.loginViaEmailPassword(email, password);
       await checkAuthStatus();
     } catch (err) {
       setError(err.message || t('login.invalid'));
@@ -51,15 +51,15 @@ export default function Login() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/");
+    alliage.auth.loginWithProvider("google", "/");
   };
 
   const handleMicrosoft = () => {
-    base44.auth.loginWithProvider("microsoft", "/");
+    alliage.auth.loginWithProvider("microsoft", "/");
   };
 
   const handleLogout = () => {
-    base44.auth.logout();
+    alliage.auth.logout();
     setIsLoggedIn(false);
     setAuthStatus(null);
     setEmail("");

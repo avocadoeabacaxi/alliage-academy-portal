@@ -1,4 +1,4 @@
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { supportTypes, trainingTypes } from '@/lib/requestTypeLabels';
 import { BRAND_OPTIONS } from '@/components/ProductSelector';
 
@@ -58,19 +58,19 @@ Dados já coletados: ${JSON.stringify(collected)}
 Conversa até agora:
 ${history.map(m => `${m.role === 'user' ? 'Usuário' : 'Assistente'}: ${m.content}`).join('\n')}`;
 
-  const res = await base44.integrations.Core.InvokeLLM({ prompt, response_json_schema: RESPONSE_SCHEMA });
+  const res = await alliage.integrations.Core.InvokeLLM({ prompt, response_json_schema: RESPONSE_SCHEMA });
   return res;
 }
 
 export async function createRequestFromChat(data, lang) {
-  const idResp = await base44.functions.invoke('generateRequestId', {});
+  const idResp = await alliage.functions.invoke('generateRequestId', {});
   const request_id = idResp.data.request_id;
   const brands = BRAND_OPTIONS[data.product_category] || [];
   const product = { category: data.product_category, brand: brands.length ? (data.product_brand || '') : '', brand_detail: '' };
   const productName = brands.length ? (data.product_brand || data.product_category) : data.product_category;
   const mode = data.participation_mode || 'Presencial';
 
-  const created = await base44.entities.TrainingRequest.create({
+  const created = await alliage.entities.TrainingRequest.create({
     request_id,
     request_category: 'Treinamento / Apoio Técnico',
     status: 'Pendente Análise',

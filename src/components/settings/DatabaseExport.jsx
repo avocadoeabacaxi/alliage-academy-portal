@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Download, Loader2 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 
 export default function DatabaseExport() {
   const [loading, setLoading] = useState(false);
 
   const download = async () => {
     setLoading(true);
-    const response = await base44.functions.invoke('exportDatabase', {});
+    const response = await alliage.functions.invoke('exportDatabase', {});
     const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

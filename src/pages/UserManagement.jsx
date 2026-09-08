@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { inviteAuthorizedUser } from '@/lib/inviteAuthorizedUser';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { UserPlus, Shield, Mail, MapPin, Loader2, Check, X, Search, ChevronDown, ChevronUp, Lock, Edit, CheckCircle2, Users as UsersIcon } from 'lucide-react';
@@ -57,7 +57,7 @@ export default function UserManagement() {
 
   const loadUsers = async () => {
     try {
-      const list = await base44.entities.User.list('created_date', 200);
+      const list = await alliage.entities.User.list('created_date', 200);
       setUsers(list);
     } catch (e) {
       setError(e.message);
@@ -85,7 +85,7 @@ export default function UserManagement() {
     setSaving(true);
     setError('');
     try {
-      await base44.entities.User.update(userId, { role: editForm.role, region: editForm.region });
+      await alliage.entities.User.update(userId, { role: editForm.role, region: editForm.region });
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: editForm.role, region: editForm.region } : u));
       setEditingUser(null);
     } catch (e) {

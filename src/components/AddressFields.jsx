@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { Loader2, MapPin } from 'lucide-react';
 
@@ -15,7 +15,7 @@ export default function AddressFields({ data, update, disabled = false }) {
       setLoading(true);
       setError(false);
       try {
-        const response = await base44.functions.invoke('googleAddress', { action: 'search', query, language: lang });
+        const response = await alliage.functions.invoke('googleAddress', { action: 'search', query, language: lang });
         setSuggestions(response.data.suggestions || []);
       } catch {
         setSuggestions([]);
@@ -30,7 +30,7 @@ export default function AddressFields({ data, update, disabled = false }) {
     setLoading(true);
     setError(false);
     try {
-      const response = await base44.functions.invoke('googleAddress', { action: 'details', placeId: place.placeId, language: lang });
+      const response = await alliage.functions.invoke('googleAddress', { action: 'details', placeId: place.placeId, language: lang });
       Object.entries(response.data.address).forEach(([key, value]) => update(key, value));
       setQuery(response.data.address.location_formatted_address);
       setSuggestions([]);

@@ -5,7 +5,7 @@ import LanguageSelector from '@/components/LanguageSelector';
 import ProfileEditModal from '@/components/ProfileEditModal';
 import AuthorizationGate from '@/components/AuthorizationGate';
 import { LayoutDashboard, FileText, PlusCircle, Users, LogOut, Menu, X, History, ClipboardList, User as UserIcon, ChevronDown, Settings, BarChart3, ContactRound, UserRoundPlus } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { teamCopy, clientCopy } from '@/lib/directoryLabels';
 
 export default function Layout() {
@@ -25,13 +25,13 @@ export default function Layout() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const u = await base44.auth.me();
+        const u = await alliage.auth.me();
         if (!u) return;
-        const res = await base44.functions.invoke('checkUserAuthorization', { email: u.email });
+        const res = await alliage.functions.invoke('checkUserAuthorization', { email: u.email });
         const appUser = res.data?.status === 'approved' && res.data?.role ? { ...u, role: res.data.role, region: res.data.region || u.region } : u;
         setUser(appUser);
         if (appUser.role !== 'solicitante') {
-          const requests = await base44.entities.TrainingRequest.filter({ status: 'Pendente Análise' });
+          const requests = await alliage.entities.TrainingRequest.filter({ status: 'Pendente Análise' });
           setPendingCount(requests.length);
         }
       } catch (e) {}
@@ -80,7 +80,7 @@ export default function Layout() {
   };
 
   const handleLogout = async () => {
-    await base44.auth.logout('/');
+    await alliage.auth.logout('/');
   };
 
   const handleSearch = (e) => {

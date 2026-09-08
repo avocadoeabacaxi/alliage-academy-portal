@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { GraduationCap, CalendarDays, ChevronRight, Wrench } from 'lucide-react';
 import { requestTypeLabels } from '@/lib/requestTypeLabels';
@@ -13,7 +13,7 @@ export default function RequestTypeSelection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.auth.me()
+    alliage.auth.me()
       .then(u => { setUser(u); })
       .catch(() => {})
       .finally(() => setLoading(false));

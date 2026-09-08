@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { Loader2, Info } from 'lucide-react';
 
 // Raio-x de tudo que existe no formulário
@@ -34,8 +34,8 @@ export default function RoutingTab() {
   const loadData = async () => {
     try {
       const [rulesData, adminsResp] = await Promise.all([
-        base44.entities.RoutingRule.list('', 500),
-        base44.functions.invoke('listUserAuthorizations', {}),
+        alliage.entities.RoutingRule.list('', 500),
+        alliage.functions.invoke('listUserAuthorizations', {}),
       ]);
       setRules(rulesData || []);
       const auths = adminsResp.data?.data || [];
@@ -67,10 +67,10 @@ export default function RoutingTab() {
       const next = current.includes(email) ? current.filter(e => e !== email) : [...current, email];
 
       if (existing) {
-        await base44.entities.RoutingRule.update(existing.id, { recipient_emails: next });
+        await alliage.entities.RoutingRule.update(existing.id, { recipient_emails: next });
         setRules(prev => prev.map(r => r.id === existing.id ? { ...r, recipient_emails: next } : r));
       } else {
-        const created = await base44.entities.RoutingRule.create({
+        const created = await alliage.entities.RoutingRule.create({
           request_type: type,
           product_category: category,
           recipient_emails: next,

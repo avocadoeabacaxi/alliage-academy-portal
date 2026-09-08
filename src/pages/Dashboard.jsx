@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge } from '@/components/StatusBadge';
 import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
@@ -44,8 +44,8 @@ export default function Dashboard() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const currentUser = await base44.auth.me();
-        const authorization = await base44.functions.invoke('checkUserAuthorization', { email: currentUser.email });
+        const currentUser = await alliage.auth.me();
+        const authorization = await alliage.functions.invoke('checkUserAuthorization', { email: currentUser.email });
         const appUser = authorization.data?.status === 'approved' && authorization.data?.role
           ? { ...currentUser, role: authorization.data.role, region: authorization.data.region || currentUser.region }
           : currentUser;
@@ -54,7 +54,7 @@ export default function Dashboard() {
           navigate('/my-requests', { replace: true });
           return;
         }
-        const requests = await base44.entities.TrainingRequest.list('-created_date', 1000);
+        const requests = await alliage.entities.TrainingRequest.list('-created_date', 1000);
         const visibleRequests = appUser.role === 'gerente_regional' && appUser.region
           ? requests.filter((request) => request.region === appUser.region)
           : requests;

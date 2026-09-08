@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Star, Check, Loader2, Activity } from 'lucide-react';
@@ -19,7 +19,7 @@ export default function Survey() {
   useEffect(() => {
     const fetchSurvey = async () => {
       try {
-        const response = await base44.functions.invoke('getSurveyByToken', { token });
+        const response = await alliage.functions.invoke('getSurveyByToken', { token });
         if (response.data?.data) {
           setSurvey(response.data.data);
           if (response.data.training_request) setTrainingRequest(response.data.training_request);
@@ -50,7 +50,7 @@ export default function Survey() {
         answer: answers[q.id] || null
       }));
 
-      await base44.functions.invoke('createSurveyResponse', {
+      await alliage.functions.invoke('createSurveyResponse', {
         survey_id: survey.id,
         training_request_id: survey.training_request_id,
         respondent_name: respondentName || '',

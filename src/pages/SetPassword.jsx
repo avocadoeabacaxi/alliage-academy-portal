@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { alliage } from "@/api/alliageClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
@@ -32,7 +32,7 @@ export default function SetPassword() {
     }
     setLoading(true);
     try {
-      await base44.auth.register({ email, password });
+      await alliage.auth.register({ email, password });
       setStep("otp");
     } catch (err) {
       const msg = (err.message || "").toLowerCase();
@@ -56,9 +56,9 @@ export default function SetPassword() {
     }
     setLoading(true);
     try {
-      const response = await base44.auth.verifyOtp({ email, otpCode: otp });
+      const response = await alliage.auth.verifyOtp({ email, otpCode: otp });
       if (response?.access_token) {
-        base44.auth.setToken(response.access_token);
+        alliage.auth.setToken(response.access_token);
         window.location.href = "/";
       } else {
         setError("Código inválido. Tente novamente.");
@@ -74,7 +74,7 @@ export default function SetPassword() {
     setError("");
     setLoading(true);
     try {
-      await base44.auth.resendOtp(email);
+      await alliage.auth.resendOtp(email);
     } catch (err) {
       setError("Erro ao reenviar código");
     } finally {

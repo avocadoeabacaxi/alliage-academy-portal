@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { Mail, AlertCircle, Loader2 } from 'lucide-react';
 
 const DEFAULT_TEMPLATES = {
@@ -47,7 +47,7 @@ export default function EmailTemplates() {
 
   const loadTemplates = async () => {
     try {
-      const data = await base44.entities.EmailTemplate.list();
+      const data = await alliage.entities.EmailTemplate.list();
       const templateMap = {};
       data.forEach(t => {
         templateMap[t.template_type] = t;
@@ -56,7 +56,7 @@ export default function EmailTemplates() {
       // Initialize missing templates with defaults
       for (const [type, defaultTpl] of Object.entries(DEFAULT_TEMPLATES)) {
         if (!templateMap[type]) {
-          const created = await base44.entities.EmailTemplate.create({
+          const created = await alliage.entities.EmailTemplate.create({
             template_type: type,
             subject: defaultTpl.subject,
             html_content: defaultTpl.html
@@ -94,7 +94,7 @@ export default function EmailTemplates() {
     try {
       const existing = templates[selectedTemplate];
       if (existing) {
-        await base44.entities.EmailTemplate.update(existing.id, {
+        await alliage.entities.EmailTemplate.update(existing.id, {
           subject: editSubject,
           html_content: editContent
         });

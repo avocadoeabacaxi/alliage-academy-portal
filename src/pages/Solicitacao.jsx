@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { Loader2, Check, Copy } from 'lucide-react';
 
@@ -75,12 +75,12 @@ export default function Solicitacao({ requestKind = 'training' }) {
     setSubmitting(true);
     setSubmitMsg(t('form.generatingId'));
     try {
-      const idResp = await base44.functions.invoke('generateRequestId', {});
+      const idResp = await alliage.functions.invoke('generateRequestId', {});
       const request_id = idResp.data.request_id;
 
       setSubmitMsg(t('form.translatingFields'));
       const textsToTranslate = { justification: form.justification };
-      const transResp = await base44.functions.invoke('translateContent', { texts: textsToTranslate, source_lang: lang });
+      const transResp = await alliage.functions.invoke('translateContent', { texts: textsToTranslate, source_lang: lang });
       const translations = transResp.data.translations || {};
 
       const entity = {
@@ -107,7 +107,7 @@ export default function Solicitacao({ requestKind = 'training' }) {
         original_language: lang,
       };
 
-      const created = await base44.entities.TrainingRequest.create(entity);
+      const created = await alliage.entities.TrainingRequest.create(entity);
       navigate(`/requests/${created.id}`);
     } catch (error) {
       setSubmitMsg('');

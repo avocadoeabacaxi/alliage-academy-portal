@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { alliage } from "@/api/alliageClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
@@ -32,7 +32,7 @@ export default function Register() {
   };
 
   const requestApproval = async () => {
-    const response = await base44.functions.invoke("requestAccess", { ...profile, preferred_language: lang });
+    const response = await alliage.functions.invoke("requestAccess", { ...profile, preferred_language: lang });
     if (!response.data?.success && response.data?.status !== "pending") {
       throw new Error(response.data?.message || "Não foi possível solicitar o acesso");
     }
@@ -47,7 +47,7 @@ export default function Register() {
     setLoading("password");
     try {
       await requestApproval();
-      await base44.auth.register({ email: profile.email.trim().toLowerCase(), password });
+      await alliage.auth.register({ email: profile.email.trim().toLowerCase(), password });
       setStep("otp");
     } catch (err) {
       setError(err.message || "Erro ao realizar cadastro");
@@ -62,7 +62,7 @@ export default function Register() {
     setLoading(provider);
     try {
       await requestApproval();
-      base44.auth.loginWithProvider(provider, "/");
+      alliage.auth.loginWithProvider(provider, "/");
     } catch (err) {
       setError(err.message || "Erro ao solicitar acesso");
       setLoading("");
@@ -74,9 +74,9 @@ export default function Register() {
     setError("");
     setLoading("otp");
     try {
-      const response = await base44.auth.verifyOtp({ email: profile.email.trim().toLowerCase(), otpCode: otp });
+      const response = await alliage.auth.verifyOtp({ email: profile.email.trim().toLowerCase(), otpCode: otp });
       if (!response?.access_token) throw new Error("Código inválido");
-      base44.auth.setToken(response.access_token);
+      alliage.auth.setToken(response.access_token);
       window.location.href = "/";
     } catch (err) {
       setError(err.message || "Código inválido");
@@ -97,7 +97,7 @@ export default function Register() {
           <Button type="submit" className="w-full h-12" disabled={loading === "otp" || otp.length < 6}>
             {loading === "otp" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Verificar e continuar
           </Button>
-          <button type="button" onClick={() => base44.auth.resendOtp(profile.email)} className="w-full text-sm text-primary hover:underline">Reenviar código</button>
+          <button type="button" onClick={() => alliage.auth.resendOtp(profile.email)} className="w-full text-sm text-primary hover:underline">Reenviar código</button>
         </form>
       </AuthLayout>
     );

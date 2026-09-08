@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import DirectoryPage from '@/components/directory/DirectoryPage';
 import { directoryLabels, teamCopy } from '@/lib/directoryLabels';
@@ -7,7 +7,7 @@ import { directoryLabels, teamCopy } from '@/lib/directoryLabels';
 export default function Team() {
   const { lang } = useLanguage();
   const [user, setUser] = useState(null);
-  useEffect(() => { base44.auth.me().then(setUser); }, []);
+  useEffect(() => { alliage.auth.me().then(setUser); }, []);
   if (!user) return null;
   const copy = teamCopy[lang] || teamCopy.pt;
   const fields = [{ key: 'name', label: copy.name, required: true }, { key: 'email', label: copy.email, type: 'email', required: true }, { key: 'phone', label: copy.phone, type: 'tel', required: true }, { key: 'position', label: copy.position }, { key: 'region', label: copy.region, options: ['Brasil', 'LATAM', 'USA', 'ROW'], defaultValue: user.region || 'Brasil' }];

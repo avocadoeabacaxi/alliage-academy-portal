@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
 import { Search, PlusCircle, FileText, ChevronRight, Trash2 } from 'lucide-react';
@@ -22,8 +22,8 @@ export default function RequestList() {
   const isSuperAdmin = user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL;
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-    base44.entities.TrainingRequest.list('-created_date', 500)
+    alliage.auth.me().then(setUser).catch(() => {});
+    alliage.entities.TrainingRequest.list('-created_date', 500)
       .then(setRequests)
       .catch(() => {})
       .finally(() => setLoading(false));

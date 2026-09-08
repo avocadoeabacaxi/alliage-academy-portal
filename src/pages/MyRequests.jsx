@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
 import { FileText, PlusCircle, Calendar } from 'lucide-react';
@@ -12,8 +12,8 @@ export default function MyRequests() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-    base44.entities.TrainingRequest.list('-created_date', 500)
+    alliage.auth.me().then(setUser).catch(() => {});
+    alliage.entities.TrainingRequest.list('-created_date', 500)
       .then(setRequests)
       .catch(() => {})
       .finally(() => setLoading(false));

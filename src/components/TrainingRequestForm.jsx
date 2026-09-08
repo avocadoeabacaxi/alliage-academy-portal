@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ChevronLeft, ChevronRight, Check, Loader2, Globe } from 'lucide-react';
 import RequestSuccessScreen from '@/components/RequestSuccessScreen';
@@ -103,7 +103,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
     setSubmitting(true);
     setSubmitMsg(t('form.generatingId'));
     try {
-      const idResp = await base44.functions.invoke('generateRequestId', {});
+      const idResp = await alliage.functions.invoke('generateRequestId', {});
       const request_id = idResp.data.request_id;
 
       setSubmitMsg(t('form.translatingFields'));
@@ -112,7 +112,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
         justification: form.justification,
         deadline_reason: form.deadline_reason
       };
-      const transResp = await base44.functions.invoke('translateContent', { texts: textsToTranslate, source_lang: lang });
+      const transResp = await alliage.functions.invoke('translateContent', { texts: textsToTranslate, source_lang: lang });
       const translations = transResp.data.translations || {};
 
       const today = new Date().toISOString().split('T')[0];
@@ -146,7 +146,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
         deadline_reason: translations.deadline_reason || { [lang]: form.deadline_reason },
       };
 
-      const created = await base44.entities.TrainingRequest.create(entity);
+      const created = await alliage.entities.TrainingRequest.create(entity);
       if (isPast) {
         navigate(`/requests/${created.id}`);
       } else {

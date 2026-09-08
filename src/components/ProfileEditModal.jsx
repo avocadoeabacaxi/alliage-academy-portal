@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, Settings } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 
 export default function ProfileEditModal({ isOpen, onClose, user, onUpdateUser }) {
   const [name, setName] = useState(user?.full_name || '');
@@ -29,12 +29,12 @@ export default function ProfileEditModal({ isOpen, onClose, user, onUpdateUser }
       let photoUrl = user?.photo_url;
       
       if (photoFile) {
-        const uploadRes = await base44.integrations.Core.UploadFile({ file: photoFile });
+        const uploadRes = await alliage.integrations.Core.UploadFile({ file: photoFile });
         photoUrl = uploadRes.file_url;
       }
       
-      await base44.auth.updateMe({ full_name: name, photo_url: photoUrl });
-      const updatedUser = await base44.auth.me();
+      await alliage.auth.updateMe({ full_name: name, photo_url: photoUrl });
+      const updatedUser = await alliage.auth.me();
       onUpdateUser({ ...user, ...updatedUser, photo_url: photoUrl });
       onClose();
     } catch (error) {

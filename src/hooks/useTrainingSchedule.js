@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { scheduleConflicts, suggestScheduleSlots, toDateTimeLocal } from '@/lib/trainingSchedule';
 
 export default function useTrainingSchedule(request, labels) {
@@ -12,7 +12,7 @@ export default function useTrainingSchedule(request, labels) {
 
   const load = useCallback(async () => {
     if (!request.educator_id) return;
-    const records = await base44.entities.TrainingSchedule.filter({ training_request_id: request.id });
+    const records = await alliage.entities.TrainingSchedule.filter({ training_request_id: request.id });
     const current = records[0] || null;
     setSchedule(current);
     if (current) {
@@ -38,7 +38,7 @@ export default function useTrainingSchedule(request, labels) {
     }
     setSaving(true);
     try {
-      const educatorSchedules = await base44.entities.TrainingSchedule.filter({ educator_id: request.educator_id });
+      const educatorSchedules = await alliage.entities.TrainingSchedule.filter({ educator_id: request.educator_id });
       const others = educatorSchedules.filter((item) => item.id !== schedule?.id);
       const conflicts = scheduleConflicts(start, end, others);
       if (conflicts.length) {
@@ -47,9 +47,9 @@ export default function useTrainingSchedule(request, labels) {
         return;
       }
       const data = { training_request_id: request.id, request_id_display: request.request_id, educator_id: request.educator_id, educator_name: request.educator_name, start_datetime: new Date(start).toISOString(), end_datetime: new Date(end).toISOString() };
-      if (schedule) await base44.entities.TrainingSchedule.update(schedule.id, data);
-      else await base44.entities.TrainingSchedule.create(data);
-      await base44.entities.TrainingRequest.update(request.id, { training_scheduled_date: start.slice(0, 10) });
+      if (schedule) await alliage.entities.TrainingSchedule.update(schedule.id, data);
+      else await alliage.entities.TrainingSchedule.create(data);
+      await alliage.entities.TrainingRequest.update(request.id, { training_scheduled_date: start.slice(0, 10) });
       setSuggestions([]);
       setMessage(labels.saved);
       await load();

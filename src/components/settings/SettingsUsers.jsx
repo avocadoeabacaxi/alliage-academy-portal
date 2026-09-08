@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { inviteAuthorizedUser } from '@/lib/inviteAuthorizedUser';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { UserPlus, Shield, Mail, MapPin, Loader2, X, Search, Edit, CheckCircle2, Lock, ChevronDown, ChevronUp, Users as UsersIcon, KeyRound, Send } from 'lucide-react';
@@ -62,7 +62,7 @@ export default function SettingsUsers({ canManage = false }) {
   const handleSendAccess = async (user) => {
     setSendingReset(user.id);
     try {
-      const response = await base44.functions.invoke('sendPasswordReset', { email: user.email, preferred_language: user.preferred_language || lang });
+      const response = await alliage.functions.invoke('sendPasswordReset', { email: user.email, preferred_language: user.preferred_language || lang });
       const data = response.data || {};
       const msg = data.message || 'Email enviado com sucesso!';
       setResetMsg(prev => ({ ...prev, [user.id]: msg }));
@@ -84,7 +84,7 @@ export default function SettingsUsers({ canManage = false }) {
     setSavingNotification(user.id);
     const nextValue = !user.receive_access_request_emails;
     try {
-      await base44.entities.User.update(user.id, { receive_access_request_emails: nextValue });
+      await alliage.entities.User.update(user.id, { receive_access_request_emails: nextValue });
       setUsers(prev => prev.map(item => item.id === user.id ? { ...item, receive_access_request_emails: nextValue } : item));
     } catch (e) {
       alert('Erro ao atualizar preferência: ' + e.message);
@@ -95,7 +95,7 @@ export default function SettingsUsers({ canManage = false }) {
 
   const loadUsers = async () => {
     try {
-      const authResponse = await base44.functions.invoke('listUserAuthorizations', {});
+      const authResponse = await alliage.functions.invoke('listUserAuthorizations', {});
       const allAuths = authResponse.data?.data || [];
       if (!canManage) {
         setUsers(allAuths.filter(a => a.status === 'approved').map(a => ({ ...a, role: a.role || 'solicitante' })));
@@ -134,16 +134,16 @@ export default function SettingsUsers({ canManage = false }) {
       const email = targetUser?.email?.toLowerCase();
       // 1. Update UserAuthorization role (source of truth) — same as the authorization tab
       if (email) {
-        const authResponse = await base44.functions.invoke('listUserAuthorizations', {});
+        const authResponse = await alliage.functions.invoke('listUserAuthorizations', {});
         const auth = (authResponse.data?.data || []).find(a => a.email?.toLowerCase() === email);
         if (auth) {
-          await base44.functions.invoke('updateUserAuthorization', { id: auth.id, role: editForm.role, region: editForm.region });
+          await alliage.functions.invoke('updateUserAuthorization', { id: auth.id, role: editForm.role, region: editForm.region });
         }
       }
       // 2. Sync platform User role (admin/user) so platform-level admin privileges match the app role
       if (!targetUser?.pending_registration) {
         const platformRole = editForm.role === 'admin' ? 'admin' : 'user';
-        await base44.entities.User.update(userId, { role: platformRole, region: editForm.region });
+        await alliage.entities.User.update(userId, { role: platformRole, region: editForm.region });
       }
       await loadUsers();
     } catch (e) {

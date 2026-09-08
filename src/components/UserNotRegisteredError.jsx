@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,11 +16,11 @@ const UserNotRegisteredError = () => {
 
   useEffect(() => {
     // Tenta obter dados do usuário logado para pré-preencher
-    base44.auth.me().then(u => {
+    alliage.auth.me().then(u => {
       if (u?.email) setEmail(u.email);
       if (u?.full_name) setFullName(u.full_name);
       // Verifica se já existe solicitação
-      base44.functions.invoke('requestAccess', { email: u.email, full_name: u.full_name })
+      alliage.functions.invoke('requestAccess', { email: u.email, full_name: u.full_name })
         .then(res => {
           if (!res.data?.success && res.data?.status) {
             setExistingStatus(res.data.status);
@@ -36,7 +36,7 @@ const UserNotRegisteredError = () => {
     setError('');
     setLoading(true);
     try {
-      const response = await base44.functions.invoke('requestAccess', { email, full_name: fullName });
+      const response = await alliage.functions.invoke('requestAccess', { email, full_name: fullName });
       if (response.data?.success) {
         setSuccess(true);
         setMessage(response.data.message);
@@ -74,7 +74,7 @@ const UserNotRegisteredError = () => {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => base44.auth.logout('/')}
+              onClick={() => alliage.auth.logout('/')}
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sair
@@ -105,7 +105,7 @@ const UserNotRegisteredError = () => {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => base44.auth.logout('/')}
+              onClick={() => alliage.auth.logout('/')}
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sair
@@ -141,7 +141,7 @@ const UserNotRegisteredError = () => {
             <Button
               variant="outline"
               className="w-full mt-4"
-              onClick={() => base44.auth.logout('/')}
+              onClick={() => alliage.auth.logout('/')}
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sair
@@ -224,7 +224,7 @@ const UserNotRegisteredError = () => {
         <Button
           variant="ghost"
           className="w-full mt-3 text-slate-500"
-          onClick={() => base44.auth.logout('/')}
+          onClick={() => alliage.auth.logout('/')}
         >
           <LogOut className="w-4 h-4 mr-2" />
           Trocar de conta

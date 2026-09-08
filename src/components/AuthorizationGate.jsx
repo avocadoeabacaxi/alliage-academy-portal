@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { Clock, AlertCircle, LogOut, Loader2, GraduationCap, Mail } from 'lucide-react';
 
 export default function AuthorizationGate({ children }) {
@@ -10,14 +10,14 @@ export default function AuthorizationGate({ children }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const user = await base44.auth.me();
+        const user = await alliage.auth.me();
         if (!user) {
           setStatus('unauthorized');
           setLoading(false);
           return;
         }
         setUserEmail(user.email || '');
-        const response = await base44.functions.invoke('checkUserAuthorization', { email: user.email });
+        const response = await alliage.functions.invoke('checkUserAuthorization', { email: user.email });
         const authStatus = response.data?.status || 'pending';
         setStatus(authStatus);
       } catch (e) {
@@ -93,7 +93,7 @@ export default function AuthorizationGate({ children }) {
               )}
 
               <button
-                onClick={() => base44.auth.logout('/login')}
+                onClick={() => alliage.auth.logout('/login')}
                 className="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#003B5C] hover:bg-[#002D44] transition-colors shadow-lg"
               >
                 <LogOut className="w-4 h-4" />

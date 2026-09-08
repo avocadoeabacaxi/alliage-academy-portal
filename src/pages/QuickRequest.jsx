@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { askAssistant, createRequestFromChat } from '@/lib/quickRequestAI';
 import ChatMessage from '@/components/quick/ChatMessage';
@@ -60,7 +60,7 @@ export default function QuickRequest() {
   const [result, setResult] = useState(null);
   const endRef = useRef(null);
 
-  useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
+  useEffect(() => { alliage.auth.me().then(setUser).catch(() => {}); }, []);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, thinking, creating]);
 
   // A saudação acompanha o idioma escolhido enquanto a conversa não começou

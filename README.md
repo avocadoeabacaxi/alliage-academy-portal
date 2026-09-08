@@ -14,6 +14,10 @@ Portal de solicitações, aprovações e avaliação de treinamentos da Alliage.
 - Agendador diário de lembretes aos participantes.
 - Nginx/Certbot no VPS para proxy reverso e HTTPS.
 
+As telas usam `src/api/alliageClient.js`, que chama os endpoints `/api` deste
+servidor. O aplicativo não carrega SDK, autenticação ou mídia do Base44; a
+compatibilidade com seus exports históricos existe apenas no importador local.
+
 ## Desenvolvimento local
 
 ```bash
@@ -53,6 +57,30 @@ Mantenha `EMAIL_DRY_RUN=true` durante homologação. Cada tentativa fica registr
 Sem `AI_API_URL`, `AI_API_KEY` e `AI_MODEL`, o portal continua funcionando: traduções mantêm o texto original e pesquisas usam o questionário trilíngue padrão.
 
 ## Produção
+
+### Login Google e Microsoft
+
+Com `APP_ORIGIN=https://training.alliage.global`, registre aplicativos Web com
+estes endereços de retorno exatos:
+
+- Google: `https://training.alliage.global/api/auth/oauth/google/callback`.
+- Microsoft: `https://training.alliage.global/api/auth/oauth/microsoft/callback`.
+
+Configure `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` para o Google. Para a
+Microsoft, configure `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` e
+`MICROSOFT_TENANT`, de acordo com os tipos de conta permitidos no Entra.
+Guarde esses valores somente no `.env` protegido do servidor e aplique com
+`docker compose up -d --no-build`.
+
+O Google usa os escopos `openid email profile`; a Microsoft também usa
+`User.Read`. Para atender usuários fora da organização Google, o público deve
+ser externo. O nome mostrado no consentimento é compartilhado pelos clientes
+do projeto Google; use um projeto exclusivo quando precisar de identidade própria.
+
+O endpoint `/api/health` informa quais provedores estão configurados, mas o
+teste completo exige entrar pelo provedor e confirmar o retorno ao portal.
+
+### Publicação
 
 1. Copie `.env.example` para `.env` e preencha os segredos.
 2. Importe o banco antes de liberar usuários.

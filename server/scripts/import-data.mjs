@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { countRecords, db, upsertAccount, upsertImportedRecord } from '../db.mjs';
 
+// Historical exports keep their original entities and IDs.
 const sourcePath = process.argv[2];
 if (!sourcePath) {
   console.error('Uso: pnpm import:data /caminho/alliage-database.json');

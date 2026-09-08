@@ -73,7 +73,7 @@ function fileToDataUrl(file) {
   });
 }
 
-export const base44 = {
+export const alliage = {
   auth: {
     async loginViaEmailPassword(email, password) {
       const result = await api('/api/auth/login', json('POST', { email, password }));

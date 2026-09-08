@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ChevronLeft, ChevronRight, Check, Loader2, Globe, CalendarDays, Upload, X, Paperclip } from 'lucide-react';
 import RequestSuccessScreen from '@/components/RequestSuccessScreen';
@@ -65,7 +65,7 @@ export default function EventRequestForm({ mode = 'new' }) {
     if (!file) return;
     setUploading(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await alliage.integrations.Core.UploadFile({ file });
       setForm(prev => ({ ...prev, attachments: [...prev.attachments, res.file_url] }));
     } catch (err) {
       alert('Erro ao enviar arquivo: ' + err.message);
@@ -121,7 +121,7 @@ export default function EventRequestForm({ mode = 'new' }) {
     setSubmitting(true);
     setSubmitMsg(t('form.generatingId'));
     try {
-      const idResp = await base44.functions.invoke('generateRequestId', {});
+      const idResp = await alliage.functions.invoke('generateRequestId', {});
       const request_id = idResp.data.request_id;
 
       setSubmitMsg(t('form.translatingFields'));
@@ -131,7 +131,7 @@ export default function EventRequestForm({ mode = 'new' }) {
         event_history: form.event_history,
         additional_notes: form.additional_notes,
       };
-      const transResp = await base44.functions.invoke('translateContent', { texts: textsToTranslate, source_lang: lang });
+      const transResp = await alliage.functions.invoke('translateContent', { texts: textsToTranslate, source_lang: lang });
       const translations = transResp.data.translations || {};
 
       const today = new Date().toISOString().split('T')[0];
@@ -157,7 +157,7 @@ export default function EventRequestForm({ mode = 'new' }) {
         additional_notes: translations.additional_notes || (form.additional_notes ? { [lang]: form.additional_notes } : {}),
       };
 
-      const created = await base44.entities.TrainingRequest.create(entity);
+      const created = await alliage.entities.TrainingRequest.create(entity);
       if (isPast) {
         navigate(`/requests/${created.id}`);
       } else {

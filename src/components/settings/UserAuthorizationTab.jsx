@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { inviteAuthorizedUser } from '@/lib/inviteAuthorizedUser';
 import { X, Loader2, Search } from 'lucide-react';
 
@@ -12,13 +12,13 @@ export default function UserAuthorizationTab() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser);
+    alliage.auth.me().then(setUser);
     loadData();
   }, []);
 
   const loadData = async () => {
     try {
-      const response = await base44.functions.invoke('listUserAuthorizations', {});
+      const response = await alliage.functions.invoke('listUserAuthorizations', {});
       setAuths(response.data?.data || []);
     } catch (e) {
       console.error(e);
@@ -51,7 +51,7 @@ export default function UserAuthorizationTab() {
     if (!reason) return;
     setUpdating(auth.id);
     try {
-      await base44.functions.invoke('updateUserAuthorization', {
+      await alliage.functions.invoke('updateUserAuthorization', {
         id: auth.id,
         status: 'rejected',
         rejection_reason: reason

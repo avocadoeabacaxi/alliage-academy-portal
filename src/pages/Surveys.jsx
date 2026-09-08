@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { Search, Loader2, BarChart3, TrendingUp, Users, FileText, Send, CheckCircle2, X, Mail, Clock } from 'lucide-react';
 
@@ -20,7 +20,7 @@ export default function Surveys() {
 
   const loadData = async () => {
     try {
-      const evals = await base44.entities.TrainingEvaluation.list('-created_date', 100);
+      const evals = await alliage.entities.TrainingEvaluation.list('-created_date', 100);
       setEvaluations(evals);
       const uniqueEducators = [...new Set(evals.map(e => e.educator_name))];
       setEducators(uniqueEducators);
@@ -34,13 +34,13 @@ export default function Surveys() {
   const handleResendSurvey = async (eval_) => {
     setResending(eval_.id);
     try {
-      await base44.functions.invoke('resendSurveyEmail', {
+      await alliage.functions.invoke('resendSurveyEmail', {
         training_request_id: eval_.training_request_id,
         request_id_display: eval_.request_id_display,
         public_token: eval_.public_token
       });
       await loadData();
-      const updated = (await base44.entities.TrainingEvaluation.filter({ id: eval_.id }))[0] || eval_;
+      const updated = (await alliage.entities.TrainingEvaluation.filter({ id: eval_.id }))[0] || eval_;
       setSuccessModal({
         evaluation: updated,
         product_name: eval_.product_name,
