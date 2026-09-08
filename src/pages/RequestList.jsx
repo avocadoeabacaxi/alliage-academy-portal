@@ -3,8 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
-import { Search, PlusCircle, FileText, ChevronRight } from 'lucide-react';
+import { Search, PlusCircle, FileText, ChevronRight, Trash2 } from 'lucide-react';
 import { requestKind, requestTypeLabels } from '@/lib/requestTypeLabels';
+import DeleteRequestModal from '@/components/DeleteRequestModal';
+
+const SUPER_ADMIN_EMAIL = 'firnando@gmail.com';
 
 export default function RequestList() {
   const { t, tf, tv, lang } = useLanguage();
@@ -15,6 +18,8 @@ export default function RequestList() {
   const [user, setUser] = useState(null);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({ status: '', region: '', priority: '', kind: '' });
+  const [toDelete, setToDelete] = useState(null);
+  const isSuperAdmin = user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL;
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -113,7 +118,7 @@ export default function RequestList() {
               <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('list.region')}</th>
               <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('list.priority')}</th>
               <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('list.status')}</th>
-              <th className="w-8" />
+              <th className="w-16" />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -131,8 +136,19 @@ export default function RequestList() {
                 <td className="px-4 py-3 text-sm text-slate-600">{t(`region.${(r.region || '').toLowerCase()}`)}</td>
                 <td className="px-4 py-3"><PriorityBadge priority={r.priority} t={t} /></td>
                 <td className="px-4 py-3"><StatusBadge status={r.status} t={t} /></td>
-                <td className="px-4 py-3 text-slate-300 group-hover:text-[#00A6D6] transition-colors">
-                  <ChevronRight className="w-4 h-4" />
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    {isSuperAdmin && (
+                      <button
+                        onClick={e => { e.stopPropagation(); setToDelete(r); }}
+                        title="Excluir solicitação"
+                        className="text-slate-300 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#00A6D6] transition-colors" />
+                  </div>
                 </td>
               </tr>
             ))}
@@ -163,6 +179,14 @@ export default function RequestList() {
           <p className="text-sm font-medium text-slate-600">{t('list.empty')}</p>
           <p className="text-xs text-slate-400 mt-0.5">{t('list.emptyDesc')}</p>
         </div>
+      )}
+
+      {toDelete && (
+        <DeleteRequestModal
+          request={toDelete}
+          onClose={() => setToDelete(null)}
+          onDeleted={(id) => { setRequests(prev => prev.filter(r => r.id !== id)); setToDelete(null); }}
+        />
       )}
     </div>
   );
