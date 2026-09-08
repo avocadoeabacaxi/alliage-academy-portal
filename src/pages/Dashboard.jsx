@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
+import { StatusBadge } from '@/components/StatusBadge';
 import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
-import { TrendingUp, Clock, CheckCircle2, XCircle, FileText, PlusCircle, Download, Activity } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle2, FileText, PlusCircle, Download, Activity } from 'lucide-react';
 import TrainersTab from '@/components/dashboard/TrainersTab';
 import { requestKind, requestTypeLabels } from '@/lib/requestTypeLabels';
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { inviteAuthorizedUser } from '@/lib/inviteAuthorizedUser';
-import { Check, X, Loader2, Search } from 'lucide-react';
+import { X, Loader2, Search } from 'lucide-react';
 
 export default function UserAuthorizationTab() {
   const [auths, setAuths] = useState([]);

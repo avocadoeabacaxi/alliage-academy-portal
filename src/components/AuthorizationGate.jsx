@@ -57,7 +57,7 @@ export default function AuthorizationGate({ children }) {
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <img
-              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/ecfb855b4_alliagi.png"
+              src="/assets/alliage-symbol.png"
               alt="Alliage Training & Education"
               className="h-16 w-auto"
             />

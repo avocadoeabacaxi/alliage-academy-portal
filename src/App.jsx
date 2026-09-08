@@ -42,6 +42,10 @@ const AuthenticatedApp = () => {
   const pathname = window.location.pathname;
   const isAuthRoute = AUTH_ROUTES.some(r => pathname.startsWith(r));
 
+  if (pathname.startsWith('/survey/')) {
+    return <Routes><Route path="/survey/:token" element={<Survey />} /></Routes>;
+  }
+
   if (isAuthRoute) {
     return (
       <Routes>
@@ -98,7 +102,6 @@ const AuthenticatedApp = () => {
         <Route path="/requests/past/event" element={<PastEventForm />} />
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/requests/:id" element={<RequestDetail />} />
-        <Route path="/survey/:token" element={<Survey />} />
         <Route path="/surveys" element={<Surveys />} />
         <Route path="/users" element={<UserManagement />} />
         <Route path="/settings" element={<Settings />} />

@@ -22,9 +22,7 @@ export default function Survey() {
         const response = await base44.functions.invoke('getSurveyByToken', { token });
         if (response.data?.data) {
           setSurvey(response.data.data);
-          // Buscar detalhes do treinamento
-          const trainingData = await base44.entities.TrainingRequest.get(response.data.data.training_request_id);
-          if (trainingData) setTrainingRequest(trainingData);
+          if (response.data.training_request) setTrainingRequest(response.data.training_request);
         }
       } catch (e) {
         console.error('Error fetching survey:', e);
@@ -59,7 +57,8 @@ export default function Survey() {
         responses: responseEntries,
         language: lang,
         rating_overall: overallRating || null,
-        submitted_at: new Date().toISOString()
+        submitted_at: new Date().toISOString(),
+        public_token: token,
       });
 
       setSubmitted(true);

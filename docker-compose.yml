@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8027:3001"
+    volumes:
+      - alliage_data:/app/.data
+
+volumes:
+  alliage_data:

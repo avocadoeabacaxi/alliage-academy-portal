@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, Mail, Lock, Loader2, AlertCircle, Clock, GraduationCap, ArrowRight, CheckCircle2, Users, BookOpen, BarChart3 } from "lucide-react";
+import { LogIn, Mail, Lock, Loader2, AlertCircle, Clock, ArrowRight, CheckCircle2, Users, BookOpen, BarChart3 } from "lucide-react";
 import GoogleIcon from "@/components/GoogleIcon";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -78,7 +78,7 @@ export default function Login() {
         <div className="relative w-full max-w-md">
           <div className="flex justify-center mb-8">
             <img
-              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/3f49984b2_logotraininnniinin.png"
+              src="/assets/alliage-training.png"
               alt="Alliage Training & Education"
               className="h-16 w-auto"
             />
@@ -136,7 +136,7 @@ export default function Login() {
         {/* Logo */}
         <div className="relative z-10">
           <img
-            src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/3f49984b2_logotraininnniinin.png"
+            src="/assets/alliage-training.png"
             alt="Alliage Training & Education"
             className="h-14 w-auto"
           />
@@ -179,7 +179,7 @@ export default function Login() {
           {/* Mobile logo */}
           <div className="lg:hidden flex justify-center mb-8">
             <img
-              src="https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/3f49984b2_logotraininnniinin.png"
+              src="/assets/alliage-training.png"
               alt="Alliage Training & Education"
               className="h-12 w-auto"
             />

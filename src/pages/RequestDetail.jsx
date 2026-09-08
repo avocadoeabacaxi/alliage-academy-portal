@@ -215,7 +215,7 @@ export default function RequestDetail() {
   };
 
   const copySurveyLink = () => {
-    const url = `https://trainning.alliage.global/survey/${survey?.public_token}`;
+    const url = `${window.location.origin}/survey/${survey?.public_token}`;
     navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -561,7 +561,7 @@ export default function RequestDetail() {
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center gap-2 bg-slate-50 rounded-xl p-3">
-                  <input readOnly value={`https://trainning.alliage.global/survey/${survey.public_token}`} className="flex-1 bg-transparent text-sm text-slate-600 outline-none cursor-default" />
+                  <input readOnly value={`${window.location.origin}/survey/${survey.public_token}`} className="flex-1 bg-transparent text-sm text-slate-600 outline-none cursor-default" />
                   <button onClick={copySurveyLink} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#00A6D6] rounded-full hover:bg-[#0094BD] transition-colors">
                     <Copy className="w-3.5 h-3.5" />
                     {copied ? '✓' : t('detail.copyLink')}

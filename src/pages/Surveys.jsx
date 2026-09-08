@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { Search, Filter, Loader2, BarChart3, TrendingUp, Users, FileText, Send, CheckCircle2, X, Mail, Clock } from 'lucide-react';
+import { Search, Loader2, BarChart3, TrendingUp, Users, FileText, Send, CheckCircle2, X, Mail, Clock } from 'lucide-react';
 
 export default function Surveys() {
   const { t, lang } = useLanguage();

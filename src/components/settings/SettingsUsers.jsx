@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { inviteAuthorizedUser } from '@/lib/inviteAuthorizedUser';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { UserPlus, Shield, Mail, MapPin, Loader2, Check, X, Search, Eye, Edit, CheckCircle2, Lock, ChevronDown, ChevronUp, Users as UsersIcon, KeyRound, Send } from 'lucide-react';
+import { UserPlus, Shield, Mail, MapPin, Loader2, X, Search, Edit, CheckCircle2, Lock, ChevronDown, ChevronUp, Users as UsersIcon, KeyRound, Send } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 const ROLES = ['admin', 'gerente_regional', 'educador', 'solicitante'];

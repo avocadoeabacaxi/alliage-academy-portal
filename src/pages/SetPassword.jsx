@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
-import { Lock, Loader2, AlertCircle, CheckCircle2, Mail, ArrowLeft, KeyRound } from "lucide-react";
+import { Lock, Loader2, AlertCircle, CheckCircle2, Mail, ArrowLeft } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 
 export default function SetPassword() {

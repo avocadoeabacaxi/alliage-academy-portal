@@ -1,7 +1,7 @@
 import React from "react";
 import LanguageSelector from "@/components/LanguageSelector";
 
-const LOGO_URL = "https://media.base44.com/images/public/6a3bbaf52679642f9d0e9feb/3f49984b2_logotraininnniinin.png";
+const LOGO_URL = "/assets/alliage-training.png";
 
 export default function AuthLayout({ icon: Icon, title, subtitle, footer, children }) {
   return (

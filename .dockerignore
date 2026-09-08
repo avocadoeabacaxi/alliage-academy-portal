@@ -1,0 +1,8 @@
+.git
+.agents
+.data
+.env
+node_modules
+dist
+skills-lock.json
+npm-debug.log

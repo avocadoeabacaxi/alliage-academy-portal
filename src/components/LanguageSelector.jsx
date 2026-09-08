@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 const LANG_LABELS = { pt: 'PT', en: 'EN', es: 'ES' };

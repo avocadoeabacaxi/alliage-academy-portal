@@ -1,77 +1,64 @@
-# Base44 Project
+# Alliage Trainning
 
-Use this repository to run and edit the app locally, then publish changes back through Base44.
+Portal de solicitações, aprovações e avaliação de treinamentos da Alliage. Esta versão é autônoma e não depende do Base44.
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+## Arquitetura
 
-## Prerequisites
+- React + Vite no frontend.
+- API HTTP em Node.js 24.
+- SQLite persistente para dados e autenticação.
+- Armazenamento local de imagens e PDFs.
+- Resend para e-mails, com modo seguro `EMAIL_DRY_RUN=true`.
+- Provedor de IA compatível com a API OpenAI para tradução e geração de pesquisas, com perguntas padrão quando a IA não está configurada.
+- OAuth Google e Microsoft opcional.
+- Agendador diário de lembretes aos participantes.
+- Nginx/Certbot no VPS para proxy reverso e HTTPS.
 
-1. Clone the repository using the project's Git URL.
-2. Navigate to the project directory.
-3. Install dependencies: `npm install`.
-4. Install the Base44 CLI: `npm install -g base44@latest`.
-
-See the [Base44 CLI docs](https://docs.base44.com/developers/references/cli/get-started/overview) if you want to run Base44 commands directly.
-
-## Run Locally
-
-Run the full local development environment from the project root:
-
-```bash
-base44 dev
-```
-
-`base44 dev` starts the local Base44 development backend and, when this app is configured for it, also starts the frontend dev server for you. Use the frontend URL printed by the command.
-
-For example, when the Base44 project config includes a `serveCommand`, `base44 dev` can launch the frontend too:
-
-```json5
-{
-  "site": {
-    "serveCommand": "npm run dev"
-  }
-}
-```
-
-In a Base44 project this lives in `base44/config.jsonc`.
-
-## Run Only The Frontend
-
-If you only want to work on the frontend against the hosted Base44 backend, run:
+## Desenvolvimento local
 
 ```bash
-npm run dev
+pnpm install
+cp .env.example .env
+pnpm dev:server
 ```
 
-Open the local URL printed by Vite.
-
-## Use The Hosted Backend
-
-For frontend-only development, create or update `.env.local` in the project root:
+Em outro terminal:
 
 ```bash
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=https://your-app.base44.app
+pnpm dev
 ```
 
-`VITE_BASE44_APP_ID` identifies the Base44 app.
+O frontend abre em `http://localhost:5173` e encaminha `/api` para `http://localhost:3001`.
 
-`VITE_BASE44_APP_BASE_URL` tells the Base44 Vite plugin where to send local `/api` requests. Point it at your deployed Base44 app URL when you want the local frontend to use the hosted backend.
+## Importar o export do Base44
 
-When you use `base44 dev`, the command injects the local Base44 values for you, so `.env.local` is mainly needed for frontend-only workflows.
-
-## Publish Your Changes
-
-After pushing your changes to git, open the Base44 dashboard and publish the app:
+O arquivo exportado contém dados pessoais e não deve ser adicionado ao Git.
 
 ```bash
-base44 dashboard open
+DATA_DIR=.data pnpm import:data /caminho/alliage-database-2026-08-03.json
 ```
 
-## Docs & Support
+A importação é idempotente: os IDs originais são preservados e uma nova execução atualiza os mesmos registros.
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+O export não contém senhas. Usuários importados precisam usar **Esqueci minha senha** após o e-mail real ser ativado. Para criar uma senha administrativa temporária diretamente no servidor:
 
-Base44 CLI command reference: [https://docs.base44.com/developers/references/cli/commands/introduction](https://docs.base44.com/developers/references/cli/commands/introduction)
+```bash
+ADMIN_PASSWORD='uma-senha-forte' pnpm admin:set-password admin@dominio.com
+```
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+## E-mail e IA
+
+Mantenha `EMAIL_DRY_RUN=true` durante homologação. Cada tentativa fica registrada em `email_log` no SQLite, mas nenhuma mensagem sai do servidor. Depois de validar domínio/remetente no Resend, configure `RESEND_API_KEY` e altere para `false`.
+
+Sem `AI_API_URL`, `AI_API_KEY` e `AI_MODEL`, o portal continua funcionando: traduções mantêm o texto original e pesquisas usam o questionário trilíngue padrão.
+
+## Produção
+
+1. Copie `.env.example` para `.env` e preencha os segredos.
+2. Importe o banco antes de liberar usuários.
+3. Inicie com `docker compose up -d --build`. O app fica disponível apenas em `127.0.0.1:8027`.
+4. Instale `deploy/nginx-http.conf` no Nginx e confira `/api/health`.
+
+O Certbot só conseguirá emitir o certificado quando os registros DNS A/AAAA do domínio apontarem para o servidor e as portas 80/443 estiverem acessíveis. Para `trainning.avocaserver.com`, mantenha `APP_ORIGIN=https://trainning.avocaserver.com`.
+
+Faça backup periódico do volume `alliage_data`; ele contém o SQLite e os uploads.
