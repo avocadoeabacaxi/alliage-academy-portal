@@ -18,7 +18,7 @@ export const config = {
   uploadsDir: resolve(process.env.UPLOADS_DIR || resolve(rootDir, '.data', 'uploads')),
   jwtSecret: process.env.JWT_SECRET || 'local-development-secret-change-before-production',
   jwtTtlSeconds: Number(process.env.JWT_TTL_SECONDS || 60 * 60 * 24 * 7),
-  emailFrom: process.env.EMAIL_FROM || 'Alliage Trainning <no-reply@trainning.alliage.global>',
+  emailFrom: process.env.EMAIL_FROM || 'Alliage Trainning <no-reply@training.alliage.global>',
   emailDryRun: booleanEnv('EMAIL_DRY_RUN', true),
   resendApiKey: process.env.RESEND_API_KEY || '',
   aiApiUrl: (process.env.AI_API_URL || '').replace(/\/$/, ''),

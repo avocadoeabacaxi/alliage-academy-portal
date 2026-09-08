@@ -66,6 +66,6 @@ docker build -f deploy/Dockerfile.prebuilt -t alliage-trainning-app .
 docker compose up -d
 ```
 
-O Certbot só conseguirá emitir o certificado quando os registros DNS A/AAAA do domínio apontarem para o servidor e as portas 80/443 estiverem acessíveis. Para `trainning.avocaserver.com`, mantenha `APP_ORIGIN=https://trainning.avocaserver.com`.
+O Certbot só conseguirá emitir o certificado quando os registros DNS A/AAAA do domínio apontarem para o servidor e as portas 80/443 estiverem acessíveis. Para `training.alliage.global`, mantenha `APP_ORIGIN=https://training.alliage.global`.
 
 Faça backup periódico do volume `alliage_data`; ele contém o SQLite e os uploads.
