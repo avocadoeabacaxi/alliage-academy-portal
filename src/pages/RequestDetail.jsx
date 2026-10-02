@@ -66,8 +66,9 @@ export default function RequestDetail() {
   const canEditExecution = userRole === 'educador' || userRole === 'admin';
   const canCloseCycle = userRole === 'gerente_regional' || userRole === 'admin';
   const canGenerateSurvey = userRole === 'educador' || userRole === 'admin';
-  const canEditAccess = req?.status !== 'Cancelado' && (userRole === 'admin' || userRole === 'educador' || user?.email === req?.requester_email);
-  const isOwnRequest = req && (req.created_by_id === user?.id || req.requester_email === user?.email);
+  const isOwnRequest = Boolean(user && req && (req.created_by_id === user.id || req.created_by === user.email || req.requester_email === user.email));
+  const canEditAccess = req?.status !== 'Cancelado' && (userRole === 'admin' || userRole === 'educador' || isOwnRequest);
+  const canEditParticipants = req?.status !== 'Cancelado' && (['admin', 'educador', 'gerente_regional'].includes(userRole) || isOwnRequest);
   const canCancel = isOwnRequest && req.status !== 'Cancelado';
 
   const handleCancel = async () => {
@@ -382,7 +383,7 @@ export default function RequestDetail() {
         </Section>
       )}
 
-      <RequestParticipants request={req} onUpdated={loadData} />
+      <RequestParticipants request={req} canEdit={canEditParticipants} onUpdated={loadData} />
 
       {/* Workflow - Stage 1 */}
       <Section title={t('detail.stage1')} icon={Clock}>

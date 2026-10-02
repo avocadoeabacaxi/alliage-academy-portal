@@ -3,7 +3,7 @@ import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { Users, Plus, Loader2, Check, Mail, Phone, X } from 'lucide-react';
 
-export default function RequestParticipants({ request, onUpdated }) {
+export default function RequestParticipants({ request, canEdit = false, onUpdated }) {
   const { t } = useLanguage();
   const participants = request.participants_list || [];
   const [adding, setAdding] = useState(false);
@@ -11,7 +11,7 @@ export default function RequestParticipants({ request, onUpdated }) {
   const [form, setForm] = useState({ name: '', phone: '', email: '', attendance_mode: 'Presencial' });
 
   const handleAdd = async () => {
-    if (!form.name.trim()) return;
+    if (!canEdit || !form.name.trim()) return;
     setSaving(true);
     try {
       const next = [...participants, { name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim(), attendance_mode: form.attendance_mode }];
@@ -55,7 +55,7 @@ export default function RequestParticipants({ request, onUpdated }) {
         </div>
       )}
 
-      {adding ? (
+      {canEdit && (adding ? (
         <div className="border-t border-slate-100 pt-3 space-y-2">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
             <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="input-base" placeholder={t('form.participantName')} />
@@ -79,7 +79,7 @@ export default function RequestParticipants({ request, onUpdated }) {
           <Plus className="w-4 h-4" />
           {t('form.addParticipant')}
         </button>
-      )}
+      ))}
     </div>
   );
 }

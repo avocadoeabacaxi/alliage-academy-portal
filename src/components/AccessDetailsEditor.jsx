@@ -12,6 +12,7 @@ export default function AccessDetailsEditor({ request, canEdit, onUpdated }) {
   const update = (key, value) => setData(prev => ({ ...prev, [key]: value }));
   const physical = ['Presencial', 'Híbrido'].includes(data.guest_participation_mode || 'Presencial');
   const save = async () => {
+    if (!canEdit) return;
     setSaving(true);
     try {
       await alliage.entities.TrainingRequest.update(request.id, {

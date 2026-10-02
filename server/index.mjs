@@ -32,6 +32,13 @@ const publicFunctionNames = new Set(['requestAccess', 'getSurveyByToken', 'creat
 const preApprovalFunctionNames = new Set(['checkUserAuthorization', 'ensureUserAuthorization']);
 const allowedEntities = new Set(['TrainingRequest', 'TrainingSchedule', 'Client', 'TeamMember', 'UserAuthorization', 'RoutingRule', 'SatisfactionSurvey', 'TrainingEvaluation', 'EmailTemplate', 'SurveyResponse', 'User']);
 const managementRoles = new Set(['admin', 'gerente_regional', 'educador']);
+// Ownership is checked by entityAccess before this field-level permission is used.
+const requesterEditableFields = new Set([
+  'guest_participation_mode', 'online_platform', 'online_access_link', 'needs_educator_link',
+  'location_country', 'location_city', 'location_specific', 'location_postal_code',
+  'location_street', 'location_number', 'location_complement', 'location_formatted_address',
+  'location_place_id', 'training_scheduled_date', 'participants_list',
+]);
 const adminEntities = new Set(['EmailTemplate', 'RoutingRule', 'UserAuthorization']);
 const managementEntities = new Set(['User', 'TrainingEvaluation', 'SurveyResponse', 'SatisfactionSurvey']);
 const ownedEntities = new Set(['Client', 'TeamMember']);
@@ -429,9 +436,23 @@ async function handleEntity(request, response, pathname, url) {
     if (!existing) throw new HttpError(404, 'Registro não encontrado');
     const payload = await readJson(request);
     if (entity === 'TrainingRequest' && !managementRoles.has(user.role)) {
+      if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+        throw new HttpError(400, 'Dados de atualização inválidos');
+      }
       const keys = Object.keys(payload);
-      if (keys.length !== 1 || keys[0] !== 'status' || payload.status !== 'Cancelado') {
-        throw new HttpError(403, 'Solicitantes só podem cancelar suas próprias solicitações');
+      const isCancellation = keys.length === 1 && keys[0] === 'status' && payload.status === 'Cancelado';
+      if (!isCancellation) {
+        if (!keys.length || keys.some(key => !requesterEditableFields.has(key))) {
+          throw new HttpError(403, 'Você pode editar apenas os dados de acesso e os participantes do seu pedido. Aprovações e demais campos são restritos aos responsáveis.');
+        }
+        if (existing.status === 'Cancelado') {
+          throw new HttpError(409, 'Não é possível editar os dados de uma solicitação cancelada');
+        }
+        if ('participants_list' in payload && (!Array.isArray(payload.participants_list) || payload.participants_list.some(participant =>
+          !participant || typeof participant !== 'object' || Array.isArray(participant) || typeof participant.name !== 'string' || !participant.name.trim()
+        ))) {
+          throw new HttpError(400, 'Informe uma lista de participantes com nome');
+        }
       }
     }
     const updated = updateRecord(entity, id, payload);

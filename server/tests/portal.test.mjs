@@ -295,3 +295,137 @@ test('pesquisa pública expõe somente detalhes necessários e aceita token corr
   assert.equal(submitted.response.status, 200);
   assert.equal(submitted.body.data.success, true);
 });
+
+function requesterHeaders() {
+  return { Authorization: `Bearer ${security.signAccessToken({ id: 'requester-test', email: 'requester@example.com' })}` };
+}
+
+function requesterTraining(overrides = {}) {
+  return dbModule.createRecord('TrainingRequest', {
+    requester_email: 'requester@example.com',
+    status: 'Pendente Análise', decision_stage1: 'Pendente', decision_stage2: 'Pendente',
+    ...overrides,
+  });
+}
+
+test('solicitante salva acesso e participantes sem modificar o fluxo de aprovação', async () => {
+  const training = requesterTraining();
+  const path = `/api/entities/TrainingRequest/${training.id}`;
+  const headers = requesterHeaders();
+  // Same payload as AccessDetailsEditor, including online and physical fields.
+  const access = {
+    guest_participation_mode: 'Online', online_platform: 'Google Meet',
+    online_access_link: '', needs_educator_link: true,
+    location_country: 'Brasil', location_city: 'Ribeirão Preto', location_specific: 'Sala 1',
+    location_postal_code: '14000-000', location_street: 'Rua de teste', location_number: '10',
+    location_complement: '', location_formatted_address: 'Endereço de teste', location_place_id: '',
+    training_scheduled_date: '2026-10-06',
+  };
+  const saved = await request(path, { method: 'PATCH', headers, body: JSON.stringify(access) });
+  assert.equal(saved.response.status, 200);
+  for (const [key, value] of Object.entries(access)) assert.equal(saved.body[key], value);
+
+  const participants = [{ name: 'Participante de teste', email: 'participante@example.com', phone: '', attendance_mode: 'Online' }];
+  const added = await request(path, { method: 'PATCH', headers, body: JSON.stringify({ participants_list: participants }) });
+  assert.equal(added.response.status, 200);
+  const loaded = await request(path, { headers });
+  assert.deepEqual(loaded.body.participants_list, participants);
+  assert.equal(loaded.body.training_scheduled_date, access.training_scheduled_date);
+  assert.equal(loaded.body.status, training.status);
+  assert.equal(loaded.body.decision_stage1, training.decision_stage1);
+  assert.equal(loaded.body.decision_stage2, training.decision_stage2);
+  assert.equal(loaded.body.requester_email, training.requester_email);
+});
+
+test('campos protegidos são rejeitados atomicamente mesmo misturados aos campos permitidos', async () => {
+  const training = requesterTraining({ online_platform: 'Google Meet' });
+  const path = `/api/entities/TrainingRequest/${training.id}`;
+  const protectedFields = {
+    status: 'Aprovado Etapa 2', decision_stage1: 'Aprovado', decision_stage2: 'Aprovado',
+    date_stage1: '2026-10-02', date_stage2: '2026-10-02', educator_analysis: { pt: 'Indevido' },
+    manager_analysis: { pt: 'Indevido' }, educator_id: 'requester-test', manager_id: 'requester-test',
+    requester_email: 'outra@example.com', created_by: 'outra@example.com', created_by_id: 'admin-test',
+    id: 'outro-id', request_id: 'OUTRO', created_date: '2026-01-01', updated_date: '2026-01-01',
+    training_completed_date: '2026-10-02', execution_notes: 'Indevido', final_notes: 'Indevido',
+  };
+  for (const [key, value] of Object.entries(protectedFields)) {
+    const denied = await request(path, {
+      method: 'PATCH', headers: requesterHeaders(),
+      body: JSON.stringify({ online_platform: 'Zoom', [key]: value }),
+    });
+    assert.equal(denied.response.status, 403, key);
+    assert.match(denied.body.message, /Aprovações e demais campos são restritos/);
+    assert.deepEqual(dbModule.getRecord('TrainingRequest', training.id), training, key);
+  }
+  const mixedCancellation = await request(path, {
+    method: 'PATCH', headers: requesterHeaders(),
+    body: JSON.stringify({ status: 'Cancelado', participants_list: [] }),
+  });
+  assert.equal(mixedCancellation.response.status, 403);
+  assert.deepEqual(dbModule.getRecord('TrainingRequest', training.id), training);
+});
+
+test('solicitante não edita nem assume a propriedade de pedido alheio', async () => {
+  const training = requesterTraining({ requester_email: 'outra@example.com', created_by_id: 'admin-test', created_by: 'admin@example.com' });
+  for (const payload of [
+    { online_platform: 'Zoom' }, { participants_list: [{ name: 'Teste' }] },
+    { requester_email: 'requester@example.com', online_platform: 'Zoom' }, { status: 'Cancelado' },
+  ]) {
+    const denied = await request(`/api/entities/TrainingRequest/${training.id}`, {
+      method: 'PATCH', headers: requesterHeaders(), body: JSON.stringify(payload),
+    });
+    assert.equal(denied.response.status, 403);
+    assert.deepEqual(dbModule.getRecord('TrainingRequest', training.id), training);
+  }
+});
+
+test('identificadores de autoria legados permitem a edição do próprio pedido', async () => {
+  for (const owner of [{ created_by_id: 'requester-test' }, { created_by: 'requester@example.com' }, { requester_email: 'requester@example.com' }]) {
+    const training = requesterTraining({ requester_email: 'legado@example.com', ...owner });
+    const saved = await request(`/api/entities/TrainingRequest/${training.id}`, {
+      method: 'PATCH', headers: requesterHeaders(), body: JSON.stringify({ needs_educator_link: true }),
+    });
+    assert.equal(saved.response.status, 200);
+    assert.equal(saved.body.needs_educator_link, true);
+  }
+});
+
+test('pedido cancelado não recebe alterações de acesso ou participantes', async () => {
+  const training = requesterTraining({ status: 'Cancelado' });
+  const path = `/api/entities/TrainingRequest/${training.id}`;
+  for (const payload of [{ online_platform: 'Zoom' }, { participants_list: [] }]) {
+    const denied = await request(path, { method: 'PATCH', headers: requesterHeaders(), body: JSON.stringify(payload) });
+    assert.equal(denied.response.status, 409);
+    assert.deepEqual(dbModule.getRecord('TrainingRequest', training.id), training);
+  }
+  const cancelled = await request(path, { method: 'PATCH', headers: requesterHeaders(), body: JSON.stringify({ status: 'Cancelado' }) });
+  assert.equal(cancelled.response.status, 200);
+});
+
+test('edição de acesso em pedidos aprovados ou concluídos não reabre fluxo nem repete envios', async () => {
+  await new Promise(resolve => setImmediate(resolve));
+  const emailsBefore = dbModule.db.prepare('SELECT COUNT(*) AS total FROM email_log').get().total;
+  const surveysBefore = dbModule.countRecords().SatisfactionSurvey;
+  for (const status of ['Aprovado Etapa 2', 'Concluído']) {
+    const training = requesterTraining({ status, decision_stage1: 'Aprovado', decision_stage2: 'Aprovado', date_stage1: '2026-10-01', date_stage2: '2026-10-02' });
+    const saved = await request(`/api/entities/TrainingRequest/${training.id}`, {
+      method: 'PATCH', headers: requesterHeaders(), body: JSON.stringify({ online_platform: 'Google Meet', participants_list: [{ name: 'Teste' }] }),
+    });
+    assert.equal(saved.response.status, 200);
+    for (const key of ['status', 'decision_stage1', 'decision_stage2', 'date_stage1', 'date_stage2']) assert.equal(saved.body[key], training[key]);
+  }
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(dbModule.db.prepare('SELECT COUNT(*) AS total FROM email_log').get().total, emailsBefore);
+  assert.equal(dbModule.countRecords().SatisfactionSurvey, surveysBefore);
+});
+
+test('atualizações inválidas não corrompem a lista de participantes', async () => {
+  const training = requesterTraining({ participants_list: [] });
+  for (const payload of [null, [], { participants_list: null }, { participants_list: {} }, { participants_list: [null] }, { participants_list: [{}] }, { participants_list: [{ name: ' ' }] }]) {
+    const denied = await request(`/api/entities/TrainingRequest/${training.id}`, {
+      method: 'PATCH', headers: requesterHeaders(), body: JSON.stringify(payload),
+    });
+    assert.equal(denied.response.status, 400);
+    assert.deepEqual(dbModule.getRecord('TrainingRequest', training.id), training);
+  }
+});
