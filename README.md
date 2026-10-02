@@ -77,6 +77,23 @@ Sem `AI_API_URL`, `AI_API_KEY` e `AI_MODEL`, o portal continua funcionando: trad
 
 ## Produção
 
+### Recuperar etapas de um pedido pendente
+
+Novas solicitações em `Pendente Análise` recebem as duas etapas `Pendente`,
+mesmo quando um cliente antigo omite esses campos. Pedidos históricos ou já
+decididos não são reabertos.
+
+Para um pedido antigo com etapas vazias, confira a prévia antes de aplicar:
+
+```bash
+node server/scripts/repair-pending-workflow.mjs /app/.data/alliage.sqlite TR-2026-041
+node server/scripts/repair-pending-workflow.mjs /app/.data/alliage.sqlite TR-2026-041 --apply
+```
+
+O reparo exige um pedido específico ainda pendente e sem decisões, cria backup
+SQLite na pasta `backups` ao lado do banco e preenche somente etapas vazias.
+Ele não aprova o pedido, altera permissões, dispara e-mails ou executa automações.
+
 ### Login Google e Microsoft
 
 A interface oferece Google e e-mail/senha. O botão Microsoft foi removido do

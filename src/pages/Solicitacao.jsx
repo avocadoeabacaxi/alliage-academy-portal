@@ -87,6 +87,8 @@ export default function Solicitacao({ requestKind = 'training' }) {
         request_id,
         request_category: 'Treinamento / Apoio Técnico',
         status: 'Pendente Análise',
+        decision_stage1: 'Pendente',
+        decision_stage2: 'Pendente',
         priority: form.priority,
         requester_name: form.requester_name,
         requester_email: form.requester_email,

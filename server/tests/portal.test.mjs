@@ -199,6 +199,70 @@ test('recursos novos usam a API própria e exclusão definitiva fica restrita ao
   assert.equal(removedSchedule.response.status, 404);
 });
 
+test('formulário simplificado recebe etapas pendentes e admin pode aprovar em sequência', async () => {
+  const login = await request('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: 'admin@example.com', password: 'Senha-Forte-123' }),
+  });
+  const headers = { Authorization: `Bearer ${login.body.access_token}` };
+  const me = await request('/api/auth/me', { headers });
+  assert.equal(me.body.role, 'admin');
+  assert.equal(me.body.authorization_status, 'approved');
+
+  // Same incomplete payload that previously hid the approval controls.
+  const created = await request('/api/entities/TrainingRequest', {
+    method: 'POST', headers,
+    body: JSON.stringify({ request_id: 'TR-TEST-WORKFLOW', status: 'Pendente Análise' }),
+  });
+  assert.equal(created.response.status, 201);
+  const path = `/api/entities/TrainingRequest/${created.body.id}`;
+  const loaded = await request(path, { headers });
+  assert.equal(loaded.body.status, 'Pendente Análise');
+  assert.equal(loaded.body.decision_stage1, 'Pendente');
+  assert.equal(loaded.body.decision_stage2, 'Pendente');
+  assert.equal(loaded.body.date_stage1, undefined);
+  assert.equal(loaded.body.date_stage2, undefined);
+
+  const first = await request(path, {
+    method: 'PATCH', headers,
+    body: JSON.stringify({ decision_stage1: 'Aprovado', status: 'Aprovado Etapa 1', educator_analysis: { pt: 'Análise de teste' } }),
+  });
+  assert.equal(first.response.status, 200);
+  assert.equal(first.body.decision_stage1, 'Aprovado');
+  assert.equal(first.body.decision_stage2, 'Pendente');
+  const second = await request(path, {
+    method: 'PATCH', headers,
+    body: JSON.stringify({ decision_stage2: 'Aprovado', status: 'Aprovado Etapa 2', manager_analysis: { pt: 'Análise de teste' } }),
+  });
+  assert.equal(second.response.status, 200);
+  assert.equal(second.body.status, 'Aprovado Etapa 2');
+});
+
+test('inicialização preenche etapas vazias sem sobrescrever decisões ou reabrir históricos', async () => {
+  const headers = { Authorization: `Bearer ${security.signAccessToken({ id: 'admin-test', email: 'admin@example.com' })}` };
+  const cases = [
+    { status: 'Pendente Análise', decision_stage1: null, decision_stage2: '' },
+    { status: 'Pendente Análise', decision_stage1: 'Pendente', decision_stage2: 'Pendente' },
+    { status: 'Aprovado Etapa 1', decision_stage1: 'Aprovado', decision_stage2: 'Pendente' },
+    { status: 'Aprovado Etapa 2', decision_stage1: 'Aprovado', decision_stage2: 'Aprovado' },
+    { status: 'Concluído', decision_stage1: 'Aprovado', decision_stage2: 'Aprovado' },
+    { status: 'Rejeitado', decision_stage1: 'Rejeitado', decision_stage2: 'Pendente' },
+    { status: 'Cancelado', decision_stage1: 'Pendente', decision_stage2: 'Pendente' },
+    { status: 'Concluído' },
+  ];
+  for (const [index, input] of cases.entries()) {
+    const result = await request('/api/entities/TrainingRequest', {
+      method: 'POST', headers,
+      body: JSON.stringify({ request_id: `TR-TEST-DEFAULTS-${index}`, ...input }),
+    });
+    assert.equal(result.response.status, 201);
+    assert.equal(result.body.status, input.status);
+    const isPending = input.status === 'Pendente Análise';
+    assert.equal(result.body.decision_stage1, isPending ? input.decision_stage1 || 'Pendente' : input.decision_stage1);
+    assert.equal(result.body.decision_stage2, isPending ? input.decision_stage2 || 'Pendente' : input.decision_stage2);
+  }
+});
+
 test('pesquisa pública expõe somente detalhes necessários e aceita token correto', async () => {
   const training = dbModule.createRecord('TrainingRequest', { request_id: 'TR-TEST-002', product_name: 'Produto', request_type: 'Técnico', justification: { pt: 'Teste' } });
   const survey = dbModule.createRecord('SatisfactionSurvey', {

@@ -406,6 +406,15 @@ async function handleEntity(request, response, pathname, url) {
   }
   if (request.method === 'POST' && !id) {
     let payload = await readJson(request);
+    // Older/simplified clients may omit the workflow fields. Only initialize
+    // pending requests; never reopen historical or already decided requests.
+    if (entity === 'TrainingRequest' && payload.status === 'Pendente Análise') {
+      payload = {
+        ...payload,
+        decision_stage1: payload.decision_stage1 || 'Pendente',
+        decision_stage2: payload.decision_stage2 || 'Pendente',
+      };
+    }
     if (entity === 'TrainingRequest' && !managementRoles.has(user.role)) {
       payload = { ...payload, requester_email: user.email, requester_name: user.full_name || payload.requester_name || '' };
     }
