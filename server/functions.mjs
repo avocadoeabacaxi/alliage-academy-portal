@@ -281,19 +281,24 @@ export async function sendParticipantReminders({ dryRun = false } = {}) {
 export async function invokeFunction(name, payload = {}, user = null) {
   switch (name) {
     case 'requestAccess': {
-      const email = payload.email?.trim().toLowerCase();
-      if (!email || !payload.full_name || !payload.phone || !payload.company_type || !payload.company_name) {
-        throw Object.assign(new Error('Preencha todos os campos obrigatórios'), { status: 400 });
+      const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : '';
+      const fullName = typeof payload.full_name === 'string' ? payload.full_name.trim() : '';
+      const phone = typeof payload.phone === 'string' ? payload.phone.trim() : '';
+      // Match the profile fields shown by both password and Google registration.
+      const missing = [!fullName && 'nome completo', !email && 'e-mail', !phone && 'celular (WhatsApp)'].filter(Boolean);
+      if (missing.length) {
+        throw Object.assign(new Error(`Preencha os campos obrigatórios: ${missing.join(', ')}.`), { status: 400 });
       }
       const existing = listRecords('UserAuthorization', { filters: { email }, limit: 1 })[0];
       if (existing) {
         return { success: false, status: existing.status, message: existing.status === 'pending' ? 'Você já possui uma solicitação pendente de aprovação.' : existing.status === 'approved' ? 'Seu acesso já foi aprovado.' : 'Sua solicitação foi rejeitada. Contate o administrador.' };
       }
       if (payload.dry_run) return { success: true, dry_run: true };
-      createRecord('UserAuthorization', { email, full_name: payload.full_name, phone: payload.phone, company_type: payload.company_type, company_name: payload.company_name, role: 'solicitante', status: 'pending', first_login_attempt: new Date().toISOString() });
+      createRecord('UserAuthorization', { email, full_name: fullName, phone, company_type: payload.company_type, company_name: payload.company_name, role: 'solicitante', status: 'pending', first_login_attempt: new Date().toISOString() });
       const recipients = listRecords('User', { limit: 500 }).filter(record => record.receive_access_request_emails).map(record => record.email);
       if (recipients.length) {
-        await sendEmail({ emailType: 'access_request', to: recipients, subject: 'Novo pedido de acesso — Alliage Trainning', html: `<h2>Novo pedido de acesso</h2><p><strong>Nome:</strong> ${escapeHtml(payload.full_name)}</p><p><strong>Email:</strong> ${escapeHtml(email)}</p><p><strong>Telefone:</strong> ${escapeHtml(payload.phone)}</p><p><strong>Empresa:</strong> ${escapeHtml(payload.company_type)} — ${escapeHtml(payload.company_name)}</p>` });
+        const company = [payload.company_type, payload.company_name].filter(Boolean).map(escapeHtml).join(' — ');
+        await sendEmail({ emailType: 'access_request', to: recipients, subject: 'Novo pedido de acesso — Alliage Trainning', html: `<h2>Novo pedido de acesso</h2><p><strong>Nome:</strong> ${escapeHtml(fullName)}</p><p><strong>Email:</strong> ${escapeHtml(email)}</p><p><strong>Telefone:</strong> ${escapeHtml(phone)}</p>${company ? `<p><strong>Empresa:</strong> ${company}</p>` : ''}` });
       }
       return { success: true, status: 'pending', message: 'Cadastro realizado. Seu acesso ficará disponível após a aprovação do administrador.' };
     }
