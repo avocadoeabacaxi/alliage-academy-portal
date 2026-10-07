@@ -100,10 +100,10 @@ export default function UserManagement() {
     setInviteMsg('');
     setError('');
     try {
-      await inviteAuthorizedUser(inviteForm);
-      setInviteMsg('Convite enviado. O usuário receberá o link para criar sua senha.');
+      const result = await inviteAuthorizedUser(inviteForm);
+      setInviteMsg(result.notificationError || 'Acesso aprovado. Convite solicitado com sucesso.');
       setInviteForm({ email: '', role: 'solicitante', region: 'Brasil' });
-      setTimeout(() => { setShowInvite(false); setInviteMsg(''); }, 2000);
+      if (!result.notificationError) setTimeout(() => { setShowInvite(false); setInviteMsg(''); }, 2000);
       loadUsers();
     } catch (e) {
       setError(e.message);

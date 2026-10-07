@@ -158,3 +158,82 @@ test('pedido de acesso usado pelo Google não exige empresa nem aprova automatic
   assert.equal(authorization.role, 'solicitante');
   assert.equal(getAccountByEmail('google-cadastro@example.com'), undefined);
 });
+
+function approvalAdminToken() {
+  dbModule.upsertAccount({ id: 'admin-registration', email: 'admin@example.com', emailVerified: true });
+  createRecord('UserAuthorization', { email: 'admin@example.com', role: 'admin', status: 'approved' });
+  return signAccessToken({ id: 'admin-registration', email: 'admin@example.com' });
+}
+
+test('lista de usuários diferencia perfil de status e inclui pedidos sem conta', async () => {
+  const token = approvalAdminToken();
+  for (const status of ['pending', 'approved', 'rejected']) {
+    createRecord('UserAuthorization', { email: `${status}@example.com`, role: 'solicitante', status });
+  }
+  createRecord('User', { id: 'sem-autorizacao', email: 'sem-autorizacao@example.com', role: 'user' });
+  createRecord('User', { id: 'com-conta', email: 'pending@example.com', role: 'user' });
+  const response = await request('/api/functions/listUserAuthorizations', {}, token);
+  assert.equal(response.status, 200);
+  const byEmail = Object.fromEntries(response.body.data.users.map(user => [user.email, user]));
+  assert.equal(byEmail['pending@example.com'].status, 'pending');
+  assert.equal(byEmail['pending@example.com'].role, 'solicitante');
+  assert.equal(byEmail['sem-autorizacao@example.com'].status, 'pending');
+  assert.equal(byEmail['approved@example.com'].status, 'approved');
+  assert.equal(byEmail['approved@example.com'].pending_registration, true);
+  assert.equal(byEmail['approved@example.com'].authorization_only, true);
+  assert.equal(byEmail['rejected@example.com'].status, 'rejected');
+  assert.equal(byEmail['rejected@example.com'].pending_registration, false);
+  createRecord('UserAuthorization', { email: 'pedido-sem-conta@example.com', status: 'pending', role: 'solicitante' });
+  const fresh = await request('/api/functions/listUserAuthorizations', {}, token);
+  const waiting = fresh.body.data.users.find(user => user.email === 'pedido-sem-conta@example.com');
+  assert.equal(waiting.status, 'pending');
+  assert.equal(waiting.authorization_only, true);
+  assert.equal(waiting.pending_registration, false);
+});
+
+test('fluxo usado por Aprovar confirma decisão persistida e libera a mesma sessão sem trocar senha', async () => {
+  const adminToken = approvalAdminToken();
+  const authorization = createRecord('UserAuthorization', { ...profile, role: 'solicitante', status: 'pending' });
+  createRecord('User', { id: 'approval-applicant', ...profile, role: 'user' });
+  const account = dbModule.upsertAccount({ id: 'approval-applicant', email: profile.email, emailVerified: true });
+  const applicantToken = signAccessToken(account);
+  assert.equal((await request('/api/entities/TrainingRequest', undefined, applicantToken)).status, 403);
+  const before = getAccountByEmail(profile.email);
+  const forbidden = await request('/api/functions/authorizeEmailInvitation', { email: profile.email, role: 'admin' }, applicantToken);
+  assert.equal(forbidden.status, 403);
+  const changedRole = await request('/api/functions/updateUserAuthorization', { id: authorization.id, role: 'solicitante' }, adminToken);
+  assert.equal(changedRole.status, 200);
+  assert.equal(getRecord('UserAuthorization', authorization.id).status, 'pending');
+  const approved = await request('/api/functions/authorizeEmailInvitation', { ...profile, role: 'solicitante', region: 'Brasil' }, adminToken);
+  assert.equal(approved.status, 200);
+  assert.equal(approved.body.data.success, true);
+  const confirmation = await request('/api/functions/listUserAuthorizations', {}, adminToken);
+  const saved = confirmation.body.data.data.find(row => row.id === authorization.id);
+  assert.equal(saved.status, 'approved');
+  assert.equal(saved.approved_by, 'admin-registration');
+  assert.ok(saved.approved_date);
+  const invitation = await request('/api/users/invite', { email: profile.email, role: 'user' }, adminToken);
+  assert.equal(invitation.status, 200);
+  assert.equal(sentMessages.filter(message => message.to.includes(profile.email)).length, 1);
+  assert.deepEqual(getAccountByEmail(profile.email), before, 'aprovar não troca credenciais nem invalida sessão');
+  const me = await request('/api/auth/me', undefined, applicantToken);
+  assert.equal(me.body.authorization_status, 'approved');
+  assert.equal(me.body.role, 'solicitante');
+  assert.equal((await request('/api/entities/TrainingRequest', undefined, applicantToken)).status, 200);
+});
+
+test('falha do convite não desfaz a aprovação já gravada nem bloqueia sessão existente', async () => {
+  const token = approvalAdminToken();
+  const authorization = createRecord('UserAuthorization', { ...profile, role: 'solicitante', status: 'pending' });
+  const applicant = dbModule.upsertAccount({ id: 'mail-failure-applicant', email: profile.email, emailVerified: true });
+  const result = await request('/api/functions/authorizeEmailInvitation', { ...profile, role: 'solicitante', region: 'Brasil' }, token);
+  assert.equal(result.status, 200);
+  const mockedFetch = globalThis.fetch;
+  globalThis.fetch = (url, options) => url === 'https://api.resend.com/emails'
+    ? Promise.resolve(Response.json({ message: 'Provider failure simulated' }, { status: 403 }))
+    : mockedFetch(url, options);
+  const invitation = await request('/api/users/invite', { email: profile.email, role: 'user' }, token);
+  assert.equal(invitation.status, 500);
+  assert.equal(getRecord('UserAuthorization', authorization.id).status, 'approved');
+  assert.equal((await request('/api/auth/me', undefined, signAccessToken(applicant))).body.authorization_status, 'approved');
+});

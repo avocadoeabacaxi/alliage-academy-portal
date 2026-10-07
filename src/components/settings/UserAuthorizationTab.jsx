@@ -10,6 +10,7 @@ export default function UserAuthorizationTab() {
   const [filterStatus, setFilterStatus] = useState('pending');
   const [updating, setUpdating] = useState(null);
   const [user, setUser] = useState(null);
+  const [decisionMessage, setDecisionMessage] = useState('');
 
   useEffect(() => {
     alliage.auth.me().then(setUser);
@@ -31,13 +32,14 @@ export default function UserAuthorizationTab() {
     if (!role) return;
     setUpdating(auth.id);
     try {
-      await inviteAuthorizedUser({
+      const result = await inviteAuthorizedUser({
         email: auth.email,
         full_name: auth.full_name,
         role,
         region: auth.region || 'Brasil',
         preferred_language: auth.preferred_language || 'pt'
       });
+      setDecisionMessage(`${auth.email}: ${result.notificationError || 'acesso aprovado e confirmado no sistema.'}`);
       await loadData();
     } catch (e) {
       alert('Erro: ' + e.message);
@@ -81,6 +83,7 @@ export default function UserAuthorizationTab() {
 
   return (
     <div className="space-y-6">
+      {decisionMessage && <p role="status" className="rounded-xl bg-slate-50 p-3 text-sm text-slate-700">{decisionMessage}</p>}
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         <div className="card-modern p-4">

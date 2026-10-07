@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { alliage } from '@/api/alliageClient';
+import ApprovalStatusRefresh from '@/components/ApprovalStatusRefresh';
 import { Clock, AlertCircle, LogOut, Loader2, GraduationCap, Mail } from 'lucide-react';
 
 export default function AuthorizationGate({ children }) {
@@ -21,7 +22,7 @@ export default function AuthorizationGate({ children }) {
         const authStatus = response.data?.status || 'pending';
         setStatus(authStatus);
       } catch (e) {
-        setStatus('pending');
+        setStatus('error');
       } finally {
         setLoading(false);
       }
@@ -45,8 +46,9 @@ export default function AuthorizationGate({ children }) {
     );
   }
 
-  if (status === 'pending' || status === 'rejected') {
+  if (status !== 'approved') {
     const isPending = status === 'pending';
+    const isRejected = status === 'rejected';
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #003B5C 0%, #00547A 50%, #00A6D6 100%)' }}>
         {/* Decorative blurred circles */}
@@ -76,12 +78,12 @@ export default function AuthorizationGate({ children }) {
                   )}
                 </div>
                 <h1 className="text-2xl font-bold text-[#003B5C] mb-2">
-                  {isPending ? 'Aguardando Aprovação' : 'Acesso Negado'}
+                  {isPending ? 'Aguardando Aprovação' : isRejected ? 'Acesso Negado' : 'Não foi possível verificar o acesso'}
                 </h1>
                 <p className="text-slate-500 text-sm leading-relaxed mb-6 px-2">
                   {isPending
                     ? 'Seu acesso ao portal está pendente de aprovação do administrador. Você receberá um email assim que for autorizado.'
-                    : 'Sua solicitação de acesso foi rejeitada. Entre em contato com o administrador para mais informações.'}
+                    : isRejected ? 'Sua solicitação de acesso foi rejeitada. Entre em contato com o administrador para mais informações.' : 'Tente verificar novamente ou volte ao login. Uma falha de conexão não altera sua aprovação.'}
                 </p>
               </div>
 
@@ -92,6 +94,7 @@ export default function AuthorizationGate({ children }) {
                 </div>
               )}
 
+              {!isRejected && <ApprovalStatusRefresh onStatus={setStatus} />}
               <button
                 onClick={() => alliage.auth.logout('/login')}
                 className="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#003B5C] hover:bg-[#002D44] transition-colors shadow-lg"

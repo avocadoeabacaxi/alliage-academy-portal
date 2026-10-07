@@ -328,9 +328,9 @@ export async function invokeFunction(name, payload = {}, user = null) {
       const userEmails = new Set(users.map(record => record.email?.toLowerCase()));
       const merged = users.map(record => {
         const authorization = authorizationByEmail.get(record.email?.toLowerCase());
-        return authorization ? { ...record, role: authorization.role || record.role, region: authorization.region || record.region || '', authorization_id: authorization.id, status: authorization.status } : record;
+        return { ...record, role: authorization?.role || record.role, region: authorization?.region || record.region || '', authorization_id: authorization?.id, status: authorization?.status || 'pending' };
       });
-      data.filter(record => record.status === 'approved' && !userEmails.has(record.email?.toLowerCase())).forEach(record => merged.push({ id: `auth_${record.id}`, email: record.email, full_name: record.full_name || '', role: record.role || 'solicitante', region: record.region || '', created_date: record.approved_date || record.first_login_attempt, authorization_id: record.id, pending_registration: true }));
+      data.filter(record => !userEmails.has(record.email?.toLowerCase())).forEach(record => merged.push({ id: `auth_${record.id}`, email: record.email, full_name: record.full_name || '', role: record.role || 'solicitante', region: record.region || '', created_date: record.approved_date || record.first_login_attempt, authorization_id: record.id, status: record.status || 'pending', authorization_only: true, pending_registration: record.status === 'approved' }));
       return { data, users: merged };
     }
     case 'authorizeEmailInvitation': {

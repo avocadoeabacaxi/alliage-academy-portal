@@ -77,6 +77,26 @@ Sem `AI_API_URL`, `AI_API_KEY` e `AI_MODEL`, o portal continua funcionando: trad
 
 ## Produção
 
+### Aprovação de acesso
+
+Em **Configurações → Usuários**, a coluna **Status do acesso** diferencia
+`Pendente`, `Aprovado` e `Rejeitado`. O perfil (como `Solicitante`) não representa
+uma aprovação. Pedidos ainda sem conta também aparecem na lista.
+
+O botão **Aprovar acesso** exige confirmação do perfil, grava a decisão e lê
+novamente a autorização antes de informar sucesso. O convite por e-mail é uma
+etapa separada: uma falha de envio é exibida sem desfazer o acesso já aprovado.
+Alterar o perfil ou redefinir a senha não aprova um pedido pendente.
+
+A tela de espera consulta o status a cada 15 segundos enquanto estiver visível,
+ao voltar para a aba e pelo botão **Verificar liberação**. Quando a aprovação é
+confirmada, o portal recarrega os dados da sessão e permite a entrada. Erros de
+consulta são apresentados como erros, sem inventar uma aprovação ou rejeição.
+
+Os testes de cadastro cobrem a lista, o fluxo de aprovação, a preservação da
+sessão e uma falha simulada do envio. Use apenas dados fictícios e envio simulado
+em testes de aprovação; não aprove contas reais para validar uma publicação.
+
 ### Recuperar etapas de um pedido pendente
 
 Novas solicitações em `Pendente Análise` recebem as duas etapas `Pendente`,

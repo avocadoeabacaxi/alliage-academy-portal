@@ -44,6 +44,13 @@ export default function SettingsUsers({ canManage = false }) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [approvalUser, setApprovalUser] = useState(null);
+  const [approvalRole, setApprovalRole] = useState('solicitante');
+  const [approving, setApproving] = useState(false);
+  const [approvalError, setApprovalError] = useState('');
+  const [approvalMessage, setApprovalMessage] = useState('');
   const [editForm, setEditForm] = useState({ role: '', region: '' });
   const [saving, setSaving] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
@@ -66,10 +73,6 @@ export default function SettingsUsers({ canManage = false }) {
       const data = response.data || {};
       const msg = data.message || 'Email enviado com sucesso!';
       setResetMsg(prev => ({ ...prev, [user.id]: msg }));
-      // If the account didn't exist before, it's now invited — refresh to reflect status
-      if (user.pending_registration && data.success && !data.dry_run) {
-        setUsers(prev => prev.map(u => u.id === user.id ? { ...u, pending_registration: false } : u));
-      }
     } catch (e) {
       setResetMsg(prev => ({ ...prev, [user.id]: 'Erro: ' + e.message }));
     } finally {
@@ -94,6 +97,7 @@ export default function SettingsUsers({ canManage = false }) {
   };
 
   const loadUsers = async () => {
+    setLoadError('');
     try {
       const authResponse = await alliage.functions.invoke('listUserAuthorizations', {});
       const allAuths = authResponse.data?.data || [];
@@ -104,6 +108,7 @@ export default function SettingsUsers({ canManage = false }) {
       setUsers(authResponse.data?.users || []);
     } catch (e) {
       console.error(e);
+      setLoadError('Não foi possível atualizar os usuários. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -113,8 +118,8 @@ export default function SettingsUsers({ canManage = false }) {
     if (!inviteForm.email.trim()) return;
     setSaving(true);
     try {
-      await inviteAuthorizedUser({ ...inviteForm, preferred_language: lang });
-      setInviteMsg('Convite enviado. O usuário receberá um link para criar a senha e acessar o portal.');
+      const result = await inviteAuthorizedUser({ ...inviteForm, preferred_language: lang });
+      setInviteMsg(result.notificationError || 'Acesso aprovado. Convite solicitado com sucesso.');
       setInviteForm({ email: '', role: 'solicitante', region: 'Brasil' });
       setTimeout(() => setInviteMsg(''), 5000);
       await loadUsers();
@@ -122,6 +127,27 @@ export default function SettingsUsers({ canManage = false }) {
       setInviteMsg('Erro: ' + e.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleApproveAccess = async () => {
+    if (!approvalUser || approving) return;
+    setApproving(true);
+    setApprovalError('');
+    setApprovalMessage('');
+    try {
+      const result = await inviteAuthorizedUser({
+        email: approvalUser.email, full_name: approvalUser.full_name,
+        role: approvalRole, region: approvalUser.region || 'Brasil',
+        preferred_language: approvalUser.preferred_language || lang,
+      });
+      setApprovalMessage(`${approvalUser.email}: ${result.notificationError || 'acesso aprovado e confirmado no sistema.'}`);
+      setApprovalUser(null);
+      await loadUsers();
+    } catch (e) {
+      setApprovalError(e.message || 'Não foi possível aprovar o acesso.');
+    } finally {
+      setApproving(false);
     }
   };
 
@@ -157,7 +183,8 @@ export default function SettingsUsers({ canManage = false }) {
     const matchesSearch = u.email.toLowerCase().includes(search.toLowerCase()) || 
                          u.full_name?.toLowerCase().includes(search.toLowerCase());
     const matchesRole = !filterRole || u.role === filterRole;
-    return matchesSearch && matchesRole;
+    const matchesStatus = !filterStatus || userStatus(u) === filterStatus;
+    return matchesSearch && matchesRole && matchesStatus;
   });
 
   if (loading) {
@@ -243,7 +270,10 @@ export default function SettingsUsers({ canManage = false }) {
       {/* Divider */}
       <div className="border-t border-slate-200 pt-4">
         <h3 className="text-sm font-semibold text-slate-700 mb-4">{canManage ? 'Gerenciar Usuários' : 'Visualizar Usuários'}</h3>
+        <p className="text-sm text-slate-500">O perfil define as permissões. Somente o status Aprovado libera a entrada no portal.</p>
       </div>
+      {loadError && <div role="alert" className="text-sm text-red-700">{loadError} <button onClick={loadUsers} className="underline">Atualizar lista</button></div>}
+      {approvalMessage && <p role="status" className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">{approvalMessage}</p>}
 
       {/* Header com Invite */}
       <div className="flex flex-col lg:flex-row gap-4 items-center">
@@ -261,6 +291,12 @@ export default function SettingsUsers({ canManage = false }) {
           <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className="input-base w-40">
             <option value="">Todos os papéis</option>
             {ROLES.map(r => <option key={r} value={r}>{t(`role.${r}`)}</option>)}
+          </select>
+          <select aria-label="Filtrar por status de acesso" value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="input-base w-40">
+            <option value="">Todos os status</option>
+            <option value="pending">Pendente</option>
+            <option value="approved">Aprovado</option>
+            <option value="rejected">Rejeitado</option>
           </select>
         </div>
         {canManage && (
@@ -314,6 +350,7 @@ export default function SettingsUsers({ canManage = false }) {
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Nome</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Papel</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Status do acesso</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Região</th>
                 {canManage && <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700">Receber pedidos de acesso</th>}
                 {canManage && <th className="px-4 py-3 text-right text-xs font-semibold text-slate-700">Ações</th>}
@@ -336,7 +373,7 @@ export default function SettingsUsers({ canManage = false }) {
                           <span className="text-sm font-semibold text-slate-900 truncate">{user.full_name || 'Sem nome'}</span>
                           {user.pending_registration && (
                             <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200 whitespace-nowrap">
-                              Convite pendente
+                              Cadastro não concluído
                             </span>
                           )}
                         </div>
@@ -350,6 +387,11 @@ export default function SettingsUsers({ canManage = false }) {
                     </span>
                   </td>
                   <td className="px-4 py-3">
+                    <span className={`inline-block whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${ACCESS_STATUS[userStatus(user)].style}`}>
+                      {ACCESS_STATUS[userStatus(user)].label}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
                     <span className="text-sm text-slate-600 flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5" />
                       {user.region || '—'}
@@ -357,7 +399,7 @@ export default function SettingsUsers({ canManage = false }) {
                   </td>
                   {canManage && (
                     <td className="px-4 py-3 text-center">
-                      {user.role === 'admin' && !user.pending_registration ? (
+                      {user.role === 'admin' && userStatus(user) === 'approved' && !user.authorization_only && !user.pending_registration ? (
                         <label className="inline-flex items-center justify-center cursor-pointer" title="Receber email quando alguém solicitar acesso">
                           <input
                             type="checkbox"
@@ -373,10 +415,17 @@ export default function SettingsUsers({ canManage = false }) {
                   {canManage && (
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        {userStatus(user) === 'pending' && (
+                          <button onClick={() => { setApprovalUser(user); setApprovalRole(ROLES.includes(user.role) ? user.role : 'solicitante'); setApprovalError(''); }} className="whitespace-nowrap rounded-lg bg-green-50 px-3 py-2 text-xs font-semibold text-green-700 border border-green-200 hover:bg-green-100">
+                            Aprovar acesso
+                          </button>
+                        )}
+                        {userStatus(user) === 'approved' && (
                         <button onClick={() => handleSendAccess(user)} disabled={sendingReset === user.id} title={user.pending_registration ? 'Enviar link de acesso / senha' : 'Redefinir senha (enviar por email)'} className={`p-1.5 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium ${user.pending_registration ? 'text-[#00A6D6] hover:bg-[#00A6D6]/10' : 'text-slate-500 hover:bg-slate-100'}`}>
-                          {sendingReset === user.id ? <Loader2 className="w-4 h-4 animate-spin" /> : user.pending_registration ? <><Send className="w-4 h-4" /><span className="hidden lg:inline">Liberar acesso</span></> : <><KeyRound className="w-4 h-4" /><span className="hidden lg:inline">Redefinir senha</span></>}
+                          {sendingReset === user.id ? <Loader2 className="w-4 h-4 animate-spin" /> : user.pending_registration ? <><Send className="w-4 h-4" /><span className="hidden lg:inline">Enviar convite</span></> : <><KeyRound className="w-4 h-4" /><span className="hidden lg:inline">Redefinir senha</span></>}
                         </button>
-                        {!user.pending_registration && (
+                        )}
+                        {!user.authorization_only && !user.pending_registration && (
                           <button onClick={() => { setModalUser(user); setEditForm({ role: user.role, region: user.region || '' }); }} className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors" title="Editar usuário">
                             <Edit className="w-4 h-4" />
                           </button>
@@ -397,12 +446,33 @@ export default function SettingsUsers({ canManage = false }) {
         )}
       </div>
 
+      <Dialog open={!!approvalUser} onOpenChange={open => { if (!open && !approving) setApprovalUser(null); }}>
+        <DialogContent className="sm:max-w-md bg-white text-slate-900">
+          <DialogHeader>
+            <DialogTitle>Aprovar acesso</DialogTitle>
+            <DialogDescription>Esta ação libera a entrada no portal com o perfil escolhido. O status será confirmado no servidor.</DialogDescription>
+          </DialogHeader>
+          <p className="break-all text-sm font-semibold">{approvalUser?.email}</p>
+          <label htmlFor="approval-role" className="text-sm">Perfil do acesso</label>
+          <select id="approval-role" value={approvalRole} onChange={e => setApprovalRole(e.target.value)} disabled={approving} className="input-base">
+            {ROLES.map(role => <option key={role} value={role}>{t(`role.${role}`)}</option>)}
+          </select>
+          {approvalError && <p role="alert" className="text-sm text-red-700">{approvalError}</p>}
+          <div className="flex justify-end gap-2">
+            <button onClick={() => setApprovalUser(null)} disabled={approving} className="rounded-full px-4 py-2 text-sm">Cancelar</button>
+            <button onClick={handleApproveAccess} disabled={approving} className="rounded-full bg-green-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+              {approving ? 'Confirmando aprovação...' : 'Confirmar aprovação'}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Modal de Edição */}
       <Dialog open={!!modalUser} onOpenChange={(open) => !open && setModalUser(null)}>
         <DialogContent className="sm:max-w-md bg-white text-slate-900 border-slate-200 [&>button]:text-slate-400 [&>button:hover]:text-slate-700">
           <DialogHeader>
             <DialogTitle className="text-slate-900">Editar Usuário</DialogTitle>
-            <DialogDescription className="text-slate-500">Atualize o papel e a região deste usuário.</DialogDescription>
+            <DialogDescription className="text-slate-500">Atualize o papel e a região deste usuário. Alterar o perfil não aprova um acesso pendente; use Aprovar acesso na lista.</DialogDescription>
           </DialogHeader>
           {modalUser && (
             <div className="space-y-4">
@@ -463,4 +533,14 @@ export default function SettingsUsers({ canManage = false }) {
       </Dialog>
     </div>
   );
+}
+
+const ACCESS_STATUS = {
+  pending: { label: 'Pendente', style: 'bg-amber-50 text-amber-700 border-amber-200' },
+  approved: { label: 'Aprovado', style: 'bg-green-50 text-green-700 border-green-200' },
+  rejected: { label: 'Rejeitado', style: 'bg-red-50 text-red-700 border-red-200' },
+};
+
+function userStatus(user) {
+  return ACCESS_STATUS[user.status] ? user.status : 'pending';
 }

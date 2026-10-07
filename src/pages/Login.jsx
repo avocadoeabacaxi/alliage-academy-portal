@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogIn, Mail, Lock, Loader2, AlertCircle, Clock, ArrowRight, CheckCircle2, Users, BookOpen, BarChart3 } from "lucide-react";
 import GoogleIcon from "@/components/GoogleIcon";
+import ApprovalStatusRefresh from '@/components/ApprovalStatusRefresh';
 import LanguageSelector from "@/components/LanguageSelector";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
@@ -29,8 +30,7 @@ export default function Login() {
       }
     } catch (err) {
       console.error('Error checking authorization:', err);
-      setAuthStatus('pending');
-      setIsLoggedIn(true);
+      setError('Não foi possível verificar sua autorização. Tente entrar novamente.');
     } finally {
       setLoading(false);
     }
@@ -102,6 +102,7 @@ export default function Login() {
                 </div>
               )}
 
+              {isPending && <ApprovalStatusRefresh onStatus={setAuthStatus} />}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-xl bg-[#003B5C] hover:bg-[#002D44] transition-colors shadow-lg"
