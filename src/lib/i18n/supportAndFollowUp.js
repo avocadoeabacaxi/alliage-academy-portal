@@ -1,0 +1,77 @@
+const support = {
+  pt: {
+    title: 'Solicitação de Apoio Técnico', intro: 'Descreva a necessidade técnica para a equipe avaliar e organizar o atendimento.',
+    steps: ['Solicitante', 'Produto', 'Necessidade técnica', 'Prazo e urgência', 'Forma de atendimento'],
+    company: 'Empresa / unidade', phone: 'WhatsApp de contato', model: 'Modelo / versão (se aplicável)', serial: 'Número de série (se aplicável)',
+    type: 'Tipo de apoio técnico', description: 'Descreva sua dúvida ou necessidade', descriptionHint: 'Informe o contexto, o resultado esperado e o que já foi tentado. Mínimo de 10 caracteres.',
+    attachments: 'Fotos e documentos', attachmentsHint: 'JPG, PNG, WebP ou PDF, até 10 MB por arquivo (máximo de 5). Para vídeos, informe um link abaixo.',
+    video: 'Link de vídeo ou documentação (opcional)', fileError: 'Use imagens ou PDF de até 10 MB, com no máximo 5 anexos.',
+    urgency: 'Urgência do apoio', deadline: 'Há uma data limite?', reason: 'Motivo da urgência / prazo (opcional)',
+    service: 'Como prefere receber o apoio?', remote: 'Remoto', onsite: 'Presencial',
+    remoteHint: 'Não é necessário informar link de reunião. A equipe combinará o atendimento após a análise.',
+    visit: 'Onde será o atendimento presencial?', local: 'A equipe técnica precisa ir ao local', ribeirao: 'Iremos até a Alliage em Ribeirão Preto – São Paulo',
+    notes: 'Informações adicionais para o atendimento (opcional)', details: 'Dados do apoio técnico',
+    submit: 'Enviar solicitação de apoio técnico', invalid: 'Confira os campos obrigatórios destacados antes de enviar.',
+    supportSubtype: 'Detalhe o tipo de apoio', attachmentOpen: 'Abrir anexo',
+  },
+  en: {
+    title: 'Technical Support Request', intro: 'Describe your technical needs so the team can assess and arrange assistance.',
+    steps: ['Requester', 'Product', 'Technical needs', 'Deadline and urgency', 'Service preference'],
+    company: 'Company / unit', phone: 'Contact WhatsApp', model: 'Model / version (if applicable)', serial: 'Serial number (if applicable)',
+    type: 'Type of technical support', description: 'Describe your question or needs', descriptionHint: 'Provide context, the expected result and what you have already tried. Minimum 10 characters.',
+    attachments: 'Photos and documents', attachmentsHint: 'JPG, PNG, WebP or PDF, up to 10 MB per file (maximum 5). For videos, provide a link below.',
+    video: 'Video or documentation link (optional)', fileError: 'Use images or PDFs up to 10 MB, with a maximum of 5 attachments.',
+    urgency: 'Support urgency', deadline: 'Is there a deadline?', reason: 'Reason for urgency / deadline (optional)',
+    service: 'How would you prefer to receive support?', remote: 'Remote', onsite: 'In person',
+    remoteHint: 'A meeting link is not required. The team will arrange assistance after reviewing the request.',
+    visit: 'Where will the in-person support take place?', local: 'The technical team needs to travel to the location', ribeirao: 'We will visit Alliage in Ribeirão Preto – São Paulo',
+    notes: 'Additional information for assistance (optional)', details: 'Technical support details',
+    submit: 'Submit technical support request', invalid: 'Check the required fields before submitting.',
+    supportSubtype: 'Specify the type of support', attachmentOpen: 'Open attachment',
+  },
+  es: {
+    title: 'Solicitud de Soporte Técnico', intro: 'Describa la necesidad técnica para que el equipo evalúe y organice la atención.',
+    steps: ['Solicitante', 'Producto', 'Necesidad técnica', 'Plazo y urgencia', 'Forma de atención'],
+    company: 'Empresa / unidad', phone: 'WhatsApp de contacto', model: 'Modelo / versión (si corresponde)', serial: 'Número de serie (si corresponde)',
+    type: 'Tipo de soporte técnico', description: 'Describa su duda o necesidad', descriptionHint: 'Indique el contexto, el resultado esperado y lo que ya intentó. Mínimo 10 caracteres.',
+    attachments: 'Fotos y documentos', attachmentsHint: 'JPG, PNG, WebP o PDF, hasta 10 MB por archivo (máximo 5). Para videos, indique un enlace abajo.',
+    video: 'Enlace de video o documentación (opcional)', fileError: 'Use imágenes o PDF de hasta 10 MB, con un máximo de 5 adjuntos.',
+    urgency: 'Urgencia del soporte', deadline: '¿Hay una fecha límite?', reason: 'Motivo de la urgencia / plazo (opcional)',
+    service: '¿Cómo prefiere recibir el soporte?', remote: 'Remoto', onsite: 'Presencial',
+    remoteHint: 'No necesita indicar un enlace de reunión. El equipo coordinará la atención después del análisis.',
+    visit: '¿Dónde será la atención presencial?', local: 'El equipo técnico necesita ir al lugar', ribeirao: 'Iremos a Alliage en Ribeirão Preto – São Paulo',
+    notes: 'Información adicional para la atención (opcional)', details: 'Datos del soporte técnico',
+    submit: 'Enviar solicitud de soporte técnico', invalid: 'Revise los campos obligatorios antes de enviar.',
+    supportSubtype: 'Detalle el tipo de soporte', attachmentOpen: 'Abrir adjunto',
+  },
+};
+
+const followUp = {
+  pt: {
+    title: 'Acompanhamento Pós-Treinamento', intro: 'Histórico interno de dúvidas, suporte e orientações após o treinamento. Visível apenas para educadores, gestores e administradores.',
+    label: 'Novo acompanhamento', placeholder: 'Descreva o contato recebido, a dúvida e a orientação ou suporte prestado…',
+    save: 'Registrar acompanhamento', saved: 'Acompanhamento registrado.', empty: 'Nenhum acompanhamento registrado.',
+    pending: 'Disponível para registro após informar a realização do treinamento.',
+    immutable: 'Cada registro mantém autor e data. Para complementar ou corrigir uma informação, adicione um novo comentário.',
+    more: 'Carregar anteriores', retry: 'Tentar novamente', error: 'Não foi possível carregar o histórico.',
+  },
+  en: {
+    title: 'Post-Training Follow-Up', intro: 'Internal history of questions, support and guidance after training. Visible only to educators, managers and administrators.',
+    label: 'New follow-up', placeholder: 'Describe the contact, the question and the guidance or support provided…',
+    save: 'Record follow-up', saved: 'Follow-up recorded.', empty: 'No follow-ups recorded.',
+    pending: 'Available after recording that the training took place.',
+    immutable: 'Each entry retains its author and date. Add a new comment to clarify or correct information.',
+    more: 'Load earlier entries', retry: 'Try again', error: 'Unable to load the history.',
+  },
+  es: {
+    title: 'Seguimiento Posterior al Entrenamiento', intro: 'Historial interno de dudas, soporte y orientación posteriores al entrenamiento. Visible solo para educadores, gestores y administradores.',
+    label: 'Nuevo seguimiento', placeholder: 'Describa el contacto recibido, la duda y la orientación o soporte brindado…',
+    save: 'Registrar seguimiento', saved: 'Seguimiento registrado.', empty: 'No hay seguimientos registrados.',
+    pending: 'Disponible después de registrar la realización del entrenamiento.',
+    immutable: 'Cada registro conserva autor y fecha. Agregue un nuevo comentario para complementar o corregir información.',
+    more: 'Cargar anteriores', retry: 'Intentar de nuevo', error: 'No se pudo cargar el historial.',
+  },
+};
+
+export const supportCopy = lang => support[lang] || support.pt;
+export const followUpCopy = lang => followUp[lang] || followUp.pt;

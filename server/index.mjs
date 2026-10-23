@@ -26,6 +26,7 @@ import { invokeFunction, runRecordAutomation, sendAccessEmail } from './function
 import { escapeHtml, sendEmail } from './mailer.mjs';
 import { hashOneTimeValue, hashPassword, randomOtp, randomToken, signAccessToken, verifyAccessToken, verifyPassword } from './security.mjs';
 import { startScheduler } from './scheduler.mjs';
+import { addTrainingFollowUp, listTrainingFollowUps } from './training-follow-ups.mjs';
 
 const distDir = resolve(config.rootDir, 'dist');
 const publicFunctionNames = new Set(['requestAccess', 'getSurveyByToken', 'createSurveyResponse']);
@@ -554,6 +555,18 @@ export const server = createServer(async (request, response) => {
       });
     }
     if (pathname.startsWith('/api/auth/')) return await handleAuth(request, response, pathname, url);
+    const followUpRoute = pathname.match(/^\/api\/requests\/([^/]+)\/follow-ups$/);
+    if (followUpRoute) {
+      const user = currentUser(request);
+      requireManagement(user);
+      const requestId = decodeURIComponent(followUpRoute[1]);
+      if (request.method === 'GET') return sendJson(response, 200, listTrainingFollowUps(requestId, url.searchParams.get('before') || ''));
+      if (request.method === 'POST') {
+        const payload = await readJson(request, 32 * 1024);
+        return sendJson(response, 201, addTrainingFollowUp(requestId, payload, user));
+      }
+      throw new HttpError(405, 'O histórico de acompanhamento não pode ser alterado ou excluído');
+    }
     if (pathname.startsWith('/api/entities/')) return await handleEntity(request, response, pathname, url);
     if (pathname.startsWith('/api/functions/')) return await handleFunction(request, response, pathname);
     if (pathname === '/api/users/invite' && request.method === 'POST') return await handleInvite(request, response);

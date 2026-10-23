@@ -4,6 +4,4 @@ const copy = {
   es: { training: 'Entrenamiento', trainingDesc: 'Solicite entrenamientos, reciclajes y actualizaciones de producto.', support: 'Soporte Técnico', supportDesc: 'Solicite soporte técnico, consultas, licitaciones o modificaciones de producto.', trainingForm: 'Solicitud de Entrenamiento', supportForm: 'Solicitud de Soporte Técnico', all: 'Todos los tipos', event: 'Evento' }
 };
 export const requestTypeLabels = (lang) => copy[lang] || copy.pt;
-export const supportTypes = ['Apoio técnico', 'Consulta de mercado', 'Licitação', 'Modificação de produto', 'Treinamento de integração'];
-export const trainingTypes = ['Novo treinamento', 'Reciclagem', 'Atualização de produto', 'Treinamento de lançamento', 'Técnico avançado', 'Treinamento clínico'];
-export const requestKind = (request) => request.request_category === 'Evento' ? 'event' : supportTypes.includes(request.request_type) ? 'support' : 'training';
+export { supportTypes, trainingTypes, requestKind } from '../../server/request-kinds.mjs';

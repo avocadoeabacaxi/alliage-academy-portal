@@ -77,6 +77,27 @@ Sem `AI_API_URL`, `AI_API_KEY` e `AI_MODEL`, o portal continua funcionando: trad
 
 ## Produção
 
+### Apoio técnico e acompanhamento pós-treinamento
+
+As duas entradas de **Apoio Técnico** (gestão e solicitantes) usam um formulário
+próprio: contato/WhatsApp, empresa/região, produto, modelo/série opcionais,
+descrição, anexos de imagem/PDF e link opcional de vídeo, urgência e atendimento.
+O remoto não exige convidados, educador, endereço ou link de reunião. O endereço
+é solicitado apenas quando a equipe técnica precisa visitar o local. As etapas
+de aprovação e os pedidos históricos permanecem preservados.
+
+Nos detalhes de um treinamento, **Acompanhamento Pós-Treinamento** mantém um
+histórico interno visível somente para educadores, gestores e administradores.
+Após registrar a realização (ou em pedidos já concluídos), é possível adicionar
+comentários de até 5000 caracteres, com autor e data definidos pelo servidor.
+Os comentários são registros independentes, somente de inclusão: não substituem
+observações, não reabrem o pedido e não disparam e-mails. Repetir um envio com o
+mesmo identificador não duplica o comentário. O histórico é paginado e incluído
+na exportação administrativa como `TrainingFollowUp`.
+
+Validação automatizada: `node --test server/tests/*.test.mjs`, sempre com banco
+temporário, dados fictícios, agendador desativado e envio simulado.
+
 ### Aprovação de acesso
 
 Em **Configurações → Usuários**, a coluna **Status do acesso** diferencia

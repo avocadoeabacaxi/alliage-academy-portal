@@ -6,6 +6,10 @@ import { StatusBadge, PriorityBadge } from '@/components/StatusBadge';
 import RequestParticipants from '@/components/RequestParticipants';
 import AccessDetailsEditor from '@/components/AccessDetailsEditor';
 import TrainingScheduler from '@/components/TrainingScheduler';
+import TrainingFollowUps from '@/components/TrainingFollowUps';
+import TechnicalSupportDetails from '@/components/TechnicalSupportDetails';
+import { requestKind } from '@/lib/requestTypeLabels';
+import { supportCopy } from '@/lib/i18n/supportAndFollowUp';
 import { ArrowLeft, Check, X, Clock, MapPin, User, Mail, Building, Calendar, Star, Copy, FileText, Loader2, Globe } from 'lucide-react';
 
 export default function RequestDetail() {
@@ -60,6 +64,8 @@ export default function RequestDetail() {
   };
 
   const userRole = user?.role || 'solicitante';
+  const kind = req ? requestKind(req) : 'training';
+  const support = supportCopy(lang);
 
   const canReviewStage1 = userRole === 'educador' || userRole === 'admin';
   const canReviewStage2 = userRole === 'gerente_regional' || userRole === 'admin';
@@ -273,7 +279,7 @@ export default function RequestDetail() {
         </div>
       </Section>
 
-      <Section title={t('detail.trainingDetails')} icon={FileText}>
+      <Section title={kind === 'support' ? support.details : t('detail.trainingDetails')} icon={FileText}>
         <div className="space-y-3">
           <InfoRow label={t('form.requestType')} value={tv(req.request_type)} />
           {Array.isArray(req.products) && req.products.length > 0 ? (
@@ -294,11 +300,11 @@ export default function RequestDetail() {
           )}
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
-              <Globe className="w-3 h-3" /> {t('form.trainingFocus')}
+              <Globe className="w-3 h-3" /> {kind === 'support' ? support.description : t('form.trainingFocus')}
             </p>
             <p className="text-sm text-slate-800 bg-slate-50 rounded-xl p-3">{tf(req.training_focus)}</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {kind !== 'support' && <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t('form.audience')}</p>
               <div className="flex flex-wrap gap-1">
@@ -306,11 +312,11 @@ export default function RequestDetail() {
               </div>
             </div>
             <InfoRow label={t('form.participantsCount')} value={req.participants_count} />
-          </div>
+          </div>}
         </div>
       </Section>
 
-      <Section title={t('detail.justification')} icon={Star}>
+      {req.request_kind !== 'support' && <Section title={t('detail.justification')} icon={Star}>
         <div className="space-y-3">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
@@ -343,7 +349,7 @@ export default function RequestDetail() {
             </div>
           )}
         </div>
-      </Section>
+      </Section>}
 
       <Section title={t('detail.urgency')} icon={Calendar}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -367,7 +373,7 @@ export default function RequestDetail() {
         )}
       </Section>
 
-      <AccessDetailsEditor request={req} canEdit={canEditAccess} onUpdated={loadData} />
+      {kind === 'support' ? <TechnicalSupportDetails request={req} /> : <AccessDetailsEditor request={req} canEdit={canEditAccess} onUpdated={loadData} />}
 
       {req.decision_stage2 === 'Aprovado' && req.status !== 'Cancelado' && (
         <TrainingScheduler request={req} canEdit={canEditExecution} />
@@ -383,7 +389,9 @@ export default function RequestDetail() {
         </Section>
       )}
 
-      <RequestParticipants request={req} canEdit={canEditParticipants} onUpdated={loadData} />
+      {kind !== 'support' && <RequestParticipants request={req} canEdit={canEditParticipants} onUpdated={loadData} />}
+
+      {kind === 'training' && ['admin', 'educador', 'gerente_regional'].includes(userRole) && <TrainingFollowUps key={id} request={req} />}
 
       {/* Workflow - Stage 1 */}
       <Section title={t('detail.stage1')} icon={Clock}>

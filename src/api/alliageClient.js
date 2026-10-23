@@ -74,6 +74,14 @@ function fileToDataUrl(file) {
 }
 
 export const alliage = {
+  trainingFollowUps: {
+    list(requestId, before = '') {
+      return api(`/api/requests/${encodeURIComponent(requestId)}/follow-ups?${new URLSearchParams({ before })}`);
+    },
+    create(requestId, payload) {
+      return api(`/api/requests/${encodeURIComponent(requestId)}/follow-ups`, json('POST', payload));
+    },
+  },
   auth: {
     async loginViaEmailPassword(email, password) {
       const result = await api('/api/auth/login', json('POST', { email, password }));

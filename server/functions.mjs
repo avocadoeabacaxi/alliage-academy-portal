@@ -364,7 +364,7 @@ export async function invokeFunction(name, payload = {}, user = null) {
       return invokeStructuredAssistant(String(payload.prompt || ''));
     case 'exportDatabase': {
       requireSuperAdmin(user);
-      const entities = ['TrainingRequest', 'TrainingSchedule', 'Client', 'TeamMember', 'UserAuthorization', 'RoutingRule', 'SatisfactionSurvey', 'TrainingEvaluation', 'EmailTemplate', 'SurveyResponse', 'User'];
+      const entities = ['TrainingRequest', 'TrainingSchedule', 'TrainingFollowUp', 'Client', 'TeamMember', 'UserAuthorization', 'RoutingRule', 'SatisfactionSurvey', 'TrainingEvaluation', 'EmailTemplate', 'SurveyResponse', 'User'];
       return {
         exported_at: new Date().toISOString(),
         entities: Object.fromEntries(entities.map(entity => [entity, listRecords(entity, { sort: '-created_date', limit: 5000 })])),
