@@ -23,6 +23,7 @@ import {
   upsertAccount,
 } from './db.mjs';
 import { invokeFunction, runRecordAutomation, sendAccessEmail } from './functions.mjs';
+import { preparePastRegistration } from './past-registration.mjs';
 import { escapeHtml, sendEmail } from './mailer.mjs';
 import { hashOneTimeValue, hashPassword, randomOtp, randomToken, signAccessToken, verifyAccessToken, verifyPassword } from './security.mjs';
 import { startScheduler } from './scheduler.mjs';
@@ -414,6 +415,7 @@ async function handleEntity(request, response, pathname, url) {
   }
   if (request.method === 'POST' && !id) {
     let payload = await readJson(request);
+    if (entity === 'TrainingRequest') payload = preparePastRegistration(payload);
     // Older/simplified clients may omit the workflow fields. Only initialize
     // pending requests; never reopen historical or already decided requests.
     if (entity === 'TrainingRequest' && payload.status === 'Pendente Análise') {

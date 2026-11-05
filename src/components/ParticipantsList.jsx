@@ -3,7 +3,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { Plus, Trash2, Users } from 'lucide-react';
 import ValidatedInput from '@/components/ValidatedInput';
 
-export default function ParticipantsList({ participants = [], onChange }) {
+export default function ParticipantsList({ participants = [], onChange, isPast = false }) {
   const { t } = useLanguage();
 
   const update = (index, key, value) => {
@@ -20,7 +20,7 @@ export default function ParticipantsList({ participants = [], onChange }) {
         <Users className="w-4 h-4 text-[#00A6D6]" />
         {t('form.participantsListLabel')}
       </label>
-      <p className="text-xs text-slate-400 mb-3">{t('form.participantsListHint')}</p>
+      <p className="text-xs text-slate-400 mb-3">{t(isPast ? 'form.past.participantsListHint' : 'form.participantsListHint')}</p>
 
       <div className="space-y-3">
         {participants.map((p, i) => (
@@ -45,7 +45,7 @@ export default function ParticipantsList({ participants = [], onChange }) {
                 className="input-base"
                 placeholder={`${t('form.participantName')} *`}
               />
-              <ValidatedInput kind="phone" value={p.phone || ''} onChange={(v) => update(i, 'phone', v)} placeholder={`${t('form.participantPhone')} *`} />
+              <ValidatedInput kind="phone" value={p.phone || ''} onChange={(v) => update(i, 'phone', v)} placeholder={`${t('form.participantPhone')} ${isPast ? `(${t('common.optional')})` : '*'}`} />
               <ValidatedInput kind="email" value={p.email || ''} onChange={(v) => update(i, 'email', v)} placeholder={`${t('form.participantEmail')} *`} />
               <select value={p.attendance_mode || 'Presencial'} onChange={(e) => update(i, 'attendance_mode', e.target.value)} className="input-base">
                 <option value="Online">{t('format.online')}</option>

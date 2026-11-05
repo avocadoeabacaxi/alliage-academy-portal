@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { config } from './config.mjs';
 import {
   createRecord,
@@ -95,6 +95,9 @@ export async function sendAccessEmail(email, fullName = '') {
 }
 
 export async function notifyAdminNewRequest(request) {
+  if (request.status === 'Concluído' || request.registration_mode === 'past') {
+    return { skipped: true, reason: 'completed-registration' };
+  }
   const ruleType = request.request_category === 'Evento' ? 'Evento' : request.request_type;
   const rules = ruleType ? listRecords('RoutingRule', { filters: { request_type: ruleType } }) : [];
   const exact = rules.find(rule => rule.product_category && rule.product_category !== '*' && rule.product_category === request.product_category);
@@ -167,19 +170,56 @@ export async function ensureSurvey(request) {
   return survey;
 }
 
-export async function sendSatisfactionSurvey(request) {
-  if (!request.requester_email) return { skipped: true };
+// Serialize the initial dispatch per request, including survey creation. The
+// durable delivery snapshot freezes recipients/content and remembers accepted
+// recipients across retries. Manual resends remain a separate, explicit action.
+const surveyDispatches = new Map();
+export function sendSatisfactionSurvey(request) {
+  if (surveyDispatches.has(request.id)) return surveyDispatches.get(request.id);
+  const task = dispatchInitialSurvey(request).finally(() => surveyDispatches.delete(request.id));
+  surveyDispatches.set(request.id, task);
+  return task;
+}
+
+async function dispatchInitialSurvey(request) {
+  const currentRecipients = uniqueEmails([request.requester_email, ...(request.participants_list || []).map(participant => participant?.email)]);
+  if (!currentRecipients.length) return { skipped: true };
   const survey = await ensureSurvey(request);
   const surveyUrl = `${config.appOrigin}/survey/${survey.public_token}`;
   const template = templateFor('survey');
   const variables = mailVariables(request, { survey_url: surveyUrl });
-  const recipients = uniqueEmails([request.requester_email, ...(request.participants_list || []).map(participant => participant?.email)]);
-  let emailsSent = 0;
-  for (const to of recipients) {
-    const result = await sendEmail({ emailType: 'survey', to, subject: fillTemplate(template.subject, variables), html: fillTemplate(template.html_content || template.html, variables) });
-    if (result.accepted) emailsSent += 1;
+  const deliveryId = `initial-survey-${request.id}`;
+  let delivery = getRecord('SurveyDelivery', deliveryId);
+  if (!delivery) {
+    delivery = {
+      id: deliveryId, training_request_id: request.id, recipients: currentRecipients,
+      subject: fillTemplate(template.subject, variables), html: fillTemplate(template.html_content || template.html, variables),
+      accepted_recipients: [],
+    };
+    // Simulations must not consume/freeze a real dispatch.
+    if (emailDeliveryEnabled()) delivery = createRecord('SurveyDelivery', delivery);
   }
-  if (emailsSent === recipients.length && emailsSent > 0) markSurveySent(request.id);
+  const { recipients } = delivery;
+  const accepted = new Set(delivery.accepted_recipients || []);
+  let emailsSent = 0;
+  const failures = [];
+  for (const to of recipients) {
+    if (accepted.has(to)) continue;
+    try {
+      const key = createHash('sha256').update(`${deliveryId}/${to}`).digest('hex');
+      const result = await sendEmail({ emailType: 'survey', to, subject: delivery.subject, html: delivery.html, idempotencyKey: `alliage/survey/${key}` });
+      if (result.accepted) {
+        emailsSent += 1;
+        accepted.add(to);
+        updateRecord('SurveyDelivery', deliveryId, { accepted_recipients: [...accepted] });
+      }
+    } catch (error) {
+      // A failure for one recipient must not block all other participants.
+      failures.push(error.message);
+    }
+  }
+  if (accepted.size === recipients.length && recipients.length > 0) markSurveySent(request.id);
+  if (failures.length) throw new Error(`Falha ao enviar pesquisa para ${failures.length} destinatário(s): ${failures[0]}`);
   return { success: true, dry_run: config.emailDryRun, emails_sent: emailsSent, survey_url: surveyUrl };
 }
 
@@ -197,10 +237,10 @@ function markSurveySent(requestId, { resend = false } = {}) {
 export async function runRecordAutomation(entity, previous, current) {
   try {
     if (entity === 'TrainingRequest') {
-      if (!previous) await notifyAdminNewRequest(current);
+      if (!previous && current.status !== 'Concluído') await notifyAdminNewRequest(current);
       if (previous && previous.status !== current.status && current.status === 'Aprovado Etapa 2') await sendApprovalEmail(current);
       if (previous && previous.status !== current.status && current.status === 'Rejeitado') await sendRejectionEmail(current);
-      if (previous && previous.status !== current.status && current.status === 'Concluído') await sendSatisfactionSurvey(current);
+      if (current.status === 'Concluído' && (!previous || previous.status !== current.status)) await sendSatisfactionSurvey(current);
     }
     if (entity === 'UserAuthorization' && previous && previous.status !== current.status) {
       if (current.status === 'approved') await sendAccessEmail(current.email, current.full_name || '');
@@ -222,7 +262,9 @@ export async function sendParticipantReminders({ dryRun = false } = {}) {
   const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const requests = listRecords('TrainingRequest', { limit: 5000 }).filter(request =>
     (request.training_scheduled_date === tomorrow || request.event_start_date === tomorrow)
-    && request.status !== 'Cancelado'
+    && !['Cancelado', 'Concluído'].includes(request.status)
+    && request.registration_mode !== 'past'
+    && !request.training_completed_date
     && !request.reminder_sent
     && Array.isArray(request.participants_list)
     && request.participants_list.length > 0
@@ -364,7 +406,7 @@ export async function invokeFunction(name, payload = {}, user = null) {
       return invokeStructuredAssistant(String(payload.prompt || ''));
     case 'exportDatabase': {
       requireSuperAdmin(user);
-      const entities = ['TrainingRequest', 'TrainingSchedule', 'TrainingFollowUp', 'Client', 'TeamMember', 'UserAuthorization', 'RoutingRule', 'SatisfactionSurvey', 'TrainingEvaluation', 'EmailTemplate', 'SurveyResponse', 'User'];
+      const entities = ['TrainingRequest', 'TrainingSchedule', 'TrainingFollowUp', 'Client', 'TeamMember', 'UserAuthorization', 'RoutingRule', 'SatisfactionSurvey', 'SurveyDelivery', 'TrainingEvaluation', 'EmailTemplate', 'SurveyResponse', 'User'];
       return {
         exported_at: new Date().toISOString(),
         entities: Object.fromEntries(entities.map(entity => [entity, listRecords(entity, { sort: '-created_date', limit: 5000 })])),

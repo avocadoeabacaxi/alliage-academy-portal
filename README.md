@@ -77,6 +77,24 @@ Sem `AI_API_URL`, `AI_API_KEY` e `AI_MODEL`, o portal continua funcionando: trad
 
 ## Produção
 
+### Registrar evento anterior
+
+No registro de treinamentos anteriores, participantes precisam de nome e e-mail;
+o telefone é opcional (e validado quando informado). A etapa online pede apenas
+a plataforma utilizada, e as opções presenciais usam verbos no passado.
+
+Novos registros criados como `Concluído` enviam a pesquisa ao solicitante e aos
+participantes cadastrados, sem notificação administrativa de nova solicitação
+ou lembretes futuros. Não há varredura, migração ou reenvio de registros antigos;
+editar um pedido que já estava concluído também não dispara a pesquisa.
+
+O envio inicial mantém destinatários/conteúdo e aceites em `SurveyDelivery`,
+registro interno incluído no export administrativo. Tentativas repetidas usam
+a mesma chave no Resend e pulam destinatários já aceitos; uma falha individual
+não interrompe os demais. Falhas continuam no `email_log`; não há novo job de
+reenvio de pesquisas. O reenvio manual existente permanece uma ação separada.
+Os testes usam banco temporário e Resend simulado, sem e-mails reais.
+
 ### Apoio técnico e acompanhamento pós-treinamento
 
 As duas entradas de **Apoio Técnico** (gestão e solicitantes) usam um formulário

@@ -51,7 +51,7 @@ async function deliver(payload, idempotencyKey) {
   }
 }
 
-export async function sendEmail({ emailType, to, subject, html, attachments = [] }) {
+export async function sendEmail({ emailType, to, subject, html, attachments = [], idempotencyKey }) {
   const recipients = [...new Set((Array.isArray(to) ? to : [to]).filter(Boolean).map(email => String(email).trim().toLowerCase()).filter(Boolean))];
   const logId = randomUUID();
   const createdAt = new Date().toISOString();
@@ -67,7 +67,7 @@ export async function sendEmail({ emailType, to, subject, html, attachments = []
   let result;
   try {
     if (!config.resendApiKey) throw new Error('Resend não configurado. Nenhum e-mail foi enviado.');
-    result = await deliver({ from: config.emailFrom, to: recipients, subject, html, attachments }, `alliage/${logId}`);
+    result = await deliver({ from: config.emailFrom, to: recipients, subject, html, attachments }, idempotencyKey || `alliage/${logId}`);
   } catch (error) {
     const message = String(error.message).replace(/re_[A-Za-z0-9_-]+/g, '[redacted]');
     db.prepare('INSERT INTO email_log (id, email_type, recipients, subject, status, error, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')

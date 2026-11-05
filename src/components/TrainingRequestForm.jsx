@@ -11,7 +11,8 @@ import ProductSelector, { resolveProductName, BRAND_OPTIONS } from '@/components
 import { requestTypeLabels, supportTypes, trainingTypes } from '@/lib/requestTypeLabels';
 import { translateOption } from '@/lib/i18n/optionValues';
 import ValidatedInput from '@/components/ValidatedInput';
-import { isValidEmail, isValidPhone } from '@/lib/validation';
+import { isValidEmail } from '@/lib/validation';
+import { validParticipants, validTrainingLogistics, trainingLogisticsPayload } from '@/lib/trainingRegistration';
 
 const AREA_OPTIONS = ['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'];
 const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Dificuldade de posicionamento comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
@@ -59,7 +60,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
     { id: 'product', title: t('form.step3.title'), desc: t('form.step3.desc') },
     { id: 'request_type', title: t('form.step2.title'), desc: t('form.step2.desc') },
     { id: 'training_focus', title: t('form.step4.title'), desc: t('form.step4.desc') },
-    ...(skipAudience ? [] : [{ id: 'audience', title: t('form.step5.title'), desc: t('form.step5.desc') }]),
+    ...(skipAudience ? [] : [{ id: 'audience', title: t('form.step5.title'), desc: t(isPast ? 'form.past.audienceDesc' : 'form.step5.desc') }]),
     { id: 'justification_urgency', title: t('form.step6.title'), desc: t('form.step6.desc') },
     { id: 'specialist', title: t('form.stepSpecialist.title'), desc: t('form.stepSpecialist.desc') },
     { id: 'logistics', title: t('form.step8.title'), desc: t('form.step8.desc') },
@@ -83,17 +84,13 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
         });
       }
       case 'training_focus': return form.training_focus.length > 10;
-      case 'audience': return (form.participants_list || []).every(p => p.name?.trim() && isValidEmail(p.email) && isValidPhone(p.phone));
+      case 'audience': return validParticipants(form.participants_list, isPast);
       case 'justification_urgency':
         if (isPast) return form.training_completed_date && form.justification.trim().length > 0;
         return form.justification.trim().length > 0 && (!form.needs_deadline || form.deadline_requested);
       case 'specialist':
         return !form.has_multiplier || (form.specialist_name.trim() && form.specialist_role.trim() && isValidEmail(form.specialist_email));
-      case 'logistics': {
-        const onlineReady = form.guest_participation_mode !== 'Online' || !!form.online_access_link || form.needs_educator_link;
-        const addressReady = form.guest_participation_mode === 'Online' || form.presencial_mode === 'ribeirao' || (form.location_country && form.location_city);
-        return onlineReady && addressReady;
-      }
+      case 'logistics': return validTrainingLogistics(form, isPast);
       default: return true;
     }
   };
@@ -119,16 +116,11 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
       const completedDate = form.training_completed_date || today;
 
       const { presencial_mode, ...formData } = form;
-      const presencialLabel = presencial_mode === 'ribeirao' ? t('form.presencialModeRibeirao') : t('form.presencialModeLocal');
-      const formatDetailsFinal = form.format === 'Presencial'
-        ? [presencialLabel, form.format_details].filter(Boolean).join(' — ')
-        : form.format_details;
       const productsList = (form.products || []).filter(p => p.category);
       const productNameFinal = productsList.map(resolveProductName).join(', ');
       const entity = {
         ...formData,
-        format: form.guest_participation_mode === 'Online' ? 'Remoto' : form.guest_participation_mode,
-        format_details: formatDetailsFinal,
+        ...trainingLogisticsPayload({ ...formData, presencial_mode }, isPast, t),
         products: productsList,
         product_name: productNameFinal,
         product_category: productsList[0]?.category || '',
@@ -299,7 +291,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
               </div>
             </Field>
             <div className="pt-2 border-t border-slate-100">
-              <ParticipantsList participants={form.participants_list} onChange={(list) => update('participants_list', list)} />
+              <ParticipantsList participants={form.participants_list} onChange={(list) => update('participants_list', list)} isPast={isPast} />
             </div>
           </div>
         )}
@@ -387,16 +379,16 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
 
         {steps[step]?.id === 'logistics' && (
           <div className="space-y-4">
-            <ParticipationAccessFields data={form} update={update} />
+            <ParticipationAccessFields data={form} update={update} isPast={isPast} />
             {form.guest_participation_mode !== 'Online' && (
               <div className="space-y-4 pl-3 border-l-2 border-[#00A6D6]/20">
-                <Field label={t('form.presencialModeQuestion')}>
+                <Field label={t(isPast ? 'form.past.presencialModeQuestion' : 'form.presencialModeQuestion')}>
                   <div className="grid grid-cols-1 gap-2">
                     <button onClick={() => update('presencial_mode', 'local')} className={`px-3 py-2.5 text-sm rounded-lg border text-left transition-all ${form.presencial_mode === 'local' ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                      {t('form.presencialModeLocal')}
+                      {t(isPast ? 'form.past.presencialModeLocal' : 'form.presencialModeLocal')}
                     </button>
                     <button onClick={() => update('presencial_mode', 'ribeirao')} className={`px-3 py-2.5 text-sm rounded-lg border text-left transition-all ${form.presencial_mode === 'ribeirao' ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
-                      {t('form.presencialModeRibeirao')}
+                      {t(isPast ? 'form.past.presencialModeRibeirao' : 'form.presencialModeRibeirao')}
                     </button>
                   </div>
                 </Field>

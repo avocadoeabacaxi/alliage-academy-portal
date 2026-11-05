@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
-export default function ParticipationAccessFields({ data, update, disabled = false }) {
+export default function ParticipationAccessFields({ data, update, disabled = false, isPast = false }) {
   const { t } = useLanguage();
   const mode = data.guest_participation_mode || 'Presencial';
   const needsOnline = mode === 'Online';
@@ -18,12 +18,14 @@ export default function ParticipationAccessFields({ data, update, disabled = fal
         </div>
       </div>
       {needsOnline && <div className="space-y-3 pl-3 border-l-2 border-[#00A6D6]/20">
-        <label className="block text-sm font-medium text-slate-700">{t('form.onlinePlatform')}</label>
+        <label className="block text-sm font-medium text-slate-700">{t(isPast ? 'form.past.onlinePlatform' : 'form.onlinePlatform')}</label>
         <select disabled={disabled} value={data.online_platform || 'Google Meet'} onChange={e => update('online_platform', e.target.value)} className="input-base disabled:bg-slate-50">
           {['Google Meet', 'Microsoft Teams', 'Zoom', 'Outro'].map(option => <option key={option}>{option}</option>)}
         </select>
-        <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" disabled={disabled} checked={!!data.needs_educator_link} onChange={e => update('needs_educator_link', e.target.checked)} />{t('form.needsEducatorLink')}</label>
-        {!data.needs_educator_link && <input type="url" disabled={disabled} value={data.online_access_link || ''} onChange={e => update('online_access_link', e.target.value)} className="input-base disabled:bg-slate-50" placeholder={t('form.onlineAccessLink')} />}
+        {!isPast && <>
+          <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" disabled={disabled} checked={!!data.needs_educator_link} onChange={e => update('needs_educator_link', e.target.checked)} />{t('form.needsEducatorLink')}</label>
+          {!data.needs_educator_link && <input type="url" disabled={disabled} value={data.online_access_link || ''} onChange={e => update('online_access_link', e.target.value)} className="input-base disabled:bg-slate-50" placeholder={t('form.onlineAccessLink')} />}
+        </>}
       </div>}
     </div>
   );

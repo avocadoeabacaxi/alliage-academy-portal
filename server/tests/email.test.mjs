@@ -14,7 +14,7 @@ process.env.SCHEDULER_ENABLED = 'false';
 const { config } = await import('../config.mjs');
 const { db, createRecord, getRecord, listRecords, updateRecord, getJobRun } = await import('../db.mjs');
 const { sendEmail } = await import('../mailer.mjs');
-const { ensureSurvey, notifyAdminNewRequest, sendSatisfactionSurvey, sendParticipantReminders, invokeFunction } = await import('../functions.mjs');
+const { ensureSurvey, notifyAdminNewRequest, sendSatisfactionSurvey, sendParticipantReminders, invokeFunction, runRecordAutomation } = await import('../functions.mjs');
 const { runScheduledJobs } = await import('../scheduler.mjs');
 const originalFetch = globalThis.fetch;
 const message = { emailType: 'qa', to: 'tester@example.com', subject: 'Teste local', html: '<p>Teste</p>' };
@@ -231,4 +231,87 @@ test('envio administrativo de acesso informa quando foi apenas simulado', async 
   const result = await invokeFunction('sendPasswordReset', { email: 'tester@example.com' }, admin);
   assert.equal(result.dry_run, true);
   assert.match(result.message, /nenhum e-mail foi enviado/);
+});
+
+test('cadastro concluído envia pesquisa, nunca aviso de nova solicitação', async () => {
+  enableSending();
+  const payloads = [];
+  globalThis.fetch = async (_, options) => { payloads.push(JSON.parse(options.body)); return accepted(); };
+  for (const category of ['Treinamento / Apoio Técnico', 'Evento']) {
+    const request = training({ status: 'Concluído', request_category: category });
+    await runRecordAutomation('TrainingRequest', null, request);
+    assert.equal(evaluation(request).status, 'sent');
+    assert.equal((await notifyAdminNewRequest(request)).skipped, true);
+  }
+  assert.equal(payloads.length, 4);
+  assert.deepEqual([...new Set(db.prepare('SELECT email_type FROM email_log').all().map(row => row.email_type))], ['survey']);
+});
+
+test('solicitação nova mantém aviso administrativo; conclusão posterior mantém pesquisa', async () => {
+  const request = training({ status: 'Pendente Análise' });
+  await runRecordAutomation('TrainingRequest', null, request);
+  assert.equal(db.prepare('SELECT email_type FROM email_log').get().email_type, 'admin_notification');
+  assert.equal(evaluation(request), undefined);
+  await runRecordAutomation('TrainingRequest', request, { ...request, status: 'Concluído' });
+  assert.equal(db.prepare("SELECT COUNT(*) AS n FROM email_log WHERE email_type='survey'").get().n, 2);
+});
+
+test('editar registro já concluído não envia ou reenvia pesquisas antigas', async () => {
+  const request = training({ status: 'Concluído', created_date: '2025-01-01T00:00:00.000Z' });
+  await runRecordAutomation('TrainingRequest', request, { ...request, format_details: 'Correção de texto' });
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM email_log').get().n, 0);
+  assert.equal(evaluation(request), undefined);
+});
+
+test('disparos concorrentes e repetidos da pesquisa não duplicam aceites', async () => {
+  enableSending();
+  const request = training({ status: 'Concluído', participants_list: [{ email: 'PARTICIPANT@example.com' }, { email: 'participant@example.com' }] });
+  let calls = 0;
+  globalThis.fetch = async () => { calls += 1; return accepted(); };
+  await Promise.all([sendSatisfactionSurvey(request), sendSatisfactionSurvey(request)]);
+  assert.equal((await sendSatisfactionSurvey(request)).emails_sent, 0);
+  assert.equal(calls, 2);
+  assert.equal(listRecords('SatisfactionSurvey').length, 1);
+  assert.deepEqual(listRecords('SurveyDelivery')[0].accepted_recipients, ['requester@example.com', 'participant@example.com']);
+});
+
+test('pesquisa parcialmente falha continua e retoma somente pendentes com conteúdo/chave estáveis', async () => {
+  enableSending();
+  const request = training({ participants_list: [{ email: 'first@example.com' }, { email: 'second@example.com' }] });
+  const attempts = [];
+  let fail = true;
+  globalThis.fetch = async (_, options) => {
+    const to = JSON.parse(options.body).to[0];
+    attempts.push({ to, body: options.body, key: options.headers['Idempotency-Key'] });
+    return fail && to === 'first@example.com' ? Response.json({ message: 'Rejected' }, { status: 403 }) : accepted();
+  };
+  await assert.rejects(sendSatisfactionSurvey(request), /Rejected/);
+  assert.deepEqual(attempts.map(a => a.to), ['requester@example.com', 'first@example.com', 'second@example.com']);
+  assert.equal(evaluation(request).status, 'pending');
+  fail = false;
+  const result = await sendSatisfactionSurvey({ ...request, product_name: 'Mudou', participants_list: [{ email: 'new@example.com' }] });
+  assert.equal(result.emails_sent, 1);
+  assert.deepEqual(attempts[1], attempts[3]);
+  assert.equal(evaluation(request).status, 'sent');
+});
+
+test('simulação não congela nem consome a entrega automática de pesquisa', async () => {
+  const request = training();
+  await sendSatisfactionSurvey(request);
+  assert.equal(listRecords('SurveyDelivery').length, 0);
+  enableSending();
+  globalThis.fetch = async () => accepted();
+  assert.equal((await sendSatisfactionSurvey(request)).emails_sent, 2);
+});
+
+test('registros anteriores e concluídos nunca entram nos lembretes futuros', async () => {
+  training({ status: 'Concluído' });
+  training({ registration_mode: 'past' });
+  training({ training_completed_date: '2026-01-01' });
+  const request = training();
+  assert.equal((await sendParticipantReminders({ dryRun: true })).trainings_to_notify, 1);
+  enableSending();
+  globalThis.fetch = async () => accepted();
+  assert.equal((await sendParticipantReminders()).trainings_notified, 1);
+  assert.equal(getRecord('TrainingRequest', request.id).reminder_sent, true);
 });
