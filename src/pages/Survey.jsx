@@ -4,10 +4,12 @@ import { alliage } from '@/api/alliageClient';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Star, Check, Loader2, Activity } from 'lucide-react';
+import { surveyProductRows } from '@/lib/surveyDetails';
+import { describeOtherOption } from '@/lib/otherOptions';
 
 export default function Survey() {
   const { token } = useParams();
-  const { t, tf, lang, setLang } = useLanguage();
+  const { t, tf, tv, lang } = useLanguage();
   const [survey, setSurvey] = useState(null);
   const [trainingRequest, setTrainingRequest] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -124,23 +126,29 @@ export default function Survey() {
         {/* Training Details */}
         {trainingRequest && (
           <div className="card-modern p-6 mb-6 border-l-4 border-l-[#00A6D6]">
-            <h2 className="text-lg font-semibold text-[#003B5C] mb-4">Detalhes do Treinamento</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-slate-500 font-medium uppercase">Produto</p>
-                <p className="text-sm font-medium text-slate-800">{trainingRequest.product_name}</p>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500 font-medium uppercase">Tipo de Treinamento</p>
-                <p className="text-sm font-medium text-slate-800">{trainingRequest.request_type}</p>
-              </div>
-              {trainingRequest.justification && (
-                <div className="md:col-span-2">
-                  <p className="text-xs text-slate-500 font-medium uppercase">Justificativa</p>
-                  <p className="text-sm text-slate-700 mt-1">{tf(trainingRequest.justification)}</p>
+            <h2 className="text-lg font-semibold text-[#003B5C] mb-4">{t('survey.activityDetails')}</h2>
+            <dl className="space-y-4">
+              {surveyProductRows(trainingRequest, tv).map((product, index) => (
+                <div key={index} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <dt className="text-xs text-slate-500 font-medium uppercase">{t('survey.productType')}</dt>
+                    <dd className="text-sm font-medium text-slate-800 whitespace-pre-wrap break-words">{product.category}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-slate-500 font-medium uppercase">{t('survey.productBrand')}</dt>
+                    <dd className="text-sm font-medium text-slate-800 whitespace-pre-wrap break-words">{product.brand}</dd>
+                  </div>
                 </div>
-              )}
-            </div>
+              ))}
+              <div>
+                <dt className="text-xs text-slate-500 font-medium uppercase">{t('survey.activityType')}</dt>
+                <dd className="text-sm font-medium text-slate-800 whitespace-pre-wrap break-words">{describeOtherOption(trainingRequest.request_type, trainingRequest.request_type_detail, tv) || '—'}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-slate-500 font-medium uppercase">{t('survey.activityFocus')}</dt>
+                <dd className="text-sm text-slate-700 mt-1 whitespace-pre-wrap break-words">{tf(trainingRequest.training_focus) || '—'}</dd>
+              </div>
+            </dl>
           </div>
         )}
 

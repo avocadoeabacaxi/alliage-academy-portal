@@ -264,7 +264,7 @@ test('inicialização preenche etapas vazias sem sobrescrever decisões ou reabr
 });
 
 test('pesquisa pública expõe somente detalhes necessários e aceita token correto', async () => {
-  const training = dbModule.createRecord('TrainingRequest', { request_id: 'TR-TEST-002', product_name: 'Produto', request_type: 'Técnico', justification: { pt: 'Teste' } });
+  const training = dbModule.createRecord('TrainingRequest', { request_id: 'TR-TEST-002', product_name: 'Produto', request_type: 'Técnico', justification: { pt: 'Interno' }, training_focus: { pt: 'Foco público' }, products: [{ category: 'Extraoral', brand: 'Saevo', private_note: 'Interno' }] });
   const survey = dbModule.createRecord('SatisfactionSurvey', {
     training_request_id: training.id,
     request_id_display: training.request_id,
@@ -280,6 +280,11 @@ test('pesquisa pública expõe somente detalhes necessários e aceita token corr
   assert.equal(fetched.body.data.data.id, survey.id);
   assert.equal(fetched.body.data.training_request.product_name, 'Produto');
   assert.equal(fetched.body.data.training_request.requester_email, undefined);
+  assert.equal(fetched.body.data.training_request.justification, undefined);
+  assert.deepEqual(fetched.body.data.training_request.training_focus, { pt: 'Foco público' });
+  assert.equal(fetched.body.data.training_request.products[0].category, 'Extraoral');
+  assert.equal(fetched.body.data.training_request.products[0].brand, 'Saevo');
+  assert.equal(fetched.body.data.training_request.products[0].private_note, undefined);
 
   const submitted = await request('/api/functions/createSurveyResponse', {
     method: 'POST',

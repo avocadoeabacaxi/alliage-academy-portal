@@ -9,6 +9,7 @@ import {
 } from './db.mjs';
 import { evaluationQuestions, generateSurveyQuestions, invokeStructuredAssistant, translateTexts } from './ai.mjs';
 import { emailDeliveryEnabled, escapeHtml, fillTemplate, sendEmail } from './mailer.mjs';
+import { publicSurveyRequest } from './survey-public-details.mjs';
 
 const FINAL_APPROVER_EMAIL = 'caio.monteiro@alliage-global.com';
 const EXCLUDED_EMAILS = new Set(['fernando@avocado.buzz']);
@@ -451,13 +452,7 @@ export async function invokeFunction(name, payload = {}, user = null) {
       const survey = listRecords('SatisfactionSurvey', { filters: { public_token: payload.token }, limit: 1 })[0];
       if (!survey || survey.is_active === false) throw Object.assign(new Error('Survey not found'), { status: 404 });
       const request = getRecord('TrainingRequest', survey.training_request_id);
-      const training_request = request ? {
-        id: request.id,
-        request_id: request.request_id,
-        product_name: request.product_name,
-        request_type: request.request_type,
-        justification: request.justification,
-      } : null;
+      const training_request = publicSurveyRequest(request);
       return { data: survey, training_request };
     }
     case 'createSurveyResponse': {

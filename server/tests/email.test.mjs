@@ -315,3 +315,78 @@ test('registros anteriores e concluídos nunca entram nos lembretes futuros', as
   assert.equal((await sendParticipantReminders()).trainings_notified, 1);
   assert.equal(getRecord('TrainingRequest', request.id).reminder_sent, true);
 });
+
+test('matriz: aprovação de etapa 1 é silenciosa; etapa 2 avisa solicitante e responsáveis', async () => {
+  const pending = training({ status: 'Pendente Análise' });
+  const stage1 = { ...pending, status: 'Aprovado Etapa 1' };
+  await runRecordAutomation('TrainingRequest', pending, stage1);
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM email_log').get().n, 0);
+  const stage2 = { ...stage1, status: 'Aprovado Etapa 2' };
+  await runRecordAutomation('TrainingRequest', stage1, stage2);
+  const log = db.prepare('SELECT email_type,recipients FROM email_log').get();
+  assert.equal(log.email_type, 'approval');
+  assert.ok(JSON.parse(log.recipients).includes('requester@example.com'));
+  await runRecordAutomation('TrainingRequest', stage2, { ...stage2, manager_analysis: 'Edição sem decisão' });
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM email_log').get().n, 1);
+});
+
+test('matriz: rejeição avisa uma vez na transição; cancelamento não dispara pesquisa', async () => {
+  const pending = training({ status: 'Pendente Análise' });
+  const rejected = { ...pending, status: 'Rejeitado' };
+  await runRecordAutomation('TrainingRequest', pending, rejected);
+  await runRecordAutomation('TrainingRequest', rejected, { ...rejected, rejection_reason: 'Texto corrigido' });
+  await runRecordAutomation('TrainingRequest', pending, { ...pending, status: 'Cancelado' });
+  assert.deepEqual(db.prepare('SELECT email_type FROM email_log').all().map(l=>l.email_type), ['rejection']);
+});
+
+test('matriz: nova solicitação usa roteamento de evento e regra exata de produto', async () => {
+  createRecord('RoutingRule', { request_type: 'Evento', product_category: '*', recipient_emails: ['event@example.com'] });
+  createRecord('RoutingRule', { request_type: 'Novo treinamento', product_category: '*', recipient_emails: ['wildcard@example.com'] });
+  createRecord('RoutingRule', { request_type: 'Novo treinamento', product_category: 'Extraoral', recipient_emails: ['product@example.com'] });
+  await notifyAdminNewRequest(training({ request_category: 'Evento' }));
+  await notifyAdminNewRequest(training({ request_type: 'Novo treinamento', product_category: 'Extraoral' }));
+  const logs = db.prepare('SELECT recipients FROM email_log ORDER BY rowid').all().map(l=>JSON.parse(l.recipients));
+  assert.ok(logs[0].includes('event@example.com'));
+  assert.ok(logs[1].includes('product@example.com'));
+  assert.ok(!logs[1].includes('wildcard@example.com'));
+});
+
+test('matriz: gerar link de pesquisa é diferente de disparar convite', async () => {
+  const request = training();
+  const result = await invokeFunction('generateSurvey', { training_request_id: request.id, request_id_display: request.request_id, product_name: request.product_name }, admin);
+  assert.ok(result.survey.public_token);
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM email_log').get().n, 0);
+  await runRecordAutomation('TrainingRequest', request, { ...request, status: 'Concluído' });
+  assert.equal(listRecords('SatisfactionSurvey').length, 1);
+  assert.equal(db.prepare("SELECT COUNT(*) n FROM email_log WHERE email_type='survey'").get().n, 2);
+});
+
+test('matriz: quantidade declarada sem lista envia pesquisa só ao solicitante', async () => {
+  const request = training({ status: 'Concluído', participants_count: '20+', participants_list: [] });
+  await runRecordAutomation('TrainingRequest', null, request);
+  const logs = db.prepare('SELECT email_type,recipients FROM email_log').all();
+  assert.equal(logs.length, 1);
+  assert.equal(logs[0].email_type, 'survey');
+  assert.deepEqual(JSON.parse(logs[0].recipients), ['requester@example.com']);
+});
+
+test('matriz: pedido de acesso avisa usuários selecionados e não duplica quando repetido', async () => {
+  createRecord('User', { email: 'enabled@example.com', receive_access_request_emails: true });
+  createRecord('User', { email: 'disabled@example.com', receive_access_request_emails: false });
+  const payload = { email: 'new@example.com', full_name: 'Teste', phone: '5516999990000' };
+  await invokeFunction('requestAccess', payload);
+  await invokeFunction('requestAccess', payload);
+  const logs = db.prepare('SELECT email_type,recipients FROM email_log').all();
+  assert.equal(logs.length, 1);
+  assert.equal(logs[0].email_type, 'access_request');
+  assert.deepEqual(JSON.parse(logs[0].recipients), ['enabled@example.com']);
+});
+
+test('matriz: mudanças de autorização avisam aprovação/rejeição, sem repetir em edição', async () => {
+  const previous = { email: 'access@example.com', status: 'pending' };
+  const approved = { ...previous, status: 'approved' };
+  await runRecordAutomation('UserAuthorization', previous, approved);
+  await runRecordAutomation('UserAuthorization', approved, { ...approved, role: 'educador' });
+  await runRecordAutomation('UserAuthorization', previous, { ...previous, status: 'rejected' });
+  assert.deepEqual(db.prepare('SELECT email_type FROM email_log ORDER BY rowid').all().map(l=>l.email_type), ['access', 'access_rejected']);
+});

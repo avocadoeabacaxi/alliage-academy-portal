@@ -77,6 +77,19 @@ Sem `AI_API_URL`, `AI_API_KEY` e `AI_MODEL`, o portal continua funcionando: trad
 
 ## Produção
 
+### Contexto público da pesquisa
+
+A pesquisa mostra tipo/categoria e marca de cada produto, tipo de atividade e
+foco do treinamento/apoio técnico, com suporte aos três idiomas. Não mostra nem
+retorna `justification` pela API pública. Produtos são projetados por lista
+permitida de campos; contatos, série, anexos e notas internas não são expostos.
+Registros legados usam produto/categoria já existentes e deixam o foco vazio
+quando não informado, sem substituir pela justificativa interna.
+
+Os testes da matriz de notificações cobrem os gatilhos atuais e não significam
+garantia de entrega na caixa de entrada. O portal ainda não recebe eventos de
+entrega/rejeição do Resend e não tem integração de envio por WhatsApp.
+
 ### Opções “Outro”
 
 Problemas específicos, impactos esperados, público de eventos, categoria do
