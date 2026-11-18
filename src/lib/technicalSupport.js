@@ -1,5 +1,6 @@
 import { isValidEmail, isValidPhone } from './validation.js';
 import { supportTypes } from './requestTypeLabels.js';
+import { validOtherFields, otherDetailsPayload, cleanProductDetails } from './otherOptions.js';
 
 export function safeSupportLink(value) {
   if (!value || typeof value !== 'string') return '';
@@ -26,6 +27,7 @@ export function validSupportStep(form, step, brandsByCategory) {
     case 0: return Boolean(text('requester_name') && isValidEmail(form.requester_email) && isValidPhone(form.requester_phone)
       && text('company_name') && form.region && (form.region === 'USA' || text('region_detail')));
     case 1: return form.products.length > 0 && form.products.every(p => p.category in brandsByCategory
+      && validOtherFields(p, ['category', 'brand'])
       && (!brandsByCategory[p.category].length || brandsByCategory[p.category].includes(p.brand))
       && (p.brand !== 'Outro' || p.brand_detail?.trim()));
     case 2: return Boolean([...supportTypes, 'Outro'].includes(form.request_type)
@@ -44,6 +46,8 @@ export function supportPayload(form, lang, requestId, productNames, translations
   const onsite = form.format === 'Presencial';
   const payload = {
     ...data,
+    ...otherDetailsPayload(form, ['request_type']),
+    products: cleanProductDetails(form.products),
     requester_name: form.requester_name.trim(), requester_email: form.requester_email.trim().toLowerCase(),
     requester_phone: form.requester_phone.replace(/\D/g, ''), company_name: form.company_name.trim(),
     request_id: requestId, request_kind: 'support', request_category: 'Treinamento / Apoio Técnico',

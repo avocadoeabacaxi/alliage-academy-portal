@@ -10,6 +10,7 @@ import TrainingFollowUps from '@/components/TrainingFollowUps';
 import TechnicalSupportDetails from '@/components/TechnicalSupportDetails';
 import { requestKind } from '@/lib/requestTypeLabels';
 import { supportCopy } from '@/lib/i18n/supportAndFollowUp';
+import { hasOther, describeOtherOption } from '@/lib/otherOptions';
 import { ArrowLeft, Check, X, Clock, MapPin, User, Mail, Building, Calendar, Star, Copy, FileText, Loader2, Globe } from 'lucide-react';
 
 export default function RequestDetail() {
@@ -275,20 +276,26 @@ export default function RequestDetail() {
           <InfoRow label={t('form.region')} value={t(`region.${(req.region || '').toLowerCase()}`)} icon={MapPin} />
           <InfoRow label={t('form.companyType')} value={tv(req.company_type)} icon={Building} />
           <InfoRow label={t('form.position')} value={req.position} />
-          <InfoRow label={t('form.area')} value={tv(req.area)} />
+          <InfoRow label={t('form.area')} value={describeOtherOption(req.area, tf(req.area_detail), tv)} />
         </div>
       </Section>
 
       <Section title={kind === 'support' ? support.details : t('detail.trainingDetails')} icon={FileText}>
         <div className="space-y-3">
-          <InfoRow label={t('form.requestType')} value={tv(req.request_type)} />
+          <InfoRow label={t('form.requestType')} value={kind === 'support' ? tv(req.request_type) : describeOtherOption(req.request_type, tf(req.request_type_detail), tv)} />
+          {req.request_category === 'Evento' && <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InfoRow label={t('event.typeLabel')} value={describeOtherOption(req.event_type, tf(req.event_type_detail), tv)} />
+            <InfoRow label={t('event.alliageRole')} value={(req.alliage_role || []).map(value => describeOtherOption(value, tf(req.alliage_role_detail), tv)).join(', ')} />
+            <InfoRow label={t('event.whoInvited')} value={describeOtherOption(req.who_invited, tf(req.who_invited_detail), tv)} />
+          </div>}
           {Array.isArray(req.products) && req.products.length > 0 ? (
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{t('form.productsLabel')}</p>
               <div className="flex flex-wrap gap-1">
                 {req.products.map((p, i) => {
                   const brand = p.brand === 'Outro' ? (p.brand_detail || '') : p.brand;
-                  return <span key={i} className="tag-cyan">{brand ? `${p.category} — ${brand}` : p.category}</span>;
+                  const category = p.category === 'Outro' ? (p.category_detail || p.category) : p.category;
+                  return <span key={i} className="tag-cyan max-w-full break-words whitespace-normal">{brand ? `${category} — ${brand}` : category}</span>;
                 })}
               </div>
             </div>
@@ -310,6 +317,7 @@ export default function RequestDetail() {
               <div className="flex flex-wrap gap-1">
                 {(req.audience || []).map(a => <span key={a} className="tag-cyan">{tv(a)}</span>)}
               </div>
+              <OtherDetailText selection={req.audience} value={tf(req.audience_detail)} />
             </div>
             <InfoRow label={t('form.participantsCount')} value={req.participants_count} />
           </div>}
@@ -330,6 +338,7 @@ export default function RequestDetail() {
               <div className="flex flex-wrap gap-1">
                 {req.specific_problems.map(p => <span key={p} className="px-2.5 py-1 text-xs font-medium bg-amber-50 text-amber-700 rounded-full">{tv(p)}</span>)}
               </div>
+              <OtherDetailText selection={req.specific_problems} value={tf(req.specific_problems_detail)} />
             </div>
           )}
           {(req.expected_impacts || []).length > 0 && (
@@ -338,8 +347,11 @@ export default function RequestDetail() {
               <div className="flex flex-wrap gap-1">
                 {req.expected_impacts.map(p => <span key={p} className="px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-full">{tv(p)}</span>)}
               </div>
+              <OtherDetailText selection={req.expected_impacts} value={tf(req.expected_impacts_detail)} />
             </div>
           )}
+          {req.request_category === 'Evento' && (req.strategic_objectives || []).length > 0 && <InfoRow
+            label={t('event.strategicObjectives')} value={req.strategic_objectives.map(value => describeOtherOption(value, tf(req.strategic_objectives_detail), tv)).join(', ')} />}
           {tf(req.consequence_60_days) && (
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
@@ -632,13 +644,17 @@ function Section({ title, icon: Icon, children }) {
   );
 }
 
+function OtherDetailText({ selection, value }) {
+  return hasOther(selection) && value ? <p className="mt-2 text-sm text-slate-800 whitespace-pre-wrap break-words bg-slate-50 rounded-xl p-3">{value}</p> : null;
+}
+
 function InfoRow({ label, value, icon: Icon }) {
   return (
     <div>
       <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5 flex items-center gap-1">
         {Icon && <Icon className="w-3 h-3" />} {label}
       </p>
-      <p className="text-sm text-slate-800">{value || '—'}</p>
+      <p className="text-sm text-slate-800 whitespace-pre-wrap break-words">{value || '—'}</p>
     </div>
   );
 }

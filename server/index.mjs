@@ -36,7 +36,7 @@ const allowedEntities = new Set(['TrainingRequest', 'TrainingSchedule', 'Client'
 const managementRoles = new Set(['admin', 'gerente_regional', 'educador']);
 // Ownership is checked by entityAccess before this field-level permission is used.
 const requesterEditableFields = new Set([
-  'guest_participation_mode', 'online_platform', 'online_access_link', 'needs_educator_link',
+  'guest_participation_mode', 'online_platform', 'online_platform_detail', 'online_access_link', 'needs_educator_link',
   'location_country', 'location_city', 'location_specific', 'location_postal_code',
   'location_street', 'location_number', 'location_complement', 'location_formatted_address',
   'location_place_id', 'training_scheduled_date', 'participants_list',

@@ -13,6 +13,8 @@ import { translateOption } from '@/lib/i18n/optionValues';
 import ValidatedInput from '@/components/ValidatedInput';
 import { isValidEmail } from '@/lib/validation';
 import { validParticipants, validTrainingLogistics, trainingLogisticsPayload } from '@/lib/trainingRegistration';
+import OtherOptionDetails from '@/components/OtherOptionDetails';
+import { validOtherFields, otherDetailsPayload, cleanProductDetails } from '@/lib/otherOptions';
 
 const AREA_OPTIONS = ['Comercial', 'Marketing', 'Pós-vendas', 'Consultor Técnico', 'Engenharia', 'Gestão de Pessoas', 'Outro'];
 const PROBLEM_OPTIONS = ['Baixa performance comercial', 'Dificuldade de posicionamento comercial', 'Capacitação', 'Dificuldade de operação', 'Alto volume de suporte técnico', 'Novo distribuidor', 'Novo colaborador', 'Lançamento de produto', 'Outro'];
@@ -36,10 +38,10 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
     products: [{ category: 'Extraoral', brand: '', brand_detail: '' }], product_obs: '',
     training_focus: '',
     participants_count: '6-10', participants_list: [],
-    justification: '', specific_problems: [], expected_impacts: [],
+    justification: '', specific_problems: [], specific_problems_detail: '', expected_impacts: [], expected_impacts_detail: '',
     needs_deadline: false, deadline_requested: '', deadline_reason: '',
     has_multiplier: false, specialist_name: '', specialist_role: '', specialist_email: '',
-    format: 'Presencial', guest_participation_mode: 'Presencial', online_platform: 'Google Meet', online_access_link: '', needs_educator_link: false,
+    format: 'Presencial', guest_participation_mode: 'Presencial', online_platform: 'Google Meet', online_platform_detail: '', online_access_link: '', needs_educator_link: false,
     format_details: '', presencial_mode: 'local', location_country: '', location_city: '', location_specific: '',
     location_postal_code: '', location_street: '', location_number: '', location_complement: '', location_formatted_address: '', location_place_id: '',
     training_completed_date: ''
@@ -77,7 +79,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
         const list = form.products || [];
         if (list.length === 0) return false;
         return list.every(p => {
-          if (!p.category) return false;
+          if (!p.category || !validOtherFields(p, ['category', 'brand'])) return false;
           const brands = BRAND_OPTIONS[p.category] || [];
           if (brands.length === 0) return true;
           return p.brand && (p.brand !== 'Outro' || (p.brand_detail || '').trim());
@@ -86,6 +88,7 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
       case 'training_focus': return form.training_focus.length > 10;
       case 'audience': return validParticipants(form.participants_list, isPast);
       case 'justification_urgency':
+        if (!validOtherFields(form, ['specific_problems', 'expected_impacts'])) return false;
         if (isPast) return form.training_completed_date && form.justification.trim().length > 0;
         return form.justification.trim().length > 0 && (!form.needs_deadline || form.deadline_requested);
       case 'specialist':
@@ -116,10 +119,11 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
       const completedDate = form.training_completed_date || today;
 
       const { presencial_mode, ...formData } = form;
-      const productsList = (form.products || []).filter(p => p.category);
+      const productsList = cleanProductDetails((form.products || []).filter(p => p.category));
       const productNameFinal = productsList.map(resolveProductName).join(', ');
       const entity = {
         ...formData,
+        ...otherDetailsPayload(form, ['area', 'request_type', 'specific_problems', 'expected_impacts']),
         ...trainingLogisticsPayload({ ...formData, presencial_mode }, isPast, t),
         products: productsList,
         product_name: productNameFinal,
@@ -310,21 +314,23 @@ export default function TrainingRequestForm({ mode = 'new', requestKind = 'train
             <Field label={t('form.specificProblems')}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {PROBLEM_OPTIONS.map(opt => (
-                  <button key={opt} onClick={() => toggleArrayItem('specific_problems', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.specific_problems.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                  <button key={opt} aria-pressed={form.specific_problems.includes(opt)} onClick={() => toggleArrayItem('specific_problems', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.specific_problems.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
                     {translateOption(opt, lang)}
                   </button>
                 ))}
               </div>
               <p className="text-xs text-slate-400 mt-1">{t('form.problemsHint')}</p>
+              <OtherOptionDetails selection={form.specific_problems} value={form.specific_problems_detail} onChange={v => update('specific_problems_detail', v)} label={t('form.otherProblemDetail')} />
             </Field>
             <Field label={t('form.expectedImpacts')}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {IMPACT_OPTIONS.map(opt => (
-                  <button key={opt} onClick={() => toggleArrayItem('expected_impacts', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.expected_impacts.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                  <button key={opt} aria-pressed={form.expected_impacts.includes(opt)} onClick={() => toggleArrayItem('expected_impacts', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.expected_impacts.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
                     {translateOption(opt, lang)}
                   </button>
                 ))}
               </div>
+              <OtherOptionDetails selection={form.expected_impacts} value={form.expected_impacts_detail} onChange={v => update('expected_impacts_detail', v)} label={t('form.otherImpactDetail')} />
             </Field>
             {!isPast && (
               <>

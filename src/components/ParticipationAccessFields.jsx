@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import OtherOptionDetails from '@/components/OtherOptionDetails';
 
 export default function ParticipationAccessFields({ data, update, disabled = false, isPast = false }) {
   const { t } = useLanguage();
@@ -22,6 +23,7 @@ export default function ParticipationAccessFields({ data, update, disabled = fal
         <select disabled={disabled} value={data.online_platform || 'Google Meet'} onChange={e => update('online_platform', e.target.value)} className="input-base disabled:bg-slate-50">
           {['Google Meet', 'Microsoft Teams', 'Zoom', 'Outro'].map(option => <option key={option}>{option}</option>)}
         </select>
+        <OtherOptionDetails selection={data.online_platform} value={data.online_platform_detail || ''} onChange={value => update('online_platform_detail', value)} label={t('form.otherPlatformDetail')} disabled={disabled} />
         {!isPast && <>
           <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" disabled={disabled} checked={!!data.needs_educator_link} onChange={e => update('needs_educator_link', e.target.checked)} />{t('form.needsEducatorLink')}</label>
           {!data.needs_educator_link && <input type="url" disabled={disabled} value={data.online_access_link || ''} onChange={e => update('online_access_link', e.target.value)} className="input-base disabled:bg-slate-50" placeholder={t('form.onlineAccessLink')} />}

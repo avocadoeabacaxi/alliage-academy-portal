@@ -77,6 +77,20 @@ Sem `AI_API_URL`, `AI_API_KEY` e `AI_MODEL`, o portal continua funcionando: trad
 
 ## Produção
 
+### Opções “Outro”
+
+Problemas específicos, impactos esperados, público de eventos, categoria do
+equipamento e plataforma online exibem uma descrição quando “Outro” está
+selecionado. A descrição é obrigatória apenas nessa seleção. Isso se aplica
+às entradas atuais e anteriores que compartilham esses campos; tipo de apoio,
+marca, área e demais opções já existentes preservam seus campos de descrição.
+
+Os complementos são salvos em campos `*_detail` e aparecem nos detalhes do pedido.
+Em problemas, impactos e público, desmarcar “Outro” esconde o campo sem perder
+o rascunho durante o preenchimento. Ao enviar, complementos de opções não
+selecionadas não são gravados. Registros
+legados sem complemento continuam legíveis, sem migração ou disparo de e-mails.
+
 ### Registrar evento anterior
 
 No registro de treinamentos anteriores, participantes precisam de nome e e-mail;

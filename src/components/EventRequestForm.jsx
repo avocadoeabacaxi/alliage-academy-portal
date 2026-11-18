@@ -7,6 +7,8 @@ import RequestSuccessScreen from '@/components/RequestSuccessScreen';
 import AddressFields from '@/components/AddressFields';
 import ValidatedInput from '@/components/ValidatedInput';
 import { isValidEmail } from '@/lib/validation';
+import OtherOptionDetails from '@/components/OtherOptionDetails';
+import { validOtherFields, otherDetailsPayload } from '@/lib/otherOptions';
 
 const EVENT_TYPES = ['Feira / Congresso', 'Palestra', 'Lançamento de produto', 'Evento Comercial', 'Outro'];
 const ALLIAGE_ROLE_OPTIONS = ['Palestrante/Apresentador', 'Moderador', 'Lançamento de produtos', 'Outro'];
@@ -43,9 +45,9 @@ export default function EventRequestForm({ mode = 'new' }) {
     event_start_date: '', event_end_date: '', format: 'Presencial',
     location_country: '', location_city: '', location_specific: '', location_postal_code: '', location_street: '', location_number: '', location_complement: '', location_formatted_address: '', location_place_id: '',
     alliage_role: [], alliage_role_detail: '', who_invited: '', who_invited_detail: '',
-    audience: [], expected_visitors: '51-100',
+    audience: [], audience_detail: '', expected_visitors: '51-100',
     justification: '', strategic_objectives: [], strategic_objectives_detail: '',
-    expected_impacts: [],
+    expected_impacts: [], expected_impacts_detail: '',
     professionals_needed: '1', professionals_names: '', professionals_equipment: '',
     deadline_requested: '',
     event_history: '', additional_notes: '', attachments: [],
@@ -105,9 +107,10 @@ export default function EventRequestForm({ mode = 'new' }) {
         return form.alliage_role.length > 0 && (!form.alliage_role.includes('Outro') || form.alliage_role_detail.trim()) &&
           form.who_invited && (form.who_invited !== 'Outro' || form.who_invited_detail.trim());
       case 'sec5':
-        return form.audience.length > 0;
+        return form.audience.length > 0 && validOtherFields(form, ['audience']);
       case 'sec6':
-        return form.justification.trim() && form.strategic_objectives.length >= 2 && form.expected_impacts.length > 0;
+        return form.justification.trim() && form.strategic_objectives.length >= 2 && form.expected_impacts.length > 0
+          && validOtherFields(form, ['strategic_objectives', 'expected_impacts']);
       case 'sec8':
         return form.professionals_needed && form.professionals_names.trim() && form.professionals_equipment.trim();
       case 'sec10':
@@ -118,6 +121,7 @@ export default function EventRequestForm({ mode = 'new' }) {
   };
 
   const handleSubmit = async () => {
+    if (!canProceed()) return;
     setSubmitting(true);
     setSubmitMsg(t('form.generatingId'));
     try {
@@ -139,10 +143,11 @@ export default function EventRequestForm({ mode = 'new' }) {
 
       const entity = {
         ...form,
+        ...otherDetailsPayload(form, ['event_type', 'alliage_role', 'who_invited', 'audience', 'strategic_objectives', 'expected_impacts']),
         request_id,
         request_category: 'Evento',
         request_type: 'Outro',
-        request_type_detail: form.event_type,
+        request_type_detail: form.event_type === 'Outro' ? form.event_type_detail.trim() : form.event_type,
         product_name: form.event_name,
         status: isPast ? 'Concluído' : 'Pendente Análise',
         decision_stage1: isPast ? 'Aprovado' : 'Pendente',
@@ -342,11 +347,12 @@ export default function EventRequestForm({ mode = 'new' }) {
             <Field label={t('form.audience')} required>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {AUDIENCE_OPTIONS.map(opt => (
-                  <button key={opt.value} onClick={() => toggleArrayItem('audience', opt.value)} className={`px-3 py-2 text-sm rounded-lg border text-left transition-all ${form.audience.includes(opt.value) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                  <button key={opt.value} aria-pressed={form.audience.includes(opt.value)} onClick={() => toggleArrayItem('audience', opt.value)} className={`px-3 py-2 text-sm rounded-lg border text-left transition-all ${form.audience.includes(opt.value) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
                     {opt.label}
                   </button>
                 ))}
               </div>
+              <OtherOptionDetails selection={form.audience} value={form.audience_detail} onChange={v => update('audience_detail', v)} label={t('form.otherAudienceDetail')} />
             </Field>
             <Field label={t('event.expectedVisitors')}>
               <div className="grid grid-cols-5 gap-2">
@@ -378,18 +384,17 @@ export default function EventRequestForm({ mode = 'new' }) {
                   </button>
                 ))}
               </div>
-              {form.strategic_objectives.includes('Outro') && (
-                <input value={form.strategic_objectives_detail} onChange={e => update('strategic_objectives_detail', e.target.value)} className="input-base mt-2" placeholder={t('event.strategicObjectivesDetail')} />
-              )}
+              <OtherOptionDetails selection={form.strategic_objectives} value={form.strategic_objectives_detail} onChange={v => update('strategic_objectives_detail', v)} label={t('event.strategicObjectivesDetail')} />
             </Field>
             <Field label={t('event.expectedImpact')} required>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {IMPACT_OPTIONS.map(opt => (
-                  <button key={opt} onClick={() => toggleArrayItem('expected_impacts', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.expected_impacts.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
+                  <button key={opt} aria-pressed={form.expected_impacts.includes(opt)} onClick={() => toggleArrayItem('expected_impacts', opt)} className={`px-3 py-2 text-xs rounded-lg border text-left transition-all ${form.expected_impacts.includes(opt) ? 'border-[#00A6D6] bg-[#00A6D6]/10 text-[#003B5C] font-medium' : 'border-slate-200 hover:border-slate-300 text-slate-700'}`}>
                     {opt}
                   </button>
                 ))}
               </div>
+              <OtherOptionDetails selection={form.expected_impacts} value={form.expected_impacts_detail} onChange={v => update('expected_impacts_detail', v)} label={t('form.otherImpactDetail')} />
             </Field>
           </div>
         )}

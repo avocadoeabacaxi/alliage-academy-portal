@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { Plus, Trash2, Package } from 'lucide-react';
+import OtherOptionDetails from '@/components/OtherOptionDetails';
 
 export const BRAND_OPTIONS = {
   'Extraoral': ['Eagle Edge', 'Saevo', 'PreXion', 'Outro'],
@@ -65,11 +66,12 @@ export default function ProductSelector({ products = [], onChange }) {
             <label className="block text-xs font-medium text-slate-600 mb-1">{t('form.productCategory')}</label>
             <select
               value={p.category}
-              onChange={(e) => update(i, { category: e.target.value, brand: '', brand_detail: '' })}
+              onChange={(e) => update(i, { category: e.target.value, category_detail: '', brand: '', brand_detail: '' })}
               className="input-base mb-3"
             >
               {Object.keys(BRAND_OPTIONS).map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
+            <OtherOptionDetails selection={p.category} value={p.category_detail || ''} onChange={value => update(i, { category_detail: value })} label={t('form.otherCategoryDetail')} />
 
             {brands.length > 0 && (
               <>
